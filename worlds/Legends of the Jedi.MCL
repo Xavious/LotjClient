@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Saturday, June 27, 2015, 5:52 PM -->
+<!-- Saved on Saturday, June 27, 2015, 7:22 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -8,7 +8,7 @@
 <world
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-27 17:52:39"
+   date_saved="2015-06-27 19:22:05"
 
    auto_say_override_prefix="-"
    auto_say_string="say "
@@ -96,7 +96,7 @@
    use_default_output_font="y"
    warn_if_scripting_inactive="y"
    wrap="y"
-   wrap_column="80"
+   wrap_column="88"
    write_world_name_to_log="y"
    > <!-- end of general world attributes -->
 
@@ -107,7 +107,7 @@
 <triggers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-27 17:52:39"
+   date_saved="2015-06-27 19:22:05"
   >
 </triggers>
 
@@ -116,7 +116,7 @@
 <aliases
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-27 17:52:39"
+   date_saved="2015-06-27 19:22:05"
   >
 </aliases>
 
@@ -125,7 +125,7 @@
 <timers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-27 17:52:39"
+   date_saved="2015-06-27 19:22:05"
   >
 </timers>
 
@@ -134,7 +134,7 @@
 <macros
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-27 17:52:39"
+   date_saved="2015-06-27 19:22:05"
   >
 
   <macro name="up" type="send_now" >
@@ -228,7 +228,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-27 17:52:39"
+   date_saved="2015-06-27 19:22:05"
   >
 </variables>
 
@@ -237,7 +237,7 @@
 <colours
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-27 17:52:39"
+   date_saved="2015-06-27 19:22:05"
   >
 
 <ansi>
@@ -294,7 +294,7 @@
 <keypad
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-27 17:52:39"
+   date_saved="2015-06-27 19:22:05"
   >
 
   <key name="0" >
@@ -408,7 +408,7 @@
 <printing
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-27 17:52:39"
+   date_saved="2015-06-27 19:22:05"
   >
 
 <ansi>
@@ -431,4 +431,12 @@
 
 </ansi>
 </printing>
+
+<!-- plugins -->
+<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\LotJMSDPHandler.xml" plugin="y" />
+<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\lotj_repaint_buffer.xml" plugin="y" />
+<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\lotj_channels_ic.xml" plugin="y" />
+<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\lotj_channels_ooc.xml" plugin="y" />
+<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\LotJCalc.xml" plugin="y" />
+<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\LotJStarMap.xml" plugin="y" />
 </muclient>

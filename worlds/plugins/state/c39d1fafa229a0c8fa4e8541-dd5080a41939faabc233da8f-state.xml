@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE muclient>
+<!-- Saved on Saturday, June 27, 2015, 7:22 PM -->
+<!-- MuClient version 4.94 -->
+<!-- Written by Nick Gammon -->
+<!-- Home Page: http://www.mushclient.com/ -->
+
+<!-- Plugin state saved. Plugin: "LotJStarMap". World: "Legends of the Jedi". -->
+
+<muclient>
+
+<!-- variables -->
+
+<variables
+   muclient_version="4.94"
+   world_file_version="15"
+   date_saved="2015-06-27 19:22:05"
+  >
+  <variable name="height">600</variable>
+  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowflags">2</variable>
+  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowmode">0</variable>
+  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowx">463</variable>
+  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowy">109</variable>
+  <variable name="systems">systems = {}
+  systems[1] = {}
+    systems[1].y = 0
+    systems[1].x = -90
+    systems[1].name = "Corusca Sector"
+    systems[1].bottom = 423.90322580645
+    systems[1].planet = "Coruscant"
+    systems[1].right = 73
+    systems[1].left = 10
+    systems[1].top = 407.90322580645
+  systems[2] = {}
+    systems[2].y = 105
+    systems[2].x = 10
+    systems[2].name = "Perave System"
+    systems[2].bottom = 31
+    systems[2].planet = "Arkania"
+    systems[2].right = 552.65789473684
+    systems[2].left = 503.65789473684
+    systems[2].top = 15
+  systems[3] = {}
+    systems[3].y = -27
+    systems[3].x = 62
+    systems[3].name = "Arkanis Sector"
+    systems[3].bottom = 524.93548387097
+    systems[3].planet = "Tatooine"
+    systems[3].right = 790
+    systems[3].left = 734
+    systems[3].top = 508.93548387097
+  systems[4] = {}
+    systems[4].y = 5
+    systems[4].x = 15
+    systems[4].name = "Mytaranor Sector"
+    systems[4].bottom = 405.1935483871
+    systems[4].planet = "Kashyyyk"
+    systems[4].right = 583.31578947368
+    systems[4].left = 524.31578947368
+    systems[4].top = 389.1935483871
+  systems[5] = {}
+    systems[5].y = -27
+    systems[5].x = -62
+    systems[5].name = "Corellian Sector"
+    systems[5].bottom = 524.93548387097
+    systems[5].planet = "Corellia"
+    systems[5].right = 183.68421052632
+    systems[5].left = 133.68421052632
+    systems[5].top = 508.93548387097
+  systems[6] = {}
+    systems[6].y = 50
+    systems[6].x = 0
+    systems[6].name = "Y'Toub System"
+    systems[6].bottom = 236.8064516129
+    systems[6].planet = "Nal Hutta"
+    systems[6].right = 505.84210526316
+    systems[6].left = 447.84210526316
+    systems[6].top = 220.8064516129
+  systems[7] = {}
+    systems[7].y = 95
+    systems[7].x = 45
+    systems[7].name = "Gaulus Sector"
+    systems[7].bottom = 68.41935483871
+    systems[7].planet = "Ryloth"
+    systems[7].right = 727.76315789474
+    systems[7].left = 687.76315789474
+    systems[7].top = 52.41935483871
+  systems[8] = {}
+    systems[8].y = 37
+    systems[8].x = 59
+    systems[8].name = "Chommell Sector"
+    systems[8].bottom = 285.45161290323
+    systems[8].planet = "Naboo"
+    systems[8].right = 790
+    systems[8].left = 749
+    systems[8].top = 269.45161290323
+  systems[9] = {}
+    systems[9].y = -50
+    systems[9].x = 0
+    systems[9].name = "Alderaan Sector"
+    systems[9].bottom = 585
+    systems[9].planet = "Alderaan"
+    systems[9].right = 505.84210526316
+    systems[9].left = 447.84210526316
+    systems[9].top = 569
+  systems[10] = {}
+    systems[10].y = 95
+    systems[10].x = -45
+    systems[10].name = "Kanz Sector"
+    systems[10].bottom = 68.41935483871
+    systems[10].planet = "Lorrd"
+    systems[10].right = 262.92105263158
+    systems[10].left = 228.92105263158
+    systems[10].top = 52.41935483871
+  systems[11] = {}
+    systems[11].y = 38
+    systems[11].x = -54
+    systems[11].name = "Calamari System"
+    systems[11].bottom = 281.70967741935
+    systems[11].planet = "Mon Calamari"
+    systems[11].right = 244.23684210526
+    systems[11].left = 155.23684210526
+    systems[11].top = 265.70967741935
+  systems[12] = {}
+    systems[12].y = 72
+    systems[12].x = -20
+    systems[12].name = "Bright Jewel Cluster"
+    systems[12].bottom = 154.48387096774
+    systems[12].planet = "Ord Mantell"
+    systems[12].right = 411.21052631579
+    systems[12].left = 337.21052631579
+    systems[12].top = 138.48387096774</variable>
+  <variable name="width">800</variable>
+</variables>
+</muclient>

@@ -1,0 +1,1658 @@
+<?xml version="1.1" encoding="iso-8859-1"?>
+<!DOCTYPE muclient>
+<!-- Saved on Tuesday, July 10, 2012, 12:36 AM -->
+<!-- MuClient version 4.73 -->
+
+<muclient>
+<plugin
+   name="LotJGUI"
+   author="KaVir modified by @Johnson"
+   id="aefaf2e23f9b4283e1ed2809"
+   language="Lua"
+   purpose="A MSDP GUI for use with LotJ MUD"
+   date_written="2012-07-10 00:36:31"
+   requires="4.73"
+   version="0.54"
+   >
+<description trim="y">
+<![CDATA[
+ChangeLog - 
+
+v0.52 -
+	adds-
+	improved botting status indicator, now shows bot cooldown time
+	botting time empties the botting bar, cooldown time refills the botting bar
+	fixes-
+	removed some superfluous information being displayed on the botting indicator
+v0.51 -
+	adds-
+	added botting status indicator
+	minimap hotspot to show current room name
+	class level readouts
+	fixes-
+	minimap correctly displays all exits except up and down
+	reordered stat displays to be more in line with the rest of the mud
+	
+  ]]> 
+  </description>
+</plugin>
+
+
+<!--  Get our standard constants -->
+
+<include name="constants.lua"/>
+<triggers>
+	<!-- level triggers -->
+	<trigger name="LevelScoreGrab" match="^(.*) Level\: (\S+)\s*?\/(\S+)\s+(.*) Level\: (\S+)\s*?\/(.*)$" script="storeLevel" regexp="y" enabled="y" group="VariableStorage" sequence="100" />
+	<trigger name="LevelGrab" match="^(.*) Level\: (\d+)\s+Max\: (.*)\s+Exp\:(.*)$" script="storeLevel2" regexp="y" enabled="y" group="VariableStorage" sequence="100" />
+	<!-- botting triggers -->
+	<trigger name="BotStart" match="^You can bot on LOTJ for 2 hours legally\.$" script="botStart" regexp="y" enabled="y" group="BottingTracker" sequence="100" />
+	<trigger name="BotResume" match="^Botting resumed\.$" script="botResume" regexp="y" enabled="y" group="BottingTracker" sequence="100" />
+	<trigger name="BotTime" match="^You may bot for another (.*) mins\.$" script="botTimeLeft" regexp="y" enabled="y" group="BottingTracker" sequence="100" />
+	<trigger name="BotPause" match="^Your botting session is PAUSED\. Type BOT START to resume\.$" script="botPause" regexp="y" enabled="y" group="BottingTracker" sequence="100" />
+	<trigger name="BotPause2" match="^Botting paused\. You have (.*) mins remaining\.$" script="botPause" regexp="y" enabled="y" group="BottingTracker" sequence="100" />
+	<trigger name="BotFlagOn" match="^You have been botting for (.*) mins\.$" script="botFlagOn" regexp="y" enabled="y" group="BottingTracker" sequence="100" />
+	<trigger name="BotCooldown" match="^You may bot again in another (.*) mins\.$" script="botCooldownLeft" regexp="y" enabled="y" group="BottingTracker" sequence="100" />
+	<trigger name="BotLimit" match="^Botting time limit reached\.$" script="botCooldownStart" regexp="y" enabled="y" group="BottingTracker" sequence="100" />
+</triggers>
+
+
+<!-- Timers -->
+<timers>
+	<timer name="BottingTicker" script="botTick" enabled="n" minute="1" group="Botting" />
+</timers>
+
+<!--  Script  -->
+
+<script>
+<![CDATA[
+--latest
+require "pairsbykeys"
+local using_msdp = false
+local background_window = "world_background_image_"..GetPluginID()  -- miniwindow ID
+local border_window = "border_image_"..GetPluginID()  -- miniwindow ID
+local titlebar_window = "titlebar_image_"..GetPluginID()  -- miniwindow ID
+local avatar_window = "avatar_image_"..GetPluginID()  -- miniwindow ID
+local bars_window = "bars_image_"..GetPluginID()  -- miniwindow ID
+local bars_border_window = "bars_border_"..GetPluginID()  -- miniwindow ID
+local minimap_window = "minimap_image_"..GetPluginID()  -- miniwindow ID
+local minimap_border_window = "minimap_border_"..GetPluginID()  -- miniwindow ID
+local score_window = "score_image_"..GetPluginID()  -- miniwindow ID
+local score_border_window = "score_border_"..GetPluginID()  -- miniwindow ID
+local health_window = "health_bar_"..GetPluginID()  -- miniwindow ID
+local mana_window = "mana_bar_"..GetPluginID()  -- miniwindow ID
+local movement_window = "movement_bar_"..GetPluginID()  -- miniwindow ID
+local exp_window = "exp_bar_"..GetPluginID()  -- miniwindow ID
+local hotkey_window = "hotkeys_"..GetPluginID()  -- miniwindow ID
+local menu_window = "menus_"..GetPluginID()  -- miniwindow ID
+local msdp = {}
+local levels = {}
+local colourGold = ColourNameToRGB("gold")
+local colourBlue = ColourNameToRGB("blue")
+local colourRed = ColourNameToRGB("red")
+local colourSilver = ColourNameToRGB("silver")
+local colourBlack = ColourNameToRGB("black")
+local textColor = colourSilver
+local score_width = 257
+local botFlag = false
+local cooldownFlag = false
+local cooldownTime = -2
+local botTime = -2
+local botColour = colourBlack
+
+-- create the layout here, on getting the prompt, or window resize
+function create_layout ()
+
+  left = 175
+  top = 145
+  right = GetInfo (281) - 320
+  bottom = GetInfo (280) - 20  -- 32 pixels from bottom
+
+  -- if its less than this, we lose the map
+  min_width = 50 + GetInfo (213) * 81 -- offset + width for 81 characters
+  if right < min_width then
+    right = min_width
+  end -- if
+
+  -- avoid the plugin crashing if someone makes the window stupidly small
+  if bottom < top then
+    bottom = top
+  end -- if
+
+  ----------------------------------------------------------------------------
+  -- Set the background, using the textured tile.
+  ----------------------------------------------------------------------------
+
+  SetBackgroundImage(GetInfo (66) .. "GUI/layout/star_background.png", 13)
+
+  ----------------------------------------------------------------------------
+  -- Set the main text area.
+  ----------------------------------------------------------------------------
+
+  -- tell the client where to draw the text
+  TextRectangle(left+13,  
+                top+13,   
+                right-13,
+                bottom-13,  
+                1,  -- BorderOffset, 
+                colourSilver,    -- BorderColour, 
+                1,  -- BorderWidth, 
+                colourSilver,  -- OutsideFillColour, 
+                8) -- OutsideFillStyle (fine hatch)
+
+  ----------------------------------------------------------------------------
+  -- Create a black window over the text area, behind the text.
+  ----------------------------------------------------------------------------
+
+  -- make a miniwindow under the text
+  if WindowCreate (border_window,   -- window ID
+                left-5, 
+                top-5,   
+                right - left + 10, -- width
+                bottom - top + 10, -- depth
+                12,  -- center it (ignored anyway) 
+                3,   -- draw underneath (1) + absolute location (2)
+                0x000000) ~= eOK then
+    -- problem creating the window.  Not sure why this happens, but it some 
+    -- players have encountered a depth of -3, which causes the plugin to crash.
+    return
+  end -- if
+
+  -- show the window
+--  WindowShow (border_window, true)
+
+
+  -- make a miniwindow under the text
+  if WindowCreate (background_window,   -- window ID
+                left-4, 
+                top-4,   
+                right - left + 8, -- width
+                bottom - top + 8, -- depth
+                12,  -- center it (ignored anyway) 
+                3,   -- draw underneath (1) + absolute location (2)
+                0x000000) ~= eOK then
+    -- problem creating the window.  Not sure why this happens, but it some 
+    -- players have encountered a depth of -3, which causes the plugin to crash.
+    return
+  end -- if
+
+  --load the black background image
+  if WindowLoadImage (background_window, "background_background", GetInfo (66) .. "GUI/layout/black_background.png") == eOK then
+    check (WindowDrawImage (background_window, "background_background", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/black_background.png' is missing.")
+  end -- if
+
+
+  -- load the left border image
+  if WindowLoadImage (background_window, "border_left", GetInfo (66) .. "GUI/layout/border_grad_right.png") == eOK then
+    check (WindowDrawImage (background_window, "border_left", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_left.png' is missing.")
+  end -- if
+
+  -- load the right border image
+  if WindowLoadImage (background_window, "border_right", GetInfo (66) .. "GUI/layout/border_grad_left.png") == eOK then
+    check (WindowDrawImage (background_window, "border_right", right-left-7, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_right.png' is missing.")
+  end -- if
+
+  -- load the top border image
+  if WindowLoadImage (background_window, "border_top", GetInfo (66) .. "GUI/layout/border_grad_bottom.png") == eOK then
+    check (WindowDrawImage (background_window, "border_top", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_top.png' is missing.")
+  end -- if
+
+  -- load the bottom border image
+  if WindowLoadImage (background_window, "border_bottom", GetInfo (66) .. "GUI/layout/border_grad_top.png") == eOK then
+    check (WindowDrawImage (background_window, "border_bottom", 0, bottom-top-7, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_top.png' is missing.")
+  end -- if
+
+  -- load the top right corner image
+  if WindowLoadImage (background_window, "corner_tr", GetInfo (66) .. "GUI/layout/border_grad_tr.png") == eOK then
+    check (WindowDrawImage (background_window, "corner_tr", right-left-7, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_tr.png' is missing.")
+  end -- if
+
+  -- load the bottom right corner image
+  if WindowLoadImage (background_window, "corner_br", GetInfo (66) .. "GUI/layout/border_grad_br.png") == eOK then
+    check (WindowDrawImage (background_window, "corner_br", right-left-7, bottom-top-7, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/corner_br.png' is missing.")
+  end -- if
+  
+    -- load the top left corner image
+  if WindowLoadImage (background_window, "corner_tl", GetInfo (66) .. "GUI/layout/border_grad_tl.png") == eOK then
+    check (WindowDrawImage (background_window, "corner_tl", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_tl.png' is missing.")
+  end -- if
+
+  -- load the bottom left corner image
+  if WindowLoadImage (background_window, "corner_bl", GetInfo (66) .. "GUI/layout/border_grad_bl.png") == eOK then
+    check (WindowDrawImage (background_window, "corner_bl", 0, bottom-top-7, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/corner_bl.png' is missing.")
+  end -- if
+
+  -- show the window
+  WindowShow (background_window, true)
+
+  ----------------------------------------------------------------------------
+  -- Create the Title at the top of the screen.
+  ----------------------------------------------------------------------------
+
+  width_of_title_image = 336
+
+  title_x = (GetInfo (281) - width_of_title_image) / 2
+
+  -- make a miniwindow to the left of the text
+  check (WindowCreate (titlebar_window,   -- window ID
+                title_x,   -- left
+                -15,   -- top
+                981, -- width
+                187, -- depth
+                12,  -- center it (ignored anyway) 
+                7,          -- draw underneath (1) + absolute location (2) + transparent (4)
+                0x000000))  -- background colour
+
+  -- load the titlebar image
+  check (WindowLoadImage (titlebar_window, "titlebar", GetInfo (66) .. "GUI/layout/LotJ_title.png"))
+
+  -- draw it
+  check (WindowDrawImageAlpha (titlebar_window, "titlebar", 0, 0, 0, 0, 1, 0, 0))  -- draw it
+
+  -- show the window
+  WindowShow (titlebar_window, true)
+
+  ----------------------------------------------------------------------------
+  -- Create the bars window to the left of the text.
+  ----------------------------------------------------------------------------
+
+  -- make a miniwindow for the graphical border
+  check (WindowCreate (bars_border_window,   -- window ID
+                14,         -- left
+                top-4,      -- top
+                142,        -- width
+                142,        -- depth
+                12,         -- center it (ignored anyway) 
+                2,          -- draw underneath (1) + absolute location (2)
+                0x000000))  -- background colour
+
+  -- make a miniwindow for the map
+  check (WindowCreate (bars_window,   -- window ID
+                29,         -- left
+                top+11,     -- top
+                112,        -- width
+                112,        -- depth
+                12,         -- center it (ignored anyway) 
+                2,          -- draw underneath (1) + absolute location (2)
+                0x000000))  -- background colour
+
+  -- load the left border image
+  if WindowLoadImage (bars_border_window, "border_left", GetInfo (66) .. "GUI/layout/border_grad_right.png") == eOK then
+    check (WindowDrawImage (bars_border_window, "border_left", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_left.png' is missing.")
+  end -- if
+
+  -- load the right border image
+  if WindowLoadImage (bars_border_window, "border_right", GetInfo (66) .. "GUI/layout/border_grad_left.png") == eOK then
+    check (WindowDrawImage (bars_border_window, "border_right", 110+17, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_right.png' is missing.")
+  end -- if
+
+  -- load the top border image
+  if WindowLoadImage (bars_border_window, "border_top", GetInfo (66) .. "GUI/layout/border_grad_bottom.png") == eOK then
+    check (WindowDrawImage (bars_border_window, "border_top", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_top.png' is missing.")
+  end -- if
+
+  -- load the bottom border image
+  if WindowLoadImage (bars_border_window, "border_bottom", GetInfo (66) .. "GUI/layout/border_grad_top.png") == eOK then
+    check (WindowDrawImage (bars_border_window, "border_bottom", 0, 110+17, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_bottom.png' is missing.")
+  end -- if
+
+  -- load the top right corner image
+  if WindowLoadImage (bars_border_window, "corner_tr", GetInfo (66) .. "GUI/layout/border_grad_tr.png") == eOK then
+    check (WindowDrawImage (bars_border_window, "corner_tr", 110+17, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_tr.png' is missing.")
+  end -- if
+
+  -- load the bottom right corner image
+  if WindowLoadImage (bars_border_window, "corner_br", GetInfo (66) .. "GUI/layout/border_grad_br.png") == eOK then
+    check (WindowDrawImage (bars_border_window, "corner_br", 110+17, 110+17, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/corner_br.png' is missing.")
+  end -- if
+
+   --load the black background image
+  if WindowLoadImage (bars_window, "bars_background", GetInfo (66) .. "GUI/layout/black_background.png") == eOK then
+    check (WindowDrawImage (bars_window, "bars_background", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/black_background.png' is missing.")
+  end -- if
+  
+    -- load the top left corner image
+  if WindowLoadImage (bars_border_window, "corner_tl", GetInfo (66) .. "GUI/layout/border_grad_tl.png") == eOK then
+    check (WindowDrawImage (bars_border_window, "corner_tl", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_tl.png' is missing.")
+  end -- if
+
+  -- load the bottom left corner image
+  if WindowLoadImage (bars_border_window, "corner_bl", GetInfo (66) .. "GUI/layout/border_grad_bl.png") == eOK then
+    check (WindowDrawImage (bars_border_window, "corner_bl", 0, 110+17, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/corner_bl.png' is missing.")
+  end -- if
+
+  -- show the window and its border
+  WindowShow (bars_border_window, true)
+  WindowShow (bars_window, true)
+
+  ----------------------------------------------------------------------------
+  -- Create the minimap window to the left of the text.
+  ----------------------------------------------------------------------------
+
+  -- make a miniwindow for the graphical border
+  check (WindowCreate (minimap_border_window,   -- window ID
+                14,         -- left
+                top+153,    -- top
+                142,        -- width
+                142,        -- depth
+                12,         -- center it (ignored anyway) 
+                2,          -- draw underneath (1) + absolute location (2)
+                0x000000))  -- background colour
+
+  -- make a miniwindow for the map
+  check (WindowCreate (minimap_window,   -- window ID
+                29,         -- left
+                top+168,    -- top
+                112,        -- width
+                112,        -- depth
+                12,         -- center it (ignored anyway) 
+                2,          -- draw underneath (1) + absolute location (2)
+                0x000000))  -- background colour
+
+  -- load the left border image
+  if WindowLoadImage (minimap_border_window, "border_left", GetInfo (66) .. "GUI/layout/border_grad_right.png") == eOK then
+    check (WindowDrawImage (minimap_border_window, "border_left", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_left.png' is missing.")
+  end -- if
+
+  -- load the right border image
+  if WindowLoadImage (minimap_border_window, "border_right", GetInfo (66) .. "GUI/layout/border_grad_left.png") == eOK then
+    check (WindowDrawImage (minimap_border_window, "border_right", 110+17, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_right.png' is missing.")
+  end -- if
+
+  -- load the top border image
+  if WindowLoadImage (minimap_border_window, "border_top", GetInfo (66) .. "GUI/layout/border_grad_bottom.png") == eOK then
+    check (WindowDrawImage (minimap_border_window, "border_top", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_top.png' is missing.")
+  end -- if
+
+  -- load the bottom border image
+  if WindowLoadImage (minimap_border_window, "border_bottom", GetInfo (66) .. "GUI/layout/border_grad_top.png") == eOK then
+    check (WindowDrawImage (minimap_border_window, "border_bottom", 0, 110+17, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_top.png' is missing.")
+  end -- if
+
+  -- load the top right corner image
+  if WindowLoadImage (minimap_border_window, "corner_tr", GetInfo (66) .. "GUI/layout/border_grad_tr.png") == eOK then
+    check (WindowDrawImage (minimap_border_window, "corner_tr", 110+17, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_tr.png' is missing.")
+  end -- if
+
+  -- load the bottom right corner image
+  if WindowLoadImage (minimap_border_window, "corner_br", GetInfo (66) .. "GUI/layout/border_grad_br.png") == eOK then
+    check (WindowDrawImage (minimap_border_window, "corner_br", 110+17, 110+17, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/corner_br.png' is missing.")
+  end -- if
+
+  -- load the paper background image
+  if WindowLoadImage (minimap_window, "minimap_background", GetInfo (66) .. "GUI/layout/black_background.png") == eOK then
+    check (WindowDrawImage (minimap_window, "minimap_background", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/black_background.png' is missing.")
+  end -- if
+  
+    -- load the top left corner image
+  if WindowLoadImage (minimap_border_window, "corner_tl", GetInfo (66) .. "GUI/layout/border_grad_tl.png") == eOK then
+    check (WindowDrawImage (minimap_border_window, "corner_tl", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_tl.png' is missing.")
+  end -- if
+
+  -- load the bottom left corner image
+  if WindowLoadImage (minimap_border_window, "corner_bl", GetInfo (66) .. "GUI/layout/border_grad_bl.png") == eOK then
+    check (WindowDrawImage (minimap_border_window, "corner_bl", 0, 110+17, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/corner_bl.png' is missing.")
+  end -- if
+
+  -- show the window and its border
+  WindowShow (minimap_border_window, true)
+  WindowShow (minimap_window, true)
+
+  -- load the terrain images
+  check (WindowLoadImage (minimap_window, "terrain_city", GetInfo (66) .. "GUI/maps/terrain_city.bmp"))
+  check (WindowLoadImage (minimap_window, "terrain_dark", GetInfo (66) .. "GUI/maps/terrain_dark.bmp"))
+
+  -- draw the map
+  draw_minimap ()
+
+  ----------------------------------------------------------------------------
+  -- Create the score window to the right of the text.
+  ----------------------------------------------------------------------------
+
+  -- make a miniwindow for the graphical border
+  check (WindowCreate (score_border_window,   -- window ID
+                right+19,   -- left
+                top-4,      -- top
+                287,        -- width
+                bottom - top + 8, -- depth
+                12,         -- center it (ignored anyway) 
+                2,          -- draw underneath (1) + absolute location (2)
+                0x000000))  -- background colour
+
+  -- make a miniwindow for the inner area
+  check (WindowCreate (score_window,   -- window ID
+                right+34,   -- left
+                top+11,     -- top
+                score_width,-- width
+                bottom - top - 22, -- depth
+                12,         -- center it (ignored anyway) 
+                2,          -- draw underneath (1) + absolute location (2)
+                0x000000))  -- background colour
+
+  -- load the left border image
+  if WindowLoadImage (score_border_window, "border_left", GetInfo (66) .. "GUI/layout/border_grad_right.png") == eOK then
+    check (WindowDrawImage (score_border_window, "border_left", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_left.png' is missing.")
+  end -- if
+
+  -- load the right border image
+  if WindowLoadImage (score_border_window, "border_right", GetInfo (66) .. "GUI/layout/border_grad_left.png") == eOK then
+    check (WindowDrawImage (score_border_window, "border_right", 145+110+17, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_right.png' is missing.")
+  end -- if
+
+  -- load the top border image
+  if WindowLoadImage (score_border_window, "border_top", GetInfo (66) .. "GUI/layout/border_grad_bottom.png") == eOK then
+    check (WindowDrawImage (score_border_window, "border_top", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_top.png' is missing.")
+  end -- if
+
+  -- load the bottom border image
+  if WindowLoadImage (score_border_window, "border_bottom", GetInfo (66) .. "GUI/layout/border_grad_top.png") == eOK then
+    check (WindowDrawImage (score_border_window, "border_bottom", 0, bottom - top - 7, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_top.png' is missing.")
+  end -- if
+
+  -- load the top right corner image
+  if WindowLoadImage (score_border_window, "corner_tr", GetInfo (66) .. "GUI/layout/border_grad_tr.png") == eOK then
+    check (WindowDrawImage (score_border_window, "corner_tr", 145+110+17, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_tr.png' is missing.")
+  end -- if
+
+  -- load the bottom right corner image
+  if WindowLoadImage (score_border_window, "corner_br", GetInfo (66) .. "GUI/layout/border_grad_br.png") == eOK then
+    check (WindowDrawImage (score_border_window, "corner_br", 145+110+17, bottom - top - 7, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/corner_br.png' is missing.")
+  end -- if
+
+  -- load the paper background image
+  if WindowLoadImage (score_window, "score_background", GetInfo (66) .. "GUI/layout/black_background.png") == eOK then
+    check (WindowDrawImage (score_window, "score_background", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/black_background.png' is missing.")
+  end -- if
+
+  -- load the avatar image
+  --if WindowLoadImage (score_window, "avatar", GetInfo (66) .. "GUI/avatars/Default.png") ~= eOK then
+  --  Note( "File '" .. GetInfo (66) .. "GUI/avatars/Default.png' is missing.")
+  --end -- if
+  
+    -- load the top left corner image
+  if WindowLoadImage (score_border_window, "corner_tl", GetInfo (66) .. "GUI/layout/border_grad_tl.png") == eOK then
+    check (WindowDrawImage (score_border_window, "corner_tl", 0, 0, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/border_grad_tl.png' is missing.")
+  end -- if
+
+  -- load the bottom left corner image
+  if WindowLoadImage (score_border_window, "corner_bl", GetInfo (66) .. "GUI/layout/border_grad_bl.png") == eOK then
+    check (WindowDrawImage (score_border_window, "corner_bl", 0, bottom-top-7, 0, 0, 1))  -- draw it
+  else -- the file is missing
+    Note( "File '" .. GetInfo (66) .. "GUI/layout/corner_bl.png' is missing.")
+  end -- if
+
+  -- fill in the window
+  draw_score ()
+
+  -- draw the spell affect icons
+  draw_affects ()
+
+  -- show the window and its border
+  WindowShow (score_border_window, true)
+  WindowShow (score_window, true)
+
+  ----------------------------------------------------------------------------
+  -- Create the health, mana and movement bars at the bottom.
+  ----------------------------------------------------------------------------
+
+  -- make a miniwindow under the text
+  check (WindowCreate (health_window,   -- window ID
+                35,            -- left
+                16+top,            -- top
+                100,           -- width
+                20,            -- depth
+                12,            -- center it (ignored anyway) 
+                2,             -- draw underneath (1) + absolute location (2)
+                colourBlack))  -- background colour
+
+  -- show the window
+  WindowShow (health_window, true)
+
+  -- make a miniwindow under the text
+  check (WindowCreate (mana_window,   -- window ID
+                35,            -- left
+                42+top,           -- top
+                100,           -- width
+                20,            -- depth
+                12,            -- center it (ignored anyway) 
+                2,             -- draw underneath (1) + absolute location (2)
+                colourBlack))  -- background colour
+
+  -- show the window
+  WindowShow (mana_window, true)
+
+  -- make a miniwindow under the text
+  check (WindowCreate (movement_window,   -- window ID
+                35,            -- left
+                68+top,           -- top
+                100,           -- width
+                20,            -- depth
+                12,            -- center it (ignored anyway) 
+                2,             -- draw underneath (1) + absolute location (2)
+                colourBlack))  -- background colour
+
+  -- show the window
+  WindowShow (movement_window, true)
+
+  -- make a miniwindow under the text
+  check (WindowCreate (exp_window,   -- window ID
+                35,            -- left
+                94+top,           -- top
+                100,           -- width
+                20,            -- depth
+                12,            -- center it (ignored anyway) 
+                2,             -- draw underneath (1) + absolute location (2)
+                colourBlack))  -- background colour
+
+  -- show the window
+  WindowShow (exp_window, true)
+
+  -- draw the energy bars
+  draw_energy_bars ()
+
+end -- create_layout
+
+
+function OnPluginWorldOutputResized ()
+  create_layout ()
+end -- function
+
+
+local RoomExit = {}
+local RoomType = {}
+local ExitCount = 0
+
+function init_rooms (data)
+
+  ExitCount = 0
+
+  index = 0
+  startpos = 1
+  max = 0
+  for i=startpos,string.len(data),1 do
+    if string.byte(data,i) == 1 or i == string.len(data) then
+      if string.byte(data,i) == 1 then
+        endpos = 1
+      else
+        endpos = 0
+      end -- if
+      variable = string.sub(data,startpos,i-endpos)
+      startpos = i+1
+      index = index + 1
+
+      pos1 = string.find(variable, "\002")
+      if pos1 ~= nil then
+        RoomExit[index] = string.sub(variable, 1, pos1-1)
+        RoomType[index] = string.sub(variable, pos1+1)
+        ExitCount = ExitCount + 1
+      end -- if
+    end -- if
+  end -- for
+
+end -- function
+
+
+-- draw one room
+function draw_room (x, y, type)
+
+  terrain_image = "terrain_dark"
+  if type == "O" then
+    terrain_image = "terrain_city"
+  end -- if
+
+  WindowCircleOp (minimap_window, 2, x-1, y-1, x+22, y+22, colourSilver, 0, 2, 0, 1)
+  WindowCircleOp (minimap_window, 2, x-1, y-1, x+21, y+21, colourBlack, 0, 1, 0, 1)
+  WindowDrawImage (minimap_window, terrain_image, x, y, x+20, y+20, 1)  -- draw the terrain
+
+end -- draw_room
+
+function removeMudColors(str)
+	if (str) then
+		return string.gsub(str, "\&.", "")
+	end
+end 
+
+
+-- draw the minimap
+function draw_minimap ()
+
+  data = msdp["ROOMEXITS"]
+
+  if data ~= nil then
+    init_rooms (data)
+  end -- if
+
+  mapCentre = 45
+
+  -- clean the background and redraw the central room
+  check (WindowDrawImage (minimap_window, "minimap_background", 0, 0, 0, 0, 1))  -- draw it
+  draw_room (mapCentre, mapCentre, "O")
+  WindowAddHotspot(minimap_window, "mm_room_name", mapCentre, mapCentre, mapCentre+20, mapCentre+20, "", "", "", "", "", removeMudColors(msdp["ROOMNAME"]), 1, 0)
+
+
+  -- draw any surrounding rooms
+  if ExitCount > 0 then
+    for i=1,ExitCount,1 do
+      if RoomExit[i] == "north" then
+        draw_room(mapCentre, mapCentre-30, RoomType[i])
+        WindowLine(minimap_window, mapCentre+9, mapCentre-2, mapCentre+9, mapCentre-10, colourSilver, 0, 1)
+        WindowLine(minimap_window, mapCentre+10, mapCentre-2, mapCentre+10, mapCentre-10, colourSilver, 0, 1)
+      elseif RoomExit[i] == "south" then
+        draw_room(mapCentre, mapCentre+30, RoomType[i])
+        WindowLine(minimap_window, mapCentre+9, mapCentre+28, mapCentre+9, mapCentre+20, colourSilver, 0, 1)
+        WindowLine(minimap_window, mapCentre+10, mapCentre+28, mapCentre+10, mapCentre+20, colourSilver, 0, 1)
+      elseif RoomExit[i] == "east" then
+        draw_room(mapCentre+30, mapCentre, RoomType[i])
+        WindowLine(minimap_window, mapCentre+22, mapCentre+9, mapCentre+28, mapCentre+9, colourSilver, 0, 1)
+        WindowLine(minimap_window, mapCentre+22, mapCentre+10, mapCentre+28, mapCentre+10, colourSilver, 0, 1)
+      elseif RoomExit[i] == "west" then
+        draw_room(mapCentre-30, mapCentre, RoomType[i])
+        WindowLine(minimap_window, mapCentre-3, mapCentre+9, mapCentre-10, mapCentre+9, colourSilver, 0, 1)
+        WindowLine(minimap_window, mapCentre-3, mapCentre+10, mapCentre-10, mapCentre+10, colourSilver, 0, 1)
+      elseif RoomExit[i] == "northeast" then
+        draw_room(mapCentre+30, mapCentre-30, RoomType[i])
+        WindowLine(minimap_window, mapCentre+22, mapCentre-2, mapCentre+28, mapCentre-10, colourSilver, 0, 1)
+        WindowLine(minimap_window, mapCentre+23, mapCentre-2, mapCentre+29, mapCentre-10, colourSilver, 0, 1)
+      elseif RoomExit[i] == "southeast" then
+        draw_room(mapCentre+30, mapCentre+30, RoomType[i])
+        WindowLine(minimap_window, mapCentre+22, mapCentre+20, mapCentre+28, mapCentre+28, colourSilver, 0, 1)
+        WindowLine(minimap_window, mapCentre+23, mapCentre+20, mapCentre+29, mapCentre+28, colourSilver, 0, 1)
+      elseif RoomExit[i] == "southwest" then
+        draw_room(mapCentre-30, mapCentre+30, RoomType[i])
+        WindowLine(minimap_window, mapCentre-10, mapCentre+28, mapCentre-3, mapCentre+20, colourSilver, 0, 1)
+        WindowLine(minimap_window, mapCentre-9, mapCentre+28, mapCentre-2, mapCentre+20, colourSilver, 0, 1)
+      elseif RoomExit[i] == "northwest" then
+        draw_room(mapCentre-30, mapCentre-30, RoomType[i])
+        WindowLine(minimap_window, mapCentre-3, mapCentre-2, mapCentre-10, mapCentre-10, colourSilver, 0, 1)
+        WindowLine(minimap_window, mapCentre-2, mapCentre-2, mapCentre-9, mapCentre-10, colourSilver, 0, 1)
+      end -- if
+    end -- for
+  end -- if
+
+end -- draw_minimap
+
+
+-- fill the three energy bars
+function draw_energy_bars ()
+
+  -- clean the background
+	check (WindowDrawImage (bars_window, "bars_background", 0, 0, 0, 0, 1))  -- draw it
+
+  -- HEALTH
+  current_health = msdp["HEALTH"]
+  max_health = msdp["HEALTHMAX"]
+
+  -- initialise with empty bars
+  if current_health == nil then
+    current_health = 0
+    max_health = 0
+  end -- if
+
+  if current_health ~= nil and max_health ~= nil then
+    type = "Health"
+    colour = 0x0000CC
+    colour2 = 0x000033
+    draw_energy_bar(type, colour, colour2, health_window, current_health, max_health)
+  end -- if
+
+
+  -- MANA
+  current_mana = msdp["MANA"]
+  max_mana = msdp["MANAMAX"]
+
+  -- initialise with empty bars
+  if current_mana == nil then
+    current_mana = 0
+    max_mana = 0
+  end -- if
+
+  if current_mana ~= nil and max_mana ~= nil then
+    type = "Mana"
+    colour = 0xCC0000
+    colour2 = 0x330000
+    draw_energy_bar(type, colour, colour2, mana_window, current_mana, max_mana)
+  end -- if
+
+
+  -- MOVEMENT
+  current_movement = msdp["MOVEMENT"]
+  max_movement = msdp["MOVEMENTMAX"]
+
+  -- initialise with empty bars
+  if current_movement == nil then
+    current_movement = 0
+    max_movement = 0
+  end -- if
+
+  if current_movement ~= nil and max_movement ~= nil then
+    type = "Move"
+    colour = 0x00CC00
+    colour2 = 0x003300
+    draw_energy_bar(type, colour, colour2, movement_window, current_movement, max_movement)
+  end -- if
+
+  -- EXP
+  current_exp = msdp["OPPONENTHEALTH"]
+  max_exp = 100
+
+  -- initialise with empty bars
+  if current_exp == nil then
+    current_exp = 0
+    max_exp = 0
+  end -- if
+
+  if current_exp ~= nil and max_exp ~= nil then
+    type = "Enemy"
+    colour = 0x00CCCC
+    colour2 = 0x003333
+    draw_energy_bar(type, colour, colour2, exp_window, current_exp, max_exp)
+  end -- if
+  WindowShow(bars_window, true)
+
+end -- draw_energy_bars
+
+
+-- fill the bar
+function draw_energy_bar (type, colour, colour2, window, current_value, max_value)
+
+  -- convert the strings to numbers
+  current = tonumber(current_value)
+  max = tonumber(max_value)
+
+  -- Calculate health
+  if current < 0 then
+    current = 0
+  elseif current > max then
+    current = max
+  end -- if
+
+  -- clear the bars
+  WindowGradient (window, 0, -1, 100, 10, colourBlack, colour2, 2)
+  WindowGradient (window, 0, 10, 100, 21, colour2, colourBlack, 2)
+
+  -- calculate the filled part
+  if max > 0 then
+    filled = current * 100 / max
+  else -- avoid division by zero
+    filled = 0
+  end -- if
+
+  -- redraw the bars
+  if current > 0 then
+    WindowGradient (window, 0, -1, filled, 10, colourBlack, colour, 2)
+    WindowGradient (window, 0, 10, filled, 21, colour, colourBlack, 2)
+  end -- if
+
+  -- write the information inside
+  outlined_text (colourSilver, window, type, 9, 3, 3, 0)
+  outlined_text (colourSilver, window, math.ceil(filled)..'%', 9, 55, 3, 0)
+
+end -- draw_energy_bar
+
+function storeLevel(name, list, args)
+	local storage = { 
+		class_name = "",
+		class_level = 0,
+		class_max = 0
+		}
+		
+		storage.class_name = Trim(args[1])
+		storage.class_level = Trim(args[2])
+		storage.class_max = Trim(args[3])
+		levels[storage.class_name] = storage
+		--table.insert(levels, storage)
+		--Note("class: '" .. storage.class_name .. "' (" .. storage.class_level .. "/" .. storage.class_max .. ")")
+	local storage = { 
+		class_name = "",
+		class_level = 0,
+		class_max = 0
+		}
+		storage.class_name = Trim(args[4])
+		storage.class_level = Trim(args[5])
+		storage.class_max = Trim(args[6])
+		levels[storage.class_name] = storage
+		--table.insert(levels, storage)
+		--Note("class: '" .. storage.class_name .. "' (" .. storage.class_level .. "/" .. storage.class_max .. ")")	
+		--for i=1, #args, 1 do
+		--	Note(i .. " : '" .. args[i] .. "'")
+		--end
+		draw_score()
+
+end
+
+function storeLevel2(name, list, args)
+	local storage = {
+		class_name = "",
+		class_level = 0,
+		class_max = 0
+		}
+		
+	storage.class_name = Trim(args[1])
+	storage.class_level = Trim(args[2])
+	storage.class_max = Trim(args[3])
+	levels[storage.class_name] = storage
+	draw_score()
+end
+
+-- fill the score
+function draw_score ()
+	-- colour score numbers based on your alignment
+	if (msdp["ALIGNMENT"] ~= nil) then
+		if (tonumber(msdp["ALIGNMENT"]) == 0) then  -- if you're neutral
+			textColor = colourSilver
+		elseif (tonumber(msdp["ALIGNMENT"]) > 0) then -- if you're good
+			textColor = 16744448
+		else
+			textColor = colourRed   -- if you're EBIL
+		end
+	end
+	
+
+  if msdp["CHARACTERNAME"] == nil or msdp["TOPLEVEL"] == nil or msdp["CLASS"] == nil then
+  	--Note("Missing character name, toplevel, or class in msdp feed.")
+    return
+  end -- if
+
+  -- clear the background
+  check (WindowDrawImage (score_window, "score_background", 0, 0, 0, 0, 1))  -- redraw the background
+
+  -- draw the avatar
+  --check (WindowDrawImage (score_window, "avatar", 70, 50, 187, 147, 3))  -- draw it
+
+  x_offset = score_width/2
+  y_offset = 6
+
+  text_length = outlined_text (colourSilver, score_window, tostring(msdp["CHARACTERNAME"]), 12, 5, y_offset, score_width)
+
+  y_offset = y_offset + 22
+  text_line = "Level " .. tostring(msdp["TOPLEVEL"]) .. " " .. tostring(msdp["RACE"]) .. " " .. tostring(msdp["CLASS"]) .. " main"
+--  text_line = msdp["CLASS"]
+  outlined_text (colourSilver, score_window, text_line, 10, 5, y_offset, score_width)
+
+  --y_offset = y_offset + 145
+  y_offset = y_offset + 20
+  outlined_text (colourSilver, score_window, "Str:", 9, 5, y_offset, 0)
+  if msdp["STR"] ~= nil and msdp["STRPERM"] ~= nil then
+    outlined_text (textColor, score_window, msdp["STR"]..' ('..msdp["STRPERM"]..')', 9, 45, y_offset, 0)
+  end -- if
+
+  outlined_text (colourSilver, score_window, "Hitroll:", 9, x_offset, y_offset, 0)
+  if msdp["HITROLL"] ~= nil then
+    outlined_text (textColor, score_window, msdp["HITROLL"], 9, 65+x_offset, y_offset, 0)
+  end -- if
+  
+  y_offset = y_offset + 20
+  outlined_text (colourSilver, score_window, "Dex:", 9, 5, y_offset, 0)
+  if msdp["DEX"] ~= nil and msdp["DEXPERM"] ~= nil then
+    outlined_text (textColor, score_window, msdp["DEX"]..' ('..msdp["DEXPERM"]..')', 9, 45, y_offset, 0)
+  end -- if
+
+
+  outlined_text (colourSilver, score_window, "Damroll:", 9, x_offset, y_offset, 0)
+  if msdp["DAMROLL"] ~= nil then
+    outlined_text (textColor, score_window, msdp["DAMROLL"], 9, 65+x_offset, y_offset, 0)
+  end -- if
+
+  
+  y_offset = y_offset + 20
+  outlined_text (colourSilver, score_window, "Con:", 9, 5, y_offset, 0)
+  if msdp["CON"] ~= nil and msdp["CONPERM"] ~= nil then
+    outlined_text (textColor, score_window, msdp["CON"]..' ('..msdp["CONPERM"]..')', 9, 45, y_offset, 0)
+  end -- if
+
+
+  outlined_text (colourSilver, score_window, "Armour:", 9, x_offset, y_offset, 0)
+  if msdp["AC"] ~= nil then
+    outlined_text (textColor, score_window, msdp["AC"], 9, 65+x_offset, y_offset, 0)
+  end -- if
+
+  y_offset = y_offset + 20
+  outlined_text (colourSilver, score_window, "Int:", 9, 5, y_offset, 0)
+  if msdp["INT"] ~= nil and msdp["INTPERM"] ~= nil then
+    outlined_text (textColor, score_window, msdp["INT"]..' ('..msdp["INTPERM"]..')', 9, 45, y_offset, 0)
+  end -- if
+  
+
+  outlined_text (colourSilver, score_window, "Align: ", 9, x_offset, y_offset, 0)
+  if msdp["ALIGNMENT"] ~= nil then
+    outlined_text (textColor, score_window, msdp["ALIGNMENT"], 9, 65+x_offset, y_offset, 0)
+  end -- if
+
+  y_offset = y_offset + 20
+  outlined_text (colourSilver, score_window, "Wis:", 9, 5, y_offset, 0)
+  if msdp["WIS"] ~= nil and msdp["WISPERM"] ~= nil then
+    outlined_text (textColor, score_window, msdp["WIS"]..' ('..msdp["WISPERM"]..')', 9, 45, y_offset, 0)
+  end -- if
+
+  outlined_text (colourSilver, score_window, "Wimpy: ", 9, x_offset, y_offset, 0)
+  if msdp["WIMPY"] ~= nil then
+    outlined_text (textColor, score_window, msdp["WIMPY"], 9, 65+x_offset, y_offset, 0)
+  end -- if
+  
+  y_offset = y_offset + 20
+  outlined_text (colourSilver, score_window, "Cha:", 9, 5, y_offset, 0)
+  if msdp["CHA"] ~= nil and msdp["CHAPERM"] ~= nil then
+    outlined_text (textColor, score_window, msdp["CHA"]..' ('..msdp["CHAPERM"]..')', 9, 45, y_offset, 0)
+  end -- if
+  
+  outlined_text (colourSilver, score_window, "Credits:", 9, x_offset, y_offset, 0)
+  if msdp["MONEYTOTAL"] ~= nil then
+    outlined_text (textColor, score_window, msdp["MONEYTOTAL"], 9, 65+x_offset, y_offset, 0)
+  end -- if  
+  
+  y_offset = y_offset + 20
+  outlined_text(colourSilver, score_window, "Bank:", 9, 5, y_offset, 0)
+  if msdp["MONEYBANK"] ~= nil then
+  	outlined_text (textColor, score_window, msdp["MONEYBANK"], 9, 45, y_offset, 0)
+  end
+  
+  outlined_text(colourSilver, score_window, "Inv:", 9, x_offset, y_offset, 0)
+  if msdp["MONEYINV"] ~= nil then
+  	outlined_text (textColor, score_window, msdp["MONEYINV"], 9, 65+x_offset, y_offset, 0)
+  end
+  
+--  y_offset = y_offset + 40
+--  outlined_text (colourSilver, score_window, "Com: ", 9, 5, y_offset, 0)
+--  if msdp["LEVELCOMBAT"] ~= nil then
+--    outlined_text (textColor, score_window, msdp["LEVELCOMBAT"], 9, 45, y_offset, 0)
+--  end
+  
+--  outlined_text (colourSilver, score_window, "Pil: ", 9, x_offset, y_offset, 0)
+--  if msdp["LEVELPILOTING"] ~= nil then
+--    outlined_text (textColor, score_window, msdp["LEVELPILOTING"], 9, 65+x_offset, y_offset, 0)
+--  end
+  
+--  y_offset = y_offset + 20
+--  outlined_text(colourSilver, score_window, "Eng: ", 9, 5, y_offset, 0)
+--  if msdp["LEVELENGINEERING"] ~= nil then
+--    outlined_text (textColor, score_window, msdp["LEVELENGINEERING"], 9, 45, y_offset, 0)
+--  end
+  
+--  outlined_text(colourSilver, score_window, "BHT: ", 9, x_offset, y_offset, 0)
+--  if msdp["LEVELHUNTING"] ~= nil then
+--    outlined_text(textColor, score_window, msdp["LEVELHUNTING"], 0, 65+x_offset, y_offset, 0)
+--  end
+  
+
+--  y_offset = y_offset + 20
+--  outlined_text(colourSilver, score_window, "Smu: ", 9, 5, y_offset, 0)
+--  if msdp["LEVELSMUGGLING"] ~= nil then
+--    outlined_text (textColor, score_window, msdp["LEVELSMUGGLING"], 9, 45, y_offset, 0)
+--  end
+  
+--  outlined_text(colourSilver, score_window, "Dip: ", 9, x_offset, y_offset, 0)
+--  if msdp["LEVELDIPLOMACY"] ~= nil then
+--    outlined_text(textColor, score_window, msdp["LEVELDIPLOMACY"], 0, 65+x_offset, y_offset, 0)
+--  end
+  
+--  y_offset = y_offset + 20
+--  outlined_text(colourSilver, score_window, "Lea: ", 9, 5, y_offset, 0)
+--  if msdp["LEVELLEADERSHIP"] ~= nil then
+--    outlined_text (textColor, score_window, msdp["LEVELLEADERSHIP"], 9, 45, y_offset, 0)
+--  end
+  
+--  outlined_text(colourSilver, score_window, "Esp: ", 9, x_offset, y_offset, 0)
+--  if msdp["LEVELESPIONAGE"] ~= nil then
+--    outlined_text(textColor, score_window, msdp["LEVELESPIONAGE"], 0, 65+x_offset, y_offset, 0)
+--  end
+  
+--  y_offset = y_offset + 20
+--  outlined_text(colourSilver, score_window, "Sli: ", 9, 5, y_offset, 0)
+--  if msdp["LEVELSLICER"] ~= nil then
+--    outlined_text (textColor, score_window, msdp["LEVELSLICER"], 9, 45, y_offset, 0)
+--  end
+  
+--  outlined_text(colourSilver, score_window, "Med: ", 9, x_offset, y_offset, 0)
+--  if msdp["LEVELMEDIC"] ~= nil then
+--    outlined_text(textColor, score_window, msdp["LEVELMEDIC"], 0, 65+x_offset, y_offset, 0)
+--  end
+  
+--  y_offset = y_offset + 20
+--  outlined_text(colourSilver, score_window, "Sci: ", 9, 5, y_offset, 0)
+--  if msdp["LEVELSCIENCE"] ~= nil then
+--    outlined_text (textColor, score_window, msdp["LEVELSCIENCE"], 9, 45, y_offset, 0)
+--  end
+  
+--  outlined_text(colourSilver, score_window, "Frc: ", 9, x_offset, y_offset, 0)
+--  if msdp["LEVELFORCE"] ~= nil then
+--    outlined_text(textColor, score_window, msdp["LEVELFORCE"], 0, 65+x_offset, y_offset, 0)
+--  end
+  y_offset = y_offset + 20
+  local skip = false
+  for k, v in pairsByKeys(levels) do
+    	if (skip == true) then
+  		skip = false
+  		outlined_text(colourSilver, score_window, abbrev_class(v.class_name) .. ": ", 9, x_offset, y_offset, 0)
+  		outlined_text(textColor, score_window, v.class_level .. " (" .. v.class_max .. ")", 0, 45+x_offset, y_offset, 0)  		
+  	else
+  		skip = true
+  		y_offset = y_offset + 20
+  		outlined_text(colourSilver, score_window, abbrev_class(v.class_name) .. ": ", 9, 5, y_offset, 0)
+  		outlined_text(textColor, score_window, v.class_level .. " (" .. v.class_max .. ")", 9, 45, y_offset, 0)
+  	end
+  end
+  
+    
+   -- if (botFlag == true) then
+  	--	outlined_text(colourRed, score_window, "BOTTING:", 9, 9, bottom-240, 0)
+  	--end
+  	draw_botting_bar()
+  
+  WindowShow(score_window, true)
+
+end -- draw_score
+
+function draw_botting_bar()
+
+  local side = GetInfo (281) - 25
+  local bot = GetInfo (280) - 20  -- 32 pixels from bottom
+  --Note("Side: " .. side .. " Bot: " .. bot)
+  if (botFlag == true) then
+  	botColour = colourRed
+  elseif (cooldownFlag == true) then
+  	botColour = colourBlue
+  else
+  	botColour = colourBlack
+  end
+  if (botTime == -2) then
+  	Send("bot status")
+  	cooldownTime = -1
+  	botTime = -1
+  	return
+  elseif (botTime == -1 and cooldownTime == -1) then
+  	return
+  end
+
+	  -- clear the bars
+  WindowGradient (score_window, 9, bot-190, score_width-11, bot-179, colourBlack, colourBlack, 2)
+  WindowGradient (score_window, 9, bot-179, score_width-11, bot-169, colourBlack, colourBlack, 2)
+
+	-- calculate the filled part
+	if (botFlag == true) then
+  		--filled = botTime * 100 / score_width-20
+		filled = botTime / 120 * (score_width-20)
+	elseif (cooldownFlag == true) then
+		--if (cooldownTime < 1) then
+		--	cooldownTime = 1		-- prevent divide by zero
+		--end
+		filled = (score_width-20) - ((cooldownTime / 30) * (score_width-20))
+	end
+  
+
+  -- redraw the bars
+  WindowGradient (score_window, 9, bot-190, 9+filled, bot-179, colourBlack, botColour, 2)
+  WindowGradient (score_window, 9, bot-179, 9+filled, bot-169, botColour, colourBlack, 2)
+  
+ --  WindowGradient (window, 0, -1, filled, 10, colourBlack, colour, 2)
+ --  WindowGradient (window, 0, 10, filled, 21, colour, colourBlack, 2)
+
+  x_add = 0
+  -- write the information inside
+  
+  
+  
+  if (botFlag == true) then
+  	outlined_text (colourSilver, score_window, "Botting:", 9, 25, bot-186, 0)
+  elseif (cooldownFlag == true) then
+  	outlined_text (colourSilver, score_window, "Cooldown:", 9, 25, bot-186, 0)
+  	x_add = x_add + 20
+  else
+  	outlined_text (colourSilver, score_window, "Not Botting", 9, 20, bot-186, 0)
+  	x_add = x_add + 20
+  end
+  if (botFlag == true) then
+  	if (botTime < 60) then
+  		outlined_text (colourSilver, score_window, tostring(botTime) .. " mins", 9, x_add+80, bot-186, 0)
+  	else
+  		outlined_text (colourSilver, score_window, displayTime(botTime*60) .. " (" .. tostring(botTime) .. " mins)", 9, x_add+80, bot-186, 0)
+  	end
+  elseif (cooldownFlag == true) then
+  	if (cooldownTime < 60) then
+  		outlined_text (colourSilver, score_window, tostring(cooldownTime) .. " mins", 9, x_add+80, bot-186, 0)
+  	else
+  		outlined_text (colourSilver, score_window, displayTime(cooldownTime*60) .. " (" .. tostring(cooldownTime) .. " mins)", 9, x_add+80, bot-186, 0)
+  	end
+  end
+end
+
+function displayTime(time)
+	local retval = {}
+	local secs = tonumber(time)
+
+	if (secs >= 315705600) then
+		local decades = secs / 315705600
+		secs = secs - (decades * 315705600)
+		retval[#retval + 1] = tostring(string.format("%.1f", decades) .. " decades")
+	end
+	if (secs >= 31570560) then
+		local years = secs / 31570560
+		secs = secs - (years * 31570560)
+		retval[#retval + 1] = tostring(string.format("%.1f", years) .. " years")
+	end
+	if (secs >= 2630880) then
+		local months = secs / 2630880
+		secs = secs - (months * 2630880)
+		retval[#retval + 1] = tostring(string.format("%.1f", months) .. " months")
+	end
+	if (secs >= 604800) then
+		local weeks = secs / 604800
+		secs = secs - (weeks * 604800)
+		retval[#retval + 1] = tostring(string.format("%.1f", weeks) .. " weeks")
+	end
+	if (secs >= 86400) then
+		local days = secs / 86400
+		secs = secs - (days * 86400)
+		retval[#retval + 1] = tostring(string.format("%.1f", days) .. " days")
+	end
+	if (secs >= 3600) then
+		local hours = secs / 3600
+		secs = secs - (hours * 3600)
+		retval[#retval + 1] = tostring(string.format("%.1f", hours) .. " hours")
+	end
+	if (secs >= 60) then
+		local mins = secs / 60
+		secs = secs - (mins * 60)
+		retval[#retval + 1] = tostring(string.format("%.1f", mins) .. " mins")
+	end
+	if (secs >= 1) then
+		retval[#retval + 1] = tostring(string.format("%.1f", secs) .. " secs")
+	end
+	--1,60,3600,86400,604800,2630880,31570560,315705600
+	return table.concat(retval, ", ")
+end
+
+function botCooldownStart()
+	botFlag = false
+	cooldownFlag = true
+	cooldownTime = 30
+	EnableTimer("BottingTicker", true)
+	draw_score()
+end
+
+function botCooldownLeft(name, list, args)
+	if (args[1] ~= "") then
+		botStop()
+		cooldownFlag = true
+		EnableTimer("BottingTicker", true)
+		cooldownTime = tonumber(args[1])
+		draw_score()
+	end
+end
+
+function botStart()
+	botFlag = true
+	botTime = 121
+	EnableTimer("BottingTicker", true)
+	draw_score()
+end
+
+function botResume()
+	botFlag = true
+	EnableTimer("BottingTicker", true)
+	draw_score()
+end
+
+function botPause(name, list, args)
+	if (args[1]) then
+		botTime = tonumber(args[1])
+	end
+	botStop()
+end
+
+function botFlagOn()
+	botFlag = true
+	EnableTimer("BottingTicker", true)
+end
+
+function botTimeLeft(name, list, args)
+	if (args[1] ~= "") then
+		botTime = tonumber(args[1])
+		draw_score()
+	end
+end
+
+function botStop()
+	cooldownFlag = false
+	botFlag = false
+	EnableTimer("BottingTicker", false)
+	draw_score()
+end
+
+function botTick()
+	if (botFlag == true) then
+		botTime = botTime - 1
+		if (botTime < 0) then
+			botTime = 0
+			botFlag = false
+			EnableTimer("BottingTicker", false)
+		end
+	elseif (cooldownFlag == true) then
+		cooldownTime = cooldownTime - 1
+		if (cooldownTime < 0) then
+			cooldownTime = 0
+			cooldownFlag = false
+			EnableTimer("BottingTicker", false)
+		end
+	end
+	draw_score()
+end
+
+function abbrev_class(classname)
+	if (classname == "combat") then
+		return "Com"
+	elseif (classname == "piloting") then
+		return "Pil"
+	elseif (classname == "engineering") then
+		return "Eng"
+	elseif (classname == "bounty hunting") then
+		return "Bht"
+	elseif (classname == "smuggling") then
+		return "Smu"
+	elseif (classname == "diplomacy") then
+		return "Dip"
+	elseif (classname == "leadership") then
+		return "Lea"
+	elseif (classname == "espionage") then
+		return "Esp"
+	elseif (classname == "slicer") then
+		return "Sli"
+	elseif (classname == "medical") then
+		return "Med"
+	elseif (classname == "science") then
+		return "Sci"
+	elseif (classname == "force") then
+		return "Frc"
+	end
+end
+
+
+local AffectName = {}
+local AffectDuration = {}
+local AffectMax = 0
+
+function init_affects (data)
+
+  index = 0
+  startpos = 1
+  max = 0
+  for i=startpos,string.len(data),1 do
+    if string.byte(data,i) == 1 or i == string.len(data) then
+      if string.byte(data,i) == 1 then
+        endpos = 1
+      else
+        endpos = 0
+      end -- if
+      variable = string.sub(data,startpos,i-endpos)
+      startpos = i+1
+      index = index + 1
+
+      pos1 = string.find(variable, "\002")
+      if pos1 ~= nil then
+        AffectName[index] = string.sub(variable, 1, pos1-1)
+        AffectDuration[index] = string.sub(variable, pos1+1)
+      end -- if
+    end -- if
+  end -- for
+
+  -- AffectMax is the highest EVER number - we need to keep track of all created icons
+  if index < AffectMax then
+    for i=index+1,AffectMax,1 do
+      AffectName[i] = nil
+      win = "affect_window_"..i
+      WindowShow (win, false)
+    end -- for
+    AffectMax = index
+  elseif index > AffectMax then
+    AffectMax = index
+  end -- if
+
+end -- function
+
+
+function draw_affects ()
+
+  affects = msdp["AFFECTS"]
+  if affects == nil or affects == "None" then
+    for i=1,AffectMax,1 do
+      WindowShow ("affect_window_"..i, false)
+    end -- for
+    AffectMax = 0
+    return
+  end -- if
+
+  init_affects (affects)
+
+  offset_x = 0
+  offset_y = 65
+
+  for i=1,AffectMax,1 do
+    if AffectName[i] ~= nil then
+      win = "affect_window_"..i
+      affect = "affect_"..i
+
+      -- draw the icons left to right, top to bottom
+      if i > 1 then
+        if offset_x == 0 then
+          offset_x = 36
+        elseif offset_x == 36 then
+          offset_x = 72
+        elseif offset_x == 72 then
+          offset_x = 108
+        else
+          offset_x = 0
+          offset_y = offset_y + 36
+        end -- if
+      end -- if
+
+      colour = colourSilver
+
+      -- make a miniwindow under the text
+      check (WindowCreate (win,   -- window ID
+                    14+offset_x,  -- left
+                    383+offset_y, -- top
+                    34,           -- width
+                    34,           -- depth
+                    12,           -- center it (ignored anyway) 
+                    2,            -- draw underneath (1) + absolute location (2)
+                    colourBlack))      -- background colour
+
+      -- load the icon
+      if WindowLoadImage (win, affect, GetInfo (66) .. "GUI/affects/" .. AffectName[i] .. ".png") == eOK then
+        check (WindowDrawImage (win, affect, 1, 1, 33, 33, 2))  -- draw the icon
+      elseif WindowLoadImage (win, affect, GetInfo (66) .. "GUI/affects/default.png") == eOK then
+        check (WindowDrawImage (win, affect, 1, 1, 33, 33, 2))  -- draw the default icon instead
+      else -- even the default spell icon is missing
+        Note( "Missing spell icons.")
+        return
+      end -- if
+
+      if tonumber(AffectDuration[i]) < 10 then
+        offset = 9
+      elseif tonumber(AffectDuration[i]) < 100 then
+        offset = 5
+      else -- two digits
+        offset = 1
+      end -- if
+
+      if tonumber(AffectDuration[i]) < 0 then
+        -- draw an infinity symbol
+        outlined_text (colour, win, "O", 6, 4, 21, 0)
+        outlined_text (colour, win, "O", 6, 9, 21, 0)
+        -- go over the first 'O' again, removing the outline from the second 'O'
+        WindowFont(win,'f','Times New Roman',6,1,0,0,0)
+        WindowText(win,'f',"O",4,21,0,0,colour,0)
+      else -- write the duration
+        outlined_text (colour, win, AffectDuration[i], 6, 4, 21, 0)
+      end -- if
+
+      -- show the window
+      WindowShow (win, true)
+
+      -- create a hotspot over the timer
+      WindowAddHotspot(win, "hs_affect_"..i, 0, 0, 34, 34, "", "", "", "", "", AffectName[i], 1, 0)
+    end -- if
+  end -- for
+
+end -- draw_affects
+
+function drawWindows()
+	draw_minimap ()
+	draw_energy_bars ()
+	draw_score ()
+	draw_affects ()
+end
+
+
+--============================================================================
+-- Central function for listening to data broadcast by LotJMSDPHandler.xml
+-- Stores broadcast information locally to be easily accessed by plugin
+--============================================================================
+
+function OnPluginBroadcast (msg, id, name, text)
+	-- Look for MSDP Handler.
+	if (id == 'b3aae34498d5bf19b5b2e2af') then
+		-- HUGE FIXME.. not an idea solution
+		if (msg == 91) then -- we got table information from MSDP handler
+			-- store information in our own msdp table
+			key = string.sub(text, 0, string.find(text,",",0,true)-1)  -- parse the variable key
+			val = utils.base64decode(string.sub(text, string.find(text,",",0,true)+1, string.len(text))) -- parse the variable value
+			msdp[key] = val -- store it
+			--Note("key: " .. key .. " val: " .. msdp[var])
+			key = ""
+			val = ""
+		end
+		if (text == 'reload') then
+			-- invalidate current data
+			page_built = false
+			return
+		end
+	end
+	drawWindows()  -- redraw windows every time new information is received
+end
+
+--============================================================================
+-- Function to be used to retrieve msdp information. Returns either the
+-- information stored in the local msdp table or gets the requested variable
+-- from msdp_helper, if it doesn't exist locally
+--============================================================================
+
+function getmsdp(key)
+	if (msdp[key] ~= nil) then  -- if the key has been updated by msdp handler already, retrieve it
+		return msdp[key]
+	elseif (GetPluginVariable("b3aae34498d5bf19b5b2e2af", key) ~= nil) then  -- if the key hasn't been updated, but msdp handler has it cached, retrieve it and store in local table for next time
+		msdp[key] = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", key))
+		return msdp[key]
+	else
+		Note("unable to find key " .. key)
+		return ""   -- should never get here  -- can't find the requested key
+	end
+	return "" -- should never ever get here
+end
+
+
+require "checkplugin"
+function OnPluginListChanged()
+	do_plugin_check_now ("b3aae34498d5bf19b5b2e2af", "LotJMSDPHandler") -- check we have MSDP handler plugin
+end
+
+
+function outlined_text (colour, window, text, size, x, y, centre_width)
+
+  outlineColour = colourBlack
+
+  -- write the information inside
+  WindowFont(window,'f','Verdana',size,1,0,0,0)
+
+  if centre_width > 0 then
+    width = WindowTextWidth (window, 'f', text)
+    x = x + ((centre_width-width) / 2)
+  end -- if
+
+  -- smear black text around the location to create an outline, so that it's clearer to read
+  WindowText(window,'f',text,x+1,y+1,0,0,outlineColour,0)
+  WindowText(window,'f',text,x+1,y,0,0,outlineColour,0)
+  WindowText(window,'f',text,x+1,y-1,0,0,outlineColour,0)
+  WindowText(window,'f',text,x,y+1,y,0,outlineColour,0)
+  WindowText(window,'f',text,x,y-1,y,0,outlineColour,0)
+  WindowText(window,'f',text,x-1,y+1,0,0,outlineColour,0)
+  WindowText(window,'f',text,x-1,y,0,0,outlineColour,0)
+  WindowText(window,'f',text,x-1,y-1,0,0,outlineColour,0)
+
+  -- display the text
+  WindowText(window,'f',text,x,y,0,0,colour,0)
+
+  return width
+end -- outlined_text
+
+
+-- MSDP negotiation
+--local MSDP = 69
+
+--function OnPluginTelnetRequest (type, data)
+--  if type == MSDP and data == "WILL" then
+--    using_msdp = true
+--    return true
+--  elseif type == MSDP and data == "SENT_DO" then
+--    -- IAC SB MSDP response IAC SE 
+--    SendPkt ("\255\250\69\1REPORT\2CHARACTERNAME\2RACE\2CLASS\2HEALTHMAX\2HEALTH\2MANAMAX\2MANA\2MOVEMENTMAX\2MOVEMENT\2TOPLEVEL\2HITROLL\2DAMROLL\2AC\2STR\2INT\2WIS\2DEX\2CON\2CHA\2STRPERM\2INTPERM\2WISPERM\2DEXPERM\2CONPERM\2CHAPERM\2ALIGNMENT\2AFFECTS\2WIMPY\2OPPONENTHEALTH\2ROOM_NAME\2ROOMEXITS\2LEVELCOMBAT\2LEVELPILOTING\2LEVELENGINEERING\2LEVELHUNTING\2LEVELSMUGGLING\2LEVELDIPLOMACY\2LEVELLEADERSHIP\2LEVELESPIONAGE\2LEVELSLICER\2LEVELMEDIC\2LEVELSCIENCE\2LEVELFORCE\2MONEYTOTAL\2MONEYBANK\2MONEYINV\2COMMCHANNEL\2COMMENCRYPT\2OOCLIMIT\2OOCBREAK\2PLANET\2CLAN\2ISPILOTING\2SHIPSPEED\2SHIPMAXSPEED\2SHIPHULL\2SHIPMAXHULL\2SHIPENERGY\2SHIPENERGY\2SHIPGALX\2SHIPGALY\2SHIPSYSX\2SHIPSYSY\2SHIPSYSZ\2SHIPHEADX\2SHIPHEADY\2SHIPHEADZ\2SHIPSYSNAME\2\255\240")
+--    return true
+--  else -- another protocol
+--    return false
+--  end -- if
+--end -- function OnPluginTelnetRequest
+
+--function OnPluginTelnetSubnegotiation (type, data)
+--  if type == MSDP then
+--    endpos = string.len(data)
+--    bName = false
+--    bValue = false
+--    bTable = false
+--    bIgnore = false
+--    variable = nil
+--    value = nil
+
+--Note('Raw data: ['..data..']')
+
+--    for i=1,endpos,1 do
+--      if string.byte(data,i) == 1 and bTable == false then
+--        if variable ~= nil and value ~= nil then
+--          StoreVariable(variable, value)
+--          variable = nil
+--          value = nil
+--        end -- if
+--        bName = true
+--        bValue = false
+--      elseif string.byte(data,i) == 2 and bTable == false then
+--        if value ~= nil then
+--          value = value.." "
+--        end -- if
+--        bName = false
+--        bValue = true
+--      elseif string.byte(data,i) == 3 then
+--        bTable = true
+--        bIgnore = true
+--      elseif string.byte(data,i) == 4 then
+--        bTable = false
+--      elseif bIgnore == true then
+--        bIgnore = false -- Just ignore one character.
+--      elseif bName == true then
+--        if variable == nil then
+--          variable = ""
+--        end -- if
+--        variable = variable..string.sub(data,i,i)
+--      elseif bValue == true then
+--        if value == nil then
+--          value = ""
+--        end -- if
+--        value = value..string.sub(data,i,i)
+--      end -- if
+--    end -- for
+
+--    if variable ~= nil then
+--      if value == nil then
+--        value = ""
+--      end -- if
+--      StoreVariable(variable, value)
+--    end -- if
+
+    --  redraw the map
+--    draw_minimap ()
+
+    -- redraw the energy bars
+--    draw_energy_bars ()
+
+    -- redraw the score sheet
+--    draw_score ()
+
+    -- redraw the spell affect icons
+--    draw_affects ()
+
+--    Redraw()
+
+--  end -- if
+--end -- function OnPluginTelnetSubnegotiation
+
+--function StoreVariable (MSDP_var, MSDP_val)
+--Note('Variable: '..MSDP_var..' = ['..MSDP_val..']')
+--  if MSDP_var == "SERVER_ID" then
+--    create_layout ()
+--    SendPkt ("\255\250\69\1PLUGIN_ID\2LotJGUI MUSHclient plugin (version 0.53)\255\240")
+--  else -- store the variable
+--    msdp[MSDP_var] = MSDP_val
+--  end -- if
+--end -- function StoreVariable
+
+]]>
+</script>
+
+</muclient>

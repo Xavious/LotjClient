@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="iso-8859-1" ?> 
+<!DOCTYPE muclient> 
+<!--  Saved on Sunday, July 04, 2012, 5:39 AM   -->  
+<muclient>
+<plugin name="LotJArmor" author="@Johnson" id="0bcd44221164545213c36fcf" language="Lua" purpose="Armor Crafting Made Easy" save_state="y" requires="4.40" version="1.81">
+<description trim="y">
+<![CDATA[ 
+'ArmorHelp'    - To see commands related to automatic armor stitching.
+'EnhanceHelp'  - To see commands related to automatic armor enhancing.
+'NewArmorHelp' - To see commands related to automatically crafting armor from start to finish.
+'ArmorHelpAll' - To see commands related to all armor crafting functions.
+
+This script can do several things, and is divided into sections that control each facet of armor crafting.
+1) Automatic stitching of armor that's already made.
+2) Automatic enhancing of armor that's already made.
+3) Automatic crafting of armor from start to finish, including automatic enhancing and automatic stitching.
+  -You must have all materials in your inventory before you begin automatic crafting.
+
+  ]]> 
+  </description>
+  </plugin>
+<!--   Get our standard constants   --> 
+  <include name="constants.lua" /> 
+<!--   Triggers    --> 
+<triggers>
+	<!-- Armor Stitching Triggers -->
+	<trigger name="stitchComplete" script="makeArmor" match="^You finish working on (.*)\.$" regexp="y" enabled="n" group="AutoArmor" sequence="100" />
+	<trigger name="armorComplete" script="makeNextArmor" match="^You hold up your finished piece of (.*) armor\!$" regexp="y" enabled="n" group="AutoArmor" sequence="100" />
+	<trigger name="ArmorBotting" script="resumeArmorFromAFK" match="You may now bot again." enabled="n" group="AutoArmor" sequence="100" />
+	<trigger name="ArmorOnConnect" script="makeArmor" match="^Show what to whom\?$" enabled="n" regexp="y" group="AutoArmor" omit_from_output="y" omit_from_log="y" sequence="100" />
+	<trigger name="BactaCheck" script="bactaNew" match="[*/*|*/*]*" enabled="n" group="BactaCheck" sequence="100" />
+	<!-- Armor Enhancing Triggers -->
+	<trigger name="enhanceFailed" script="enhanceArmor" match="^You hold up the enhanced armor only to find that you failed\.$" regexp="y" enabled="n" group="AutoEnhance" sequence="100" />
+	<trigger name="enhanceComplete" script="enhanceNext" match="^You finish adding your (.*) to the armor\.$" regexp="y" enabled="n" group="AutoEnhance" sequence="100" />
+	<trigger name="enhanceAlreadyDone" script="enhanceNext" match="^This armor already has (.*)\!$" regexp="y" enabled="n" group="AutoEnhance" sequence="100" />
+	<trigger name="enhanceBadItem" script="enhanceBadItem" match="^Thats not a piece of armor\!$" regexp="y" enabled="n" group="AutoEnhance" sequence="100" />
+	<trigger name="enhanceBadOverlay" script="enhanceBadItem" match="^Thats not the right kind of item\.$" regexp="y" enabled="n" group="AutoEnhance" sequence="100" />
+	<trigger name="EnhanceBotting" script="resumeEnhanceFromAFK" match="You may now bot again." enabled="n" group="AutoEnhance" sequence="100" />
+	<trigger name="EnhanceOnConnect" script="enhanceArmor" match="^Show what to whom\?$" enabled="n" regexp="y" group="AutoEnhance" omit_from_output="y" omit_from_log="y" sequence="100" />
+	<trigger name="Enhancemissingitem" script="enhanceBadItem" match="^You don\'t have an item like that\.$" regexp="y" enabled="n" group="AutoEnhance" sequence="100" />
+
+	<!-- Armor Crafting Triggers -->
+	<trigger name="NewArmorMade" script="NANext" match="^You create your new piece of (.*) armor\: (.*)$" enabled="n" regexp="y" group="NewArmor" sequence="100" />
+	<!-- Misc Triggers -->
+	<trigger name="afkOn" script="afkOn" match="You are now afk." enabled="n" group="AutoAFK" sequence="100" />
+	<trigger name="afkOff" script="afkOff" match="You are no longer afk." enabled="n" group="AutoAFK" sequence="100" />
+</triggers>
+
+<aliases>
+	<!-- Armor Stitching Aliases -->
+	<alias name="ArmorAdd" script="addItem" match="^armoradd (.*)$" enabled="y" group="AutoArmorCmd" regexp="y" ignore_case="y" sequence="100" /> 
+	<alias name="ArmorAddShort" script="addItem" match="^aadd (.*)$" enabled="y" group="AutoArmorCmd" regexp="y" ignore_case="y" sequence="100" /> 
+	<alias name="ArmorRem" script="removeItem" match="^armorrem (.*)$" enabled="y" group="AutoArmorCmd" regexp="y" ignore_case="y" sequence="100" />
+	<alias name="ArmorClear" script="clearList" match="armorclear" enabled="y" group="AutoArmorCmd" ignore_case="y" send_to="1" sequence="100" />
+	<alias name="ArmorAuto" script="armorAuto" match="^armorAuto( +(.*))?$" enabled="y" group="AutoArmorCmd" regexp="y" ignore_case="y" sequence="100" />
+	<alias name="ArmorList" script="displayList" match="armorList" enabled="y" group="AutoArmorCmd" send_to="1" ignore_case="y" sequence="100" />
+	<alias name="ArmorStart" script="armorStart" match="armorStart" enabled="y" group="AutoArmorCmd" send_to="1" ignore_case="y" sequence="100" />
+	<alias name="makearmor" script="makeArmor" match="^makearmor( +(.*))?$" enabled="y" group="AutoArmor" regexp="y" ignore_case="y" sequence="100" /> 
+	<alias name="makeNextArmor" script="makeNextArmor" match="armorNext" enabled="y" group="AutoArmorCmd" ignore_case="y" send_to="1" sequence="100" />
+	<alias name="DisplayArmorHelp" script="displayArmorHelp" match="armorhelp" enabled="y" group="AutoArmorCmd" ignore_case="y" send_to="1" sequence="100" />
+	<alias name="BactaCheck" script="switchBacta" match="^bactaCheck( +(.*))?$" enabled="y" group="AutoArmorCmd" regexp="y" ignore_case="y" sequence="100" />
+	<!-- Armor Enhancing Aliases -->
+	<alias name="EnhanceAdd" script="addEnhanceItem" match="^enhanceadd (.*) (.*)$" enabled="y" regexp="y" group="EnhanceArmorCmd" ignore_case="y" sequence="100" />
+	<alias name="EnhanceAddShort" script="addEnhanceItem" match="^eadd (.*) (.*)$" enabled="y" regexp="y" group="EnhanceArmorCmd" ignore_case="y" sequence="100" />
+	<alias name="EnhanceClear" script="clearEnhanceList" match="enhanceclear" enabled="y" group="EnhanceArmorCmd" ignore_case="y" sequence="100" />
+	<alias name="EnhanceAuto" script="enhanceAuto" match="^enhanceAuto( +(.*))?$" enabled="y" group="EnhanceArmorCmd" regexp="y" ignore_case="y" sequence="100" />
+	<alias name="EnhanceList" script="displayEnhanceList" match="enhanceList" enabled="y" group="EnhanceArmorCmd" ignore_case="y" sequence="100" />
+	<alias name="EnhanceStart" script="enhanceStart" match="enhanceStart" enabled="y" group="EnhanceArmorCmd" send_to="1" ignore_case="y" sequence="100" />
+	<alias name="enhanceArmor" script="enhanceArmor" match="^enhance$" enabled="y" group="EnhanceArmorCmd" regexp="y" ignore_case="y" sequence="100" /> 
+	<alias name="enhanceNextArmor" script="enhanceNext" match="enhanceNext" enabled="y" group="EnhanceArmorCmd" ignore_case="y" send_to="1" sequence="100" />
+	<alias name="TransitionAuto" script="transitionAuto" match="^transitionAuto( +(.*))?$" enabled="y" group="EnhanceArmorCmd" regexp="y" ignore_case="y" sequence="100" />
+	<alias name="DisplayEnhanceHelp" script="displayEnhanceHelp" match="enhancehelp" enabled="y" group="EnhanceArmorCmd" ignore_case="y" sequence="100" />
+	<!-- Armor Crafting Aliases -->
+	<alias name="NewArmorAdd" script="newArmorAdd" match="newArmorAdd" enabled="y" group="NewArmorCmd" ignore_case="y" sequence="100" />
+	<alias name="NewArmorAddShort" script="newArmorAdd" match="naadd" enabled="y" group="NewArmorCmd" ignore_case="y" sequence="100" />
+	<alias name="NewArmorAddManual" script="newArmorAddM" match="^naaddm (.*) (.*) (.*) \'(.*)\' \'(.*)?\' (.*) (.*) (.*) (.*) (.*) (.*)$" enabled="y" regexp="y" group="NewArmorCmd" ignore_case="y" sequence="100" />
+	<alias name="NewArmorStart" script="NAStart" match="newArmorStart" enabled="y" group="NewArmorCmd" ignore_case="y" sequence="100" />
+	<alias name="NewArmorList" script="displayNAList" match="newArmorList" enabled="y" group="NewArmorCmd" send_to="1" ignore_case="y" sequence="100" />
+	<alias name="NewArmorClear" script="clearNAList" match="NewArmorClear" enabled="y" group="NewArmorCmd" ignore_case="y" sequence="100" />
+	<alias name="DisplayNAHelp" script="displayNAHelp" match="newarmorhelp" enabled="y" group="NewArmorCmd" ignore_case="y" sequence="100" />
+	<!-- Misc Aliases -->
+	<alias name="ClearAll" script="clearAllList" match="armorclearall" enabled="y" group="AutoArmorCmd" ignore_case="y" sequence="100" />
+	<alias name="DisplayAllHelp" script="displayAllHelp" match="armorhelpall" enabled="y" group="AutoArmorCmd" ignore_case="y" send_to="1" sequence="100" />
+</aliases>
+<!--   Script    --> 
+<script>
+<![CDATA[ 
+armorList = {}
+currentPos = 1
+autoArmor = false
+enhanceList = {}
+autoEnhance = false
+currentEnh = 1
+autoTransition = false
+newArmorAuto = false
+afk = false
+NAList = {}
+currentNA = 1
+newarmor = {
+	material = "",
+	wearloc = "",
+	cover = "",
+	desc = "",
+	restring = "",
+	underlay = "",
+	coating = "",
+	keyword = "",
+	work = "",
+	enhance = ""
+	}
+bactaCheck = false
+previousBacta = 0
+
+function makeArmor(name, line, args)
+	if (armorList[currentPos]) then
+		Send("makearmor ".. armorList[currentPos])
+	else
+		Note("Armor list empty, aborting!")
+		toggleOff()
+	end
+end
+
+function armorStart(name, line, args)
+	if (#armorList > 0) then -- we have stuff to make!
+		currentPos = 0
+		makeNextArmor()
+		toggleOn()
+	else                     -- nothing to make
+		Note("Nothing to make!")
+		toggleOff()
+	end
+end
+
+function toggleOn(name, line, args)
+	autoArmor = true
+	EnableTriggerGroup("AutoArmor", true)
+	EnableTriggerGroup("AutoAFK", true)
+	Note("AutoArmor activated.")
+end
+
+function toggleOff(name, line, args)
+	autoArmor = false
+	EnableTriggerGroup("AutoArmor", false)
+	EnableTriggerGroup("AutoAFK", false)
+	Note("AutoArmor deactivated.")
+end
+
+function afkOn(name, list, args)
+	afk = true
+end
+
+function afkOff(name, list, args)
+	afk = false
+end
+
+function makeNextArmor(name, line, args)
+	currentPos = currentPos + 1
+	if (currentPos > #armorList) then  -- reached end of list
+		Note("Armormaking complete.")      -- finished
+		toggleOff()
+	else                                    -- middle of list
+		makeArmor()  -- finally, make armor
+	end
+end
+
+function addItem(name, line, args)
+	if not args[1] then
+		Note("Invalid arguments given to armoradd. Use format 'armoradd <armor>'.")
+		return
+	end
+	armorList[#armorList + 1] = args[1]
+	Note("'" .. armorList[#armorList] .. "' added to armor list.")
+end
+
+function removeItem(name, line, args)
+   for i, v in ipairs(armorList) do
+      if ((v == args[1]) or (i == tonumber(args[1]))) then
+         Note("Removed '" .. armorList[i] .. "' index(" .. i .. ") from armor list.")
+         table.remove(armorList, i)
+         if (currentPos > i) then  -- if our item is higher in the list than what we remove
+         	currentPos = currentPos - 1  -- decrement the pointer to follow the current item
+         end
+         break
+      else
+         if (#armorList == i) then
+            Note("Unable to find specified item in armor list.")
+         end
+      end
+   end
+end
+
+function clearList(name, line, args)
+	armorList = {}
+	Note("Armor list cleared.")
+	currentPos = 0
+	toggleOff()
+end
+
+function clearAllList()
+	clearList()
+	clearEnhanceList()
+	clearNAList()
+end
+
+function resumeArmorFromAFK(name, line, args)
+	if (afk) then
+		Send("afk")
+	end
+	Send("bot start")
+	makeArmor()
+end
+
+function displayList(name, line, args)
+    ColourNote("silver","","Armor List Contains: ")
+    for i, v in ipairs(armorList) do
+      if (i == currentPos) then
+        ColourNote("lime","","--]>"..v.."<[--")
+      else
+        ColourNote("silver","",v)
+      end
+    end
+end
+
+function armorAuto(name, line, args)
+   if (args[1] == "on") then
+      toggleOn()
+   else
+      if (args[1] == "off") then
+         toggleOff()
+      else
+         if(autoArmor == true) then
+            toggleOff()
+         else
+            toggleOn()
+         end
+      end
+   end
+end
+
+function displayAllHelp()
+	displayArmorHelp()
+	displayEnhanceHelp()
+	displayNAHelp()
+end
+
+function displayArmorHelp(name, line, args)
+   Note("Armor Stitching Commands:")
+   Note("------------------------------")
+   Note("Makearmor           - Resume stitching current item in the list")
+   Note("ArmorStart          - Begin automatic stitching session from front of list")
+   Note("ArmorAdd <item>     - Add an item to the automatic stitching list")
+   Note("ArmorRem <item/#>   - Remove an item from stitching list by name or index number")
+   Note("ArmorList           - Display stitching list contents")
+   Note("ArmorNext           - Skip current item in stitching list")
+   Note("ArmorAuto (on/off)  - Turns automatic stitching on or off")
+   Note("BactaCheck (on/off) - Helps display the amount of bacta contained in armor")
+   Note("ArmorClearAll       - Clear all armor related lists and deactivate all armor scripts")
+   Note("ArmorHelp           - Display this command list")
+   Note("ArmorHelpAll        - Display all armor related command lists")
+   Note("\n")
+end -- function
+
+function enhanceArmor(name, line, args)
+	if (enhanceList[currentEnh][1]) then
+		Send("enhancearmor " .. enhanceList[currentEnh][1] .. " " .. enhanceList[currentEnh][2])
+	else
+		Note("Enhance list empty, aborting!")
+		toggleEnhanceOff()
+	end
+end
+
+function enhanceStart(name, list, args)
+	if (#enhanceList > 0) then  -- we have stuff to enhance
+		currentEnh = 0
+		enhanceNext()
+		toggleEnhanceOn()
+	else
+		Note("Nothing to enhance!")
+		toggleEnhanceOff()
+	end
+end
+
+function enhanceBadItem(name, line, args)
+	if (autoArmor) then -- if automatic stitching is activated, remove this item from the stitching list
+						-- because we ran into an error with the enhancement and don't want to stitch an
+						-- unenhanced piece of gear
+		Execute("armorrem " .. currentPos)
+	end
+	enhanceNext() -- move on to next piece to enhance
+end
+function toggleEnhanceOn(name, line, args)
+	autoEnhance = true
+	EnableTriggerGroup("AutoEnhance", true)
+	EnableTriggerGroup("AutoAFK", true)
+	Note("AutoEnhance activated.")
+end
+
+function toggleEnhanceOff(name, list, args)
+	autoEnhance = false
+	EnableTriggerGroup("AutoEnhance", false)
+	EnableTriggerGroup("AutoAFK", false)
+	Note("AutoEnhance deactivated.")
+end
+
+function enhanceNext(name, list, args)
+	currentEnh = currentEnh + 1
+	if (currentEnh > #enhanceList) then -- reached end of list
+		Note("AutoEnhance complete.")   -- finished
+		toggleEnhanceOff()
+		if (autoTransition == true) then -- if we're automatically switching to makearmor when done
+			armorStart()
+		end
+	else
+		enhanceArmor()  -- enhance the armor if we aren't done
+	end
+end
+
+function addEnhanceItem(name, line, args)
+	if (args[1] == nil or args[2] == nil) then
+		Note("Invalid arguments given to enhanceadd. Use format 'enhanceadd <armor> <underlay>'.")
+		return
+	end
+	t = #enhanceList -- Find the size of the list
+	temp = {}
+	table.insert(temp, 1, args[1])
+	table.insert(temp, args[2])
+	if (t == 0) then
+		table.insert(enhanceList, 1, temp) -- Make first entry
+	else
+		table.insert(enhanceList, temp) -- Make subsequent entries
+	end
+	Note("'" .. enhanceList[#enhanceList][1] .. ":" .. enhanceList[#enhanceList][2] .. "' added to enhance list.")
+end
+
+function clearEnhanceList(name, line, args)
+	enhanceList = {}
+	Note("Enhance list cleared.")
+	currentPos = 0
+	toggleTransitionOff()
+	toggleEnhanceOff()
+end
+
+function resumeEnhanceFromAFK(name, line, args)
+	if (afk) then
+		Send("afk")
+	end
+	Send("bot start")
+	enhanceArmor()
+end
+
+function displayEnhanceList(name, line, args)
+   ColourNote("silver","","Enhance List Contains: ")
+   for i, v in ipairs(enhanceList) do
+    if (i == currentEnh) then
+      ColourNote("lime","","--]>"..v[1]..":"..v[2].."<[--")
+    else
+      ColourNote("silver","","--]>"..v[1]..":"..v[2].."<[--")
+    end
+   end
+end
+
+function enhanceAuto(name, line, args)
+   if (args[1] == "on") then
+      toggleEnhanceOn()
+   else
+      if (args[1] == "off") then
+         toggleEnhanceOff()
+      else
+         if(autoEnhance == true) then
+            toggleEnhanceOff()
+         else
+            toggleEnhanceOn()
+         end
+      end
+   end
+end
+
+function displayEnhanceHelp(name, line, args)
+   Note("Armor Enhancing Commands:")
+   Note("------------------------------")
+   Note("Enhance                       - Resume enhancing current item in enhance list")
+   Note("EnhanceStart                  - Begin new enhancing session from front of list")
+   Note("EnhanceAdd <armor> <underlay> - Manually add an item to the enhance list")
+   Note("EnhanceList                   - Display enhance list contents")
+   Note("EnhanceClear                  - Clear current Enhance list")
+   Note("EnhanceNext                   - Skip current item in enhance list")
+   Note("EnhanceAuto (on/off)          - Turns automatic enhancing on or off")
+   Note("TransitionAuto (on/off)       - Automatically begins stitching when enhance list is finished")
+   Note("EnhanceHelp                   - Display this command list")
+   Note("\n")
+end -- function
+
+function toggleTransitionOff(name, line, args)
+	autoTransition = false
+	Note("AutoTransition deactivated.")
+end
+
+function toggleTransitionOn(name, line, args)
+	autoTransition = true
+	Note("AutoTransition activated.")
+end
+
+function transitionAuto(name, line, args)
+   if (args[1] == "on") then
+      toggleTransitionOn()
+   else
+      if (args[1] == "off") then
+         toggleTransitionOff()
+      else
+         if(autoTransition == true) then
+            toggleTransitionOff()
+         else
+            toggleTransitionOn()
+         end
+      end
+   end
+end
+
+function newArmorAddM(name, line, wildcards)
+	--material wearloc cover 'desc' 'restring' underlay coating keyword enhance stitch number
+	--davor about cover 'a black suit of armor' none bacta ablative armor yes yes 1
+	newarmor.material = wildcards[1]
+	newarmor.wearloc  = wildcards[2]
+	newarmor.cover    = wildcards[3]
+	newarmor.desc     = wildcards[4]
+	newarmor.restring = wildcards[5]
+	newarmor.underlay = wildcards[6]
+	newarmor.coating  = wildcards[7]
+	newarmor.keyword  = wildcards[8]
+	newarmor.enhance  = wildcards[9]
+	newarmor.work     = wildcards[10]
+	local keyword = wildcards[8]
+	for i=1, tonumber(wildcards[11]), 1 do
+		newarmor.keyword = i .. "." .. keyword
+		if ((newarmor.underlay ~= "") and (newarmor.enhance == "yes")) then
+			Execute("eadd " .. newarmor.keyword .. " " .. newarmor.underlay)
+		end
+		if ((newarmor.coating ~= "") and (newarmor.enhance == "yes")) then
+			Execute("eadd " .. newarmor.keyword .. " " .. newarmor.coating)
+		end
+		if (newarmor.work == "yes") then
+			Execute("aadd " .. newarmor.keyword)
+		end
+		addNAItem(newarmor)  -- add item to the queue
+	end
+	
+	newarmor = {
+		material = "",
+		wearloc = "",
+		cover = "",
+		desc = "",
+		restring = "",
+		underlay = "",
+		coating = "",
+		keyword = "",
+		work = "",
+		enhance = ""
+		}
+end
+	
+
+function newArmorAdd(name, line, args)
+	newarmor.material = utils.inputbox("Material to be used?", "Material", "rethin", "Courier", 9)
+	newarmor.wearloc =  utils.inputbox("Wear location for new piece?", "Wear Location", "about", "Courier", 9)
+	newarmor.cover =    utils.inputbox("Cover or nocover?", "Cover/Nocover", "cover", "Courier", 9)
+	newarmor.desc =     utils.inputbox("Desc for new armor?", "Description", "Description", "Courier", 9)
+	newarmor.restring = utils.inputbox("Restring for armor? (leave blank for none)", "Restring", "Restring", "Courier", 9)
+	newarmor.underlay = utils.inputbox("Underlay for armor?", "Underlay", "bacta", "Courier", 9)
+	newarmor.coating  = utils.inputbox("Coating for armor?", "Coating", "ablative", "Courier", 9)
+	newarmor.keyword  = utils.inputbox("Keyword for armor?", "Keyword", "armor", "Courier", 9)
+	newarmor.enhance  = utils.inputbox("Autoenhancing?", "Enhance?", "yes", "Courier", 9)
+	newarmor.work     = utils.inputbox("Autostitching?", "Stitch?", "yes", "Courier", 9)
+	if ((newarmor.underlay ~= "") and (newarmor.enhance == "yes")) then
+		Execute("eadd " .. newarmor.keyword .. " " .. newarmor.underlay)
+	end
+	if ((newarmor.coating ~= "") and (newarmor.enhance == "yes")) then
+		Execute("eadd " .. newarmor.keyword .. " " .. newarmor.coating)
+	end
+	if (newarmor.work == "yes") then
+		Execute("aadd " .. newarmor.keyword)
+	end
+	addNAItem(newarmor)  -- add item to the queue
+	
+	newarmor = {
+	material = "",
+	wearloc = "",
+	cover = "",
+	desc = "",
+	restring = "",
+	underlay = "",
+	coating = "",
+	keyword = "",
+	work = "",
+	enhance = ""
+	}
+end
+
+function NANext()
+	currentNA = currentNA + 1
+	if (currentNA > #NAList) then  -- reached end of list
+		Note("New Armor Making complete.")      -- finished
+		toggleNAOff()
+		enhanceStart() -- start enhancing armors
+	else                                    -- middle of list
+		newArmor()  -- finally, make armor
+	end
+end
+
+function NAStart()
+	if (#NAList > 0) then -- we have new armors to make
+		currentNA = 0
+		toggleTransitionOn()
+		toggleNAOn()
+		NANext()
+	else
+		Note("No new armors to make!")
+		toggleNAOff()
+	end
+end
+
+function newArmor()
+	if (NAList[currentNA]) then
+		Send("makearmor " .. NAList[currentNA].material .. " " .. NAList[currentNA].wearloc .. " " .. NAList[currentNA].cover .. " " .. NAList[currentNA].desc)
+	else
+		Note("New Armor Making list empty, aborting!")
+		toggleNAOff()
+	end
+end
+
+function addNAItem(item)
+	t = #NAList -- Find the size of the list
+	if (t == 0) then
+		table.insert(NAList, 1, item) -- Make first entry
+	else
+		table.insert(NAList, item) -- Make subsequent entries
+	end
+	Note("Added keyword '" .. item.keyword .. "' to New Armor List.")
+end
+
+function displayNAList(name, line, args)
+	Note("New Armor List Contains: ")
+	for k, v in ipairs(NAList) do
+		Note(v.keyword .. ":")
+		for ke, va in ipairs(v) do
+ 			Note("  " .. tostring(ke) .. ":" .. tostring(va))
+	    end     
+   end
+end
+
+function clearNAList(name, line, args)
+	NAList = {}
+	newarmor = {
+	material = "",
+	wearloc = "",
+	cover = "",
+	desc = "",
+	restring = "",
+	underlay = "",
+	coating = "",
+	keyword = "",
+	work = "",
+	enhance = ""
+	}
+	Note("New Armor list cleared.")
+	currentnA = 0
+	toggleNAOff()
+end
+
+function toggleNAOn()
+	newArmorAuto = true
+	EnableTriggerGroup("NewArmor", true)
+	Note("New Armor Making Activated.")
+end
+
+function toggleNAOff()
+	newArmorAuto = false
+	EnableTriggerGroup("NewArmor", false)
+	Note("New Armor Making Deactivated.")
+end
+
+function displayNAHelp(name, line, args)
+   Note("New Armor Commands:")
+   Note("------------------------------")
+   Note("NewArmorAdd   - Add a new piece of armor to be crafted into the queue, prompting for each parameter")
+   Note("NAAddM        - Manually add armor to the list in the format:")
+   Note("                naaddm material wearloc cover 'desc' 'restring' underlay coating keyword enhance stitch number")
+   Note("NewArmorStart - Begin crafting new armors from start of queue, automatically moving on to enhancing and stitching")
+   Note("NewArmorList  - Display contents of armors to be crafted")
+   Note("NewArmorClear - Clear current list of new armors to be crafted")
+   Note("NewArmorHelp  - Show this command list")
+   Note("\n")
+end -- function
+
+function bactaNew(name, line, args)
+	if (math.abs(previousBacta - tonumber(args[2])) > 0) then
+		Note(math.abs(previousBacta - tonumber(args[2])))
+	end
+	previousBacta = tonumber(args[2])
+end
+
+function toggleBactaOn(name, line, args)
+	bactaCheck = true
+	EnableTriggerGroup("BactaCheck", true)
+	Note("BactaCheck activated.")
+end
+
+function toggleBactaOff(name, line, args)
+	bactaCheck = false
+	EnableTriggerGroup("BactaCheck", false)
+	Note("BactaCheck deactivated.")
+end
+
+function switchBacta(name, line, args)
+   if (args[1] == "on") then
+      toggleBactaOn()
+   else
+      if (args[1] == "off") then
+         toggleBactaOff()
+      else
+         if(bactaCheck == true) then
+            toggleBactaOff()
+         else
+            toggleBactaOn()
+         end
+      end
+   end
+end
+
+  ]]> 
+  </script>
+ <!--   Plugin help    -->
+  <aliases>
+  <alias script="OnHelp" match="LotJArmor:help" enabled="y" /> 
+  </aliases>
+ <script>
+ <![CDATA[ function OnHelp ()
+  world.Note (world.GetPluginInfo (world.GetPluginID (), 3))
+end
+
+  ]]> 
+  </script>
+  </muclient>

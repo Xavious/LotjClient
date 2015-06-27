@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="iso-8859-1" ?> 
+<!DOCTYPE muclient> 
+<muclient>
+<plugin name="LotJLocate" author="@Johnson" id="fe08090f4911cce509dea457" language="Lua" purpose="Locating ships" save_state="y" date_written="2013-03-18 14:17:01" requires="4.40" version="1.0">
+<description trim="y">
+<![CDATA[ 
+LotJLocate v 1.0 by Johnson. Enter 'alochelp' for general command information.
+   Enter 'alochelp <command>' for more detailed information on that command.
+  ]]> 
+  </description>
+  </plugin>
+<!--   Get our standard constants   --> 
+  <include name="constants.lua" /> 
+<!--   Triggers    --> 
+<triggers>
+  <trigger enabled="n" match="^You manage to locate a record on the target vessel\.\.\.$" script="locateNext" name="LocSuccess" regexp="y" group="LotJLocate" sequence="100" /> 
+  <trigger enabled="n" match="^You were unable to locate any records on the target ship\.$" script="locateFailed" name="LocFail" regexp="y" group="LotJLocate" sequence="100" />
+  <trigger enabled="n" match="^You can\'t seem to call up the right information on the datapad\!$" script="locateFailed" name="LocFail2" regexp="y" group="LotJLocate" sequence="100" />
+  </triggers>
+<!--   Aliases    --> 
+<aliases>
+  <alias name="Loc" script="locate" match="^aloc( +(.*))?$" enabled="y" group="LocateCmd" regexp="y" ignore_case="y" sequence="100" /> 
+  <alias name="LocAdd" script="locateAdd" match="^alocadd( +(.*))?$" enabled="y" group="LocateCmd" regexp="y" ignore_case="y" sequence="100" /> 
+  <alias name="LocRem" script="locateRem" match="^alocrem( +(.*))?$" enabled="y" group="LocateCmd" regexp="y" ignore_case="y" sequence="100" /> 
+  <alias name="LocClear" script="locateClear" match="^alocclear( +(.*))?$" enabled="y" group="LocateCmd" regexp="y" ignore_case="y" sequence="100" /> 
+  <alias name="LocReset" script="locateReset" match="^alocreset( +(.*))?$" enabled="y" group="LocateCmd" regexp="y" ignore_case="y" sequence="100" />
+  <alias name="LocStart" script="locateStart" match="^alocstart( +(.*))?$" enabled="y" group="LocateCmd" regexp="y" ignore_case="y" sequence="100" /> 
+  <alias name="LocList" script="locateList" match="^aloclist( +(.*))?$" enabled="y" group="LocateCmd" regexp="y" ignore_case="y" sequence="100" /> 
+  <alias name="LocMax" script="setMaxTries" match="^alocmax( +(.*))?$" enabled="y" group="LocateCmd" regexp="y" ignore_case="y" sequence="100" />
+  <alias name="LocHelp" script="locHelp" match="^alochelp(\s*(.*))?$" enabled="y" group="LocateCmd" regexp="y" ignore_case="y" sequence="100" />
+  <alias name="LocCycle" script="locCycle" match="^aloccycle$" enabled="y" group="LocateCmd" regexp="y" ignore_case="y" sequence="100" />
+  </aliases>
+<!--   Script    --> 
+<script>
+<![CDATA[
+local loclist = {}
+local locpos = 0
+local locitem = ""
+local loctries = 0
+local maxtries = tonumber(GetVariable("maxtries")) or 3
+local cycle = false
+
+function locate(name, line, args)
+  if not args or args[1] == "" then -- entered nothing
+    if locpos > 0 then -- if we're using a list
+      Send("locateship "..loclist[locpos])
+    elseif locitem ~= "" then -- not using a list
+      Send("locateship "..locitem)
+    else
+      locateStop()
+    end
+  elseif string.find(args[1], ",", 0, true) then -- entered many items
+    locateClear() -- clear the list and start fresh
+    Execute("alocadd "..args[1])
+    locateStart()
+  else -- entered one item
+    if Trim(args[1]) == "" then -- clean up blank arguments messing up things
+      locate()
+      return
+    end
+    locitem = Trim(args[1])
+    locpos = 0
+    loctries = 1
+    Send("locateship "..locitem)
+  end
+  EnableTriggerGroup("LotJLocate", true)
+end
+
+function locateNext()
+  if locitem ~= "" then -- we're not using the list
+    if cycle then -- if cycle is on
+      locate()
+    else          -- cycle is off, finished
+      locateStop()
+    end
+    return
+  else -- we are using a list
+    locpos = locpos + 1
+    if locpos > #loclist then -- we're at the end of the list
+      if cycle then -- cycle is on
+        Note("End of locate list reached, cycling to the beginning.")
+        locateStart()
+      else -- cycle is off
+        locateStop()
+      end
+    else -- we're in the middle of the list
+      locate()
+    end
+  end
+end
+
+function locateStop()
+  locpos = 0
+  locitem = ""
+  Note("Locating finished.")
+  EnableTriggerGroup("LotJLocate", false)
+end
+
+function setMaxTries(name, line, args)
+  if args[1] == "" then
+    ColourNote("red","black","Must supply a number to set maximum locate tries!")
+  else
+    maxtries = tonumber(args[1])
+    SetVariable("maxtries", args[1])
+    ColourNote("yellow","black","Max locating tries set to: "..maxtries)
+  end
+end
+
+function locCycle()
+  if cycle then
+    cycle = false
+    ColourNote("red","black","Locate will not cycle infinitely.")
+  else
+    cycle = true
+    ColourNote("lime","black","Locate will cycle infinitely.")
+  end
+end
+
+function locateFailed()
+  loctries = loctries + 1
+  if loctries > maxtries then -- we're done trying that ship, move to the next
+    loctries = 1
+    locateNext()
+  else
+    locate()
+  end
+end
+
+function locateAdd(name, line, args)
+	local addItems = utils.split(args[1], ",")
+	if addItems then
+	  for i, v in ipairs(addItems) do
+	    loclist[#loclist+1]=Trim(v)
+	    ColourNote("lime","black","Added "..loclist[#loclist].." to locate list.")
+	  end
+	else
+	  loclist[#loclist+1] = Trim(args[1])
+	  ColourNote("lime","black","Added "..loclist[#loclist].." to locate list.")
+	end
+end
+
+function locateRem(name, line, args)
+  if not args[1] then
+    Note("Remove what?")
+    return
+  end
+  for i, v in ipairs(loclist) do
+    if (tonumber(args[1]) == i) or (string.lower(Trim(args[1])) == string.lower(v)) then
+      Note("Removed '" .. v .. "' from locate list.")
+      table.remove(loclist, i)
+      if (locpos > i) then  -- if our item is higher in the list than what we remove
+        locpos = locpos - 1  -- decrement the pointer to follow the current item
+      end
+    else
+      if (#loclist == i) then
+        Note("Item '" .. args[1] .. "' not found in study list.")
+      end
+    end
+  end
+end
+
+function locateClear()
+  loclist = {}
+  locpos = 0
+  loctries = 1
+  locitem = ""
+  ColourNote("yellow","","Locate list cleared.")
+end
+function locateReset()
+	locateClear()
+	cycle = false
+	maxtries = 3
+  SetVariable("maxtries", 3)
+	ColourNote("yellow","","LotJLocate settings have been reset to defaults.")
+end
+function locateStart()
+  locpos = 0
+  locitem = ""
+  locateNext()
+end
+function locateList()
+  Note("Locate list contains:")
+  for i, v in ipairs(loclist) do
+    if (i == locpos) then
+      ColourNote("lime","black","--]> "..i..") "..v.." <[--")
+    else
+      Note(i..") "..v)
+    end
+  end
+end
+
+-- define our help command structure
+local commands = { { name = "aloc", desc = "Multi-purpose command used to resume locating sessions, or begin a new session with a single command.",
+                         args = { { name = "<none>", desc = "Used with no arguments, this command resumes your place in the locate list."},
+                                  { name = "<argument>", desc = "Used with one argument, this command begins a locate session independent of the current locate list."},
+                                  { name = "<arg>,<arg>,<arg>", desc = "Used with comma-separated arguments, this command clears the list and adds each given item to a new list, locating each one in succession."} }
+                          },
+               { name = "alocadd", desc = "Command used to add things to the locate list.",
+                        args = { { name = "<argument>", desc = "Add a single item to the locate list."},
+                                 { name = "<arg>,<arg>,<arg>", desc = "Used with comma-separted arguments, add multiple items to the locate list."} }
+                          },
+               { name = "alocrem", desc = "Removes an item from the locate list.",
+                        args = { { name = "<number>", desc = "Given a single number, this command removes an item from the locate list at the given index."},
+                                 { name = "<argument>", desc = "Given a single argument, this command removes all instances of the argument from the locate list."} }
+                          },
+               { name = "alocclear", desc = "Deletes the current locate list.",
+                        args = { }
+                          },
+							 { name = "alocreset", desc = "Reset LotJLocate settings to defaults.",
+												args = { }
+													},
+               { name = "alocstart", desc = "Starts locating at the beginning of the current locate list.",
+                        args = { }
+                          },
+               { name = "aloclist", desc = "Displays the current locate list.",
+                        args = { }
+                          },
+               { name = "alocmax", desc = "Sets the number of attempts to be made locating each ship.",
+                        args = { { name = "<number>", desc = "Sets the number of locate attempts to be made for each ship in the list."}, }
+                          },
+               { name = "aloccycle", desc = "Toggle infinite locate cycling.",
+                        args = { }
+                          },
+               { name = "alochelp", desc = "Display this help file.",
+                        args = { { name = "<argument>", desc = "Display more detailed help information on the given command."} }
+                          },           
+                           }
+
+function locHelp(name, line, args)
+  local found = false
+  if args[1] == "" then -- show general help
+    ColourNote("white","black","LotJLocate v"..GetPluginInfo(GetPluginID(), 19).." by Johnson. Enter 'alochelp <command>' for more detailed information.")
+    for a, b in ipairs(commands) do -- commands
+      local command = b
+      ColourNote("silver","black",string.format("%-20s", command.name).." : "..command.desc)
+    end
+    Note("")
+  else -- entered something
+    ColourNote("white","black","LotJLocate v"..GetPluginInfo(GetPluginID(), 19).." by Johnson. Enter 'alochelp' for more general information.")
+
+    for a, b in ipairs(commands) do -- scroll through commands
+    
+      if (string.lower(b.name) == string.lower(Trim(args[1]))) then -- found our argument
+        found = true
+        ColourNote("silver","black",b.name .. " : " .. b.desc)
+        ColourNote("silver","black","Available arguments:")
+        if #b.args == 0 then -- no arguments
+          ColourNote("silver","black","   None.")
+        else -- arguments to print
+          for i, k in ipairs(b.args) do
+            ColourNote("silver","black",string.format("%20s", k.name).." : " .. k.desc)
+          end -- end print arguments
+        end -- end no arguments
+        Note("")
+      end -- end found command
+    end -- end scroll commands
+    if not found then
+      ColourNote("silver","black","Command '"..args[1].."' not found.")
+    end
+  end -- end no input
+end
+
+  ]]> 
+  </script>
+  </muclient>

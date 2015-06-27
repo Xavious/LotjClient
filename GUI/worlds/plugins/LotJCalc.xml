@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="iso-8859-1" ?> 
+<!DOCTYPE muclient> 
+<!--  Saved on Sunday, July 04, 2012, 6:29 PM   -->  
+<muclient>
+<plugin name="LotJCalc" author="@Johnson" id="b2c06b3dcc775c0ede861316" language="Lua" purpose="Calculate Sectors Easily" save_state="y" requires="4.40" version="1.06">
+<description trim="y">
+<![CDATA[ 
+Automatically calculate hyperjumps to the specified sector.
+  ]]> 
+  </description>
+  </plugin>
+<!--   Get our standard constants   --> 
+  <include name="constants.lua" /> 
+<!--   Triggers    --> 
+<triggers>
+
+  <trigger enabled="n" group="CalcStart" match="^You use the datapad to lookup the information\.$" name="ShowplanetSuccess" script="showplanetSuccess" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
+  <trigger enabled="n" group="CalcStart" match="^No such planet\.$" name="ShowplanetFailure" script="showplanetFailure" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger> 
+  <trigger enabled="n" group="CalcCap" match="^Planet\: (.*)$" name="PlanetCap" script="planetCheck" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
+  <trigger enabled="n" group="CalcCap" match="^Starsystem\: (.*)$" name="SystemCap" script="setSystem" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
+  <trigger enabled="n" group="CalcCap" match="^Coordinates\: (.*) (.*) (.*)$" name="CoordCap" script="setCoords" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
+  <trigger enabled="n" group="GagAll" match="^(.*)$" name="GagAll" regexp="y" keep_evaluating="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
+  <trigger enabled="n" group="CalcCap" match="^Use \'SHOWPLANET \<planet\> RESOURCES\' for current resources\.$" name="CalcEnd" regexp="y" omit_from_log="y" omit_from_output="y" script="calculate" sequence="100"></trigger>
+	
+	<!-- triggers relating to space capturing -->
+	<trigger name="StoreSpaceCoordinate" match="^(.*) (\-?\d+) (\-?\d+) (\-?\d+)(.*)?$" script="spaceCapStore" omit_from_output="y" keep_evaluating="y" group="SpaceCap" enabled="n" regexp="y" sequence="100" />
+	<trigger name="CapStop" match="^Your Coordinates\: (.*)$" script="spaceCapStop" group="SpaceCap" enabled="n" regexp="y" sequence="100" />
+
+  </triggers>
+<!--   Aliases    --> 
+<aliases>
+  <alias name="calculate" script="showPlanet" match="^calculate (.*)$" enabled="y" regexp="y" group="LotJCalc" sequence="100"></alias>
+  <alias name="calc" script="showPlanet" match="^calc (.*)$" enabled="y" regexp="y" group="LotJCalc" sequence="100"></alias>
+	
+	<!-- aliases relating to space coord capturing -->
+	<alias name="CoordCapStart" match="rad" script="spaceCapStart" enabled="y" group="FlightCmd" ignore_case="y" sequence="100" />
+	<alias name="CoordCalc" match="lcalc *" script="spaceCapCalc" enabled="y" group="FlightCmd" ignore_case="y" sequence="100" />
+  </aliases>
+<!--   Script    --> 
+<script>
+<![CDATA[ 
+local planets = {}
+local planetname = ""
+local systemname = ""
+local coordX = 0
+local coordY = 0
+local coordZ = 0
+SetVariable("planetname", "")
+
+
+local spaceCoords = {}
+
+function spaceCapStart()
+	EnableTriggerGroup("SpaceCap", true)
+	spaceCoords = {}
+	Send("radar")
+end
+function spaceCapStop()
+	EnableTriggerGroup("SpaceCap", false)
+end
+
+function spaceCapStore(name, line, args, styles)
+	local body = {
+		name=Trim(args[1]),
+		x=tonumber(args[2]),
+		y=tonumber(args[3]),
+		z=tonumber(args[4])
+	}
+	if (body.name ~= "Your Coordinates:" and body.name ~= "New course set, approaching" and not string.find(body.name, "Speed:", 0, true)) then
+		spaceCoords[#spaceCoords + 1] = body
+		ColourTell("silver", "black", #spaceCoords..") ")
+		for k, v in pairs(styles) do
+      Hyperlink("lcalc "..#spaceCoords, v.text, "Jump to "..spaceCoords[#spaceCoords].name, RGBColourToName(v.textcolour), RGBColourToName(v.backcolour), false)
+    end
+  else
+    for k, v in pairs(styles) do
+      ColourTell (RGBColourToName(v.textcolour), RGBColourToName(v.backcolour), v.text) 
+    end   
+  end
+  Note("")
+end
+
+function spaceCapCalc(name, line, args)
+	for i, v in ipairs(spaceCoords) do
+		if ((tonumber(args[1]) == i) or string.find(string.lower(v.name), string.lower(args[1]), 0, true)) then
+  		ColourNote("lime", "black", "Entering coordinates for "..v.name)
+	  	Send("calc local "..v.x.." "..v.y.." "..v.z+500)
+	  	return
+		end
+	end
+	ColourNote("red","black","Invalid argument given to lcalc: ".. args[1])
+end
+
+function showPlanet(name, list, args)
+  if not args or args[1] == "" then -- we entered "calc" with no args, so pass it through
+    Send("calculate")
+    return
+  end
+  if args[1] == "stop" then -- entered "calc stop", pass it through
+    SetVariable("planetname", "")
+    Send("calculate stop")
+    return
+  end
+  if string.find(args[1], "local", 0, true) then -- we entered calc local x y z, pass it through
+    SetVariable("planetname", "local")
+    Send("calculate "..args[1])
+    return
+  end
+  if string.find(args[1], "%'[%d-]* [%d-]*%'", 0, false) then -- we entered an uncharted sector in 'x y' x y z format
+    -- set our planetname to the x y coordinates
+    local xstart, xend = string.find(args[1], "%'[%d-]+", 0, false)
+    local xcoord = string.sub(args[1], xstart+1, xend)
+    local ystart, yend = string.find(args[1], "[%d-]+%'", xend, false)
+    local ycoord = string.sub(args[1], ystart, yend-1)
+    --Note("xstart: "..xstart.." xend: "..xend.." xcoord: "..xcoord)
+    --Note("ystart: "..ystart.." yend: "..yend.." ycoord: "..ycoord)
+
+    SetVariable("planetname", "("..xcoord..","..ycoord..")")
+    --Note(GetVariable("planetname"))
+    Send("calculate "..args[1])
+    return
+  end
+  -- add option to enter calc x y x y z for uncharted sectors here
+  if (args[1] ~= nil and args[1] ~= "stop") then -- we entered a standard planetname
+		planetname = Trim(args[1])
+		SetVariable("planetname", planetname)
+		SendNoEcho("showplanet '" .. planetname .. "'")
+		EnableTriggerGroup("CalcStart", true)
+	else
+		Note("Invalid planet name!")
+	end
+end
+
+function showplanetSuccess(name, list, args)
+	toggleOn()
+	gagOn()
+end
+
+function showplanetFailure(name, list, args)
+	toggleOff()
+	gagOff()
+	ColourNote("red", "", "Planet lookup failed.")
+end
+
+function planetCheck(name, list, args)
+	if (args[1] ~= nil) then
+		if (string.lower(planetname) == string.lower(args[1])) then
+			return true
+		end
+	end
+	ColourNote("red", "", "Invalid planet found.")
+	toggleOff()
+	gagOff()
+	return false
+end
+
+function calculate(name, list, args)
+	local newX = coordX + 500
+	Send("calculate \"" .. systemname .. "\" " .. newX .. " " .. coordY .. " " .. coordZ)
+	toggleOff()
+	gagOff()
+end
+
+function toggleOn(name, list, args)
+	EnableTriggerGroup ("CalcCap", true)
+end
+
+function toggleOff(name, list, args)
+	EnableTriggerGroup ("CalcCap", false)
+	EnableTriggerGroup ("CalcStart", false)
+end
+
+function gagOn(name, list, args)
+	EnableTrigger ("GagAll", true)
+end
+function gagOff(name, list, args)
+	EnableTrigger ("GagAll", false)
+end
+
+function setSystem(name, list, args)
+	if (args[1] ~= nil) then
+		systemname = args[1]
+		ColourNote("green", "", "System found: " .. systemname)
+	else
+		ColourNote("red", "", "Invalid system name!")
+	end
+
+end
+
+function clearPlanet()
+  SetVariable("planetname", "")
+end
+
+function setCoords(name, list, args)
+	if ((args[1] ~= nil) and (args[2] ~= nil) and (args[3] ~= nil)) then
+		coordX = args[1]
+		coordY = args[2]
+		coordZ = args[3]
+		ColourNote("green", "", "Coordinates found: " .. coordX .. ", " .. coordY .. ", " .. coordZ)
+	else
+		ColourNote("red", "", "Invalid number of coordinate arguments!")
+	end
+end
+  ]]> 
+  </script>
+  </muclient>
