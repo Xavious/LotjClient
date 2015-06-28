@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Sunday, June 28, 2015, 2:02 PM -->
+<!-- Saved on Sunday, June 28, 2015, 6:11 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 14:02:21"
+   date_saved="2015-06-28 18:11:30"
   >
   <variable name="WINDOW_HEIGHT">131</variable>
   <variable name="WINDOW_NAME">Communication Log</variable>
@@ -53,8 +53,8 @@
   <variable name="log_to_file">0</variable>
   <variable name="mw_96ce07ef668c1258781d6b49_windowflags">2</variable>
   <variable name="mw_96ce07ef668c1258781d6b49_windowmode">0</variable>
-  <variable name="mw_96ce07ef668c1258781d6b49_windowx">1237</variable>
-  <variable name="mw_96ce07ef668c1258781d6b49_windowy">0</variable>
+  <variable name="mw_96ce07ef668c1258781d6b49_windowx">135</variable>
+  <variable name="mw_96ce07ef668c1258781d6b49_windowy">2</variable>
   <variable name="newbie_echo">1</variable>
   <variable name="ooc_echo">1</variable>
   <variable name="rpcchat_echo">1</variable>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Sunday, June 28, 2015, 2:02 PM -->
+<!-- Saved on Sunday, June 28, 2015, 6:11 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 14:02:21"
+   date_saved="2015-06-28 18:11:30"
   >
   <variable name="AC">LTg2NQ==</variable>
   <variable name="AFFECTS"></variable>
