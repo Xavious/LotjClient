@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Sunday, June 28, 2015, 12:46 PM -->
+<!-- Saved on Sunday, June 28, 2015, 1:59 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -8,7 +8,7 @@
 <world
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 12:46:32"
+   date_saved="2015-06-28 13:59:56"
 
    auto_say_override_prefix="-"
    auto_say_string="say "
@@ -107,7 +107,7 @@
 <triggers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 12:46:32"
+   date_saved="2015-06-28 13:59:56"
   >
 </triggers>
 
@@ -116,7 +116,7 @@
 <aliases
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 12:46:32"
+   date_saved="2015-06-28 13:59:56"
   >
 </aliases>
 
@@ -125,7 +125,7 @@
 <timers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 12:46:32"
+   date_saved="2015-06-28 13:59:56"
   >
 </timers>
 
@@ -134,7 +134,7 @@
 <macros
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 12:46:32"
+   date_saved="2015-06-28 13:59:56"
   >
 
   <macro name="up" type="send_now" >
@@ -228,7 +228,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 12:46:32"
+   date_saved="2015-06-28 13:59:56"
   >
 </variables>
 
@@ -237,7 +237,7 @@
 <colours
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 12:46:32"
+   date_saved="2015-06-28 13:59:56"
   >
 
 <ansi>
@@ -294,7 +294,7 @@
 <keypad
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 12:46:32"
+   date_saved="2015-06-28 13:59:56"
   >
 
   <key name="0" >
@@ -408,7 +408,7 @@
 <printing
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 12:46:32"
+   date_saved="2015-06-28 13:59:56"
   >
 
 <ansi>
@@ -433,10 +433,10 @@
 </printing>
 
 <!-- plugins -->
-<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\LotJMSDPHandler.xml" plugin="y" />
-<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\lotj_repaint_buffer.xml" plugin="y" />
-<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\lotj_channels_ic.xml" plugin="y" />
-<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\lotj_channels_ooc.xml" plugin="y" />
-<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\LotJCalc.xml" plugin="y" />
-<include name="C:\Users\Brandon\Documents\GitHub\LotjClient\GUI\worlds\plugins\LotJStarMap.xml" plugin="y" />
+<include name=".\GUI\worlds\plugins\LotJMSDPHandler.xml" plugin="y" />
+<include name=".\GUI\worlds\plugins\lotj_repaint_buffer.xml" plugin="y" />
+<include name=".\GUI\worlds\plugins\LotJStarMap.xml" plugin="y" />
+<include name=".\GUI\worlds\plugins\LotJCalc.xml" plugin="y" />
+<include name=".\GUI\worlds\plugins\lotj_channels_ic.xml" plugin="y" />
+<include name=".\GUI\worlds\plugins\lotj_channels_ooc.xml" plugin="y" />
 </muclient>

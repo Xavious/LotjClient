@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Sunday, June 28, 2015, 12:46 PM -->
+<!-- Saved on Sunday, June 28, 2015, 2:02 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-28 12:46:36"
+   date_saved="2015-06-28 14:02:21"
   >
   <variable name="AC">LTg2NQ==</variable>
   <variable name="AFFECTS"></variable>
@@ -58,8 +58,8 @@
   <variable name="MAXAMMO">MA==</variable>
   <variable name="MEDPACPOWER">MA==</variable>
   <variable name="MONEYBANK">MA==</variable>
-  <variable name="MONEYINV">MTUwMzQzNQ==</variable>
-  <variable name="MONEYTOTAL">MTUwMzQzNQ==</variable>
+  <variable name="MONEYINV">MA==</variable>
+  <variable name="MONEYTOTAL">MA==</variable>
   <variable name="MOVEMENT">MjQ0MA==</variable>
   <variable name="MOVEMENTMAX">MjQ0MA==</variable>
   <variable name="MSDPDebug">0</variable>
@@ -76,7 +76,7 @@
   <variable name="ROOMVNUM">MTM5MjQ=</variable>
   <variable name="SERVERID"></variable>
   <variable name="SERVERTIME">MA==</variable>
-  <variable name="SHIELDENERGY">MTkwMA==</variable>
+  <variable name="SHIELDENERGY">MA==</variable>
   <variable name="SHIPENERGY">MA==</variable>
   <variable name="SHIPGALX">MA==</variable>
   <variable name="SHIPGALY">MA==</variable>
