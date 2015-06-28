@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Saturday, June 27, 2015, 7:22 PM -->
+<!-- Saved on Sunday, June 28, 2015, 12:46 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,13 +14,13 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-27 19:22:05"
+   date_saved="2015-06-28 12:46:36"
   >
   <variable name="height">600</variable>
   <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowflags">2</variable>
   <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowmode">0</variable>
-  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowx">463</variable>
-  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowy">109</variable>
+  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowx">0</variable>
+  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowy">0</variable>
   <variable name="systems">systems = {}
   systems[1] = {}
     systems[1].y = 0
