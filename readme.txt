@@ -7,6 +7,7 @@
 -Sunday, June 28th 2015
    -Added a relative directory path to the database so the client will work no matter where user installs it.
    -Added auto connect to world on launch
+   -Fixed plugin log path
 
 -Saturday, June 27th 2015
    -Lotj MUD client project intialized on GitHub
