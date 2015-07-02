@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Monday, June 29, 2015, 8:59 PM -->
+<!-- Saved on Thursday, July 02, 2015, 8:21 AM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -8,7 +8,7 @@
 <world
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-29 20:59:56"
+   date_saved="2015-07-02 08:21:27"
 
    auto_say_override_prefix="-"
    auto_say_string="say "
@@ -46,6 +46,7 @@
    edit_script_with_notepad="y"
    enable_aliases="y"
    enable_beeps="y"
+   enable_command_stack="y"
    enable_scripts="y"
    enable_timers="y"
    enable_triggers="y"
@@ -107,7 +108,7 @@
 <triggers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-29 20:59:56"
+   date_saved="2015-07-02 08:21:27"
   >
 </triggers>
 
@@ -116,7 +117,7 @@
 <aliases
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-29 20:59:56"
+   date_saved="2015-07-02 08:21:27"
   >
 </aliases>
 
@@ -125,7 +126,7 @@
 <timers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-29 20:59:56"
+   date_saved="2015-07-02 08:21:27"
   >
 </timers>
 
@@ -134,7 +135,7 @@
 <macros
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-29 20:59:56"
+   date_saved="2015-07-02 08:21:27"
   >
 
   <macro name="up" type="send_now" >
@@ -228,7 +229,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-29 20:59:56"
+   date_saved="2015-07-02 08:21:27"
   >
 </variables>
 
@@ -237,7 +238,7 @@
 <colours
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-29 20:59:56"
+   date_saved="2015-07-02 08:21:27"
   >
 
 <ansi>
@@ -294,7 +295,7 @@
 <keypad
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-29 20:59:56"
+   date_saved="2015-07-02 08:21:27"
   >
 
   <key name="0" >
@@ -408,7 +409,7 @@
 <printing
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-29 20:59:56"
+   date_saved="2015-07-02 08:21:27"
   >
 
 <ansi>
@@ -433,7 +434,6 @@
 </printing>
 
 <!-- plugins -->
-<include name="LotJMSDPHandler.xml" plugin="y" />
 <include name="lotj_repaint_buffer.xml" plugin="y" />
 <include name="LotJStarMap.xml" plugin="y" />
 <include name="LotJCalc.xml" plugin="y" />
@@ -441,4 +441,5 @@
 <include name="lotj_channels_ooc.xml" plugin="y" />
 <include name="LotJFlight.xml" plugin="y" />
 <include name="LotJResearch.xml" plugin="y" />
+<include name="LotJMSDPHandler.xml" plugin="y" />
 </muclient>

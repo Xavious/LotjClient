@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Monday, June 29, 2015, 9:00 PM -->
+<!-- Saved on Thursday, July 02, 2015, 8:21 AM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-06-29 21:00:00"
+   date_saved="2015-07-02 08:21:56"
   >
   <variable name="WINDOW_HEIGHT">131</variable>
   <variable name="WINDOW_NAME">OOC Log</variable>

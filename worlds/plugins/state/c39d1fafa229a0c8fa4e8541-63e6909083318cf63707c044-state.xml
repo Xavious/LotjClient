@@ -5,7 +5,7 @@
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
 
-<!-- Plugin state saved. Plugin: "LotJFlight". World: "Legends of the Jedi". -->
+<!-- Plugin state saved. Plugin: "Example_Mapper". World: "Legends of the Jedi". -->
 
 <muclient>
 
@@ -14,7 +14,8 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:56"
+   date_saved="2015-07-02 08:21:23"
   >
+  <variable name="room_name">&amp;gPort District &amp;W-- &amp;zDesjak and &amp;YAnoliekk</variable>
 </variables>
 </muclient>

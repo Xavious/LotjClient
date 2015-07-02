@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE muclient>
+<muclient>
+<plugin
+   name="Example_Mapper"
+   author="Nick Gammon"
+   id="63e6909083318cf63707c044"
+   language="Lua"
+   purpose="Example mapper"
+   save_state="y"
+   date_written="2014-10-22"
+   requires="4.61"
+   version="1.0"
+   >
+
+<description trim="y">
+<![CDATA[
+ Description here.
+]]>
+</description>
+
+</plugin>
+
+<aliases>
+  <alias
+   script="OnHelp"
+   match="mapper help"
+   enabled="y"
+  >
+  </alias>
+</aliases>
+
+
+<!--  Script  -->
+
+<script>
+<![CDATA[
+
+-- mapper module
+require "mapper"
+
+-- configuration table
+config = { 
+	OUR_ROOM_COLOUR         = { name = "Our room",  colour =  ColourNameToRGB "black", },
+}  
+
+rooms = { }
+-- -----------------------------------------------------------------
+-- these commands will be considered "room changing" commands
+-- -----------------------------------------------------------------
+local valid_direction = {
+  n = "n",
+  s = "s",
+  e = "e",
+  w = "w",
+  u = "u",
+  d = "d",
+  ne = "ne",
+  sw = "sw",
+  nw = "nw",
+  se = "se",
+  north = "n",
+  south = "s",
+  east = "e",
+  west = "w",
+  up = "u",
+  down = "d",
+  northeast = "ne",
+  northwest = "nw",
+  southeast = "se",
+  southwest = "sw",
+  ['in'] = "in",
+  out = "out",
+  }  -- end of valid_direction
+  
+-- for calculating the way back
+local inverse_direction = {
+  n = "s",
+  s = "n",
+  e = "w",
+  w = "e",
+  u = "d",
+  d = "u",
+  ne = "sw",
+  sw = "ne",
+  nw = "se",
+  se = "nw",
+  ['in'] = "out",
+  out = "in",
+  }  -- end of inverse_direction  
+
+-- -----------------------------------------------------------------
+-- mapper 'get_room' callback - it wants to know about room uid
+-- -----------------------------------------------------------------
+function get_room (uid)
+
+	room = rooms[uid]
+	if not room then
+		return nil
+	end
+	
+	room.bordercolour = config.ROOM_COLOUR.colour
+	room.borderpen = miniwin.pen_solid 
+	room.borderpenwidth = 1
+	room.fillbrush = miniwin.brush_null  -- no fill
+	
+	if uid == current_room then
+		room.bordercolour = config.OUR_ROOM_COLOUR.colour
+		room.borderpenwidth = 2
+	end
+	
+	room.area = "The Swamp"
+	room.hovermessage = room.name
+	return room
+end -- get_room
+
+-- -----------------------------------------------------------------
+-- Plugin Install
+-- -----------------------------------------------------------------
+function OnPluginInstall ()
+  -- initialize mapper
+  mapper.init { 
+            config = config,      -- ie. colours, sizes
+            get_room = get_room,  -- info about room (uid)
+			show_help  = OnHelp,   -- to show help
+              }
+               
+  mapper.mapprint (string.format ("MUSHclient mapper installed, version %0.1f", mapper.VERSION))
+end -- OnPluginInstall
+
+-- -----------------------------------------------------------------
+-- Plugin Help
+-- -----------------------------------------------------------------
+function OnHelp ()
+  mapper.mapprint (string.format ("[MUSHclient mapper, version %0.1f]", mapper.VERSION))
+  mapper.mapprint (world.GetPluginInfo (world.GetPluginID (), 3))
+end
+
+require "checkplugin"
+function OnPluginListChanged()
+	do_plugin_check_now ("b3aae34498d5bf19b5b2e2af", "LotJMSDPHandler") -- check we have MSDP handler plugin
+end
+
+dofile(GetPluginInfo(GetPluginID(), 20) .. "lotj_colors.lua")
+function OnPluginBroadcast (msg, id, name, text)
+	-- Look for MSDP Handler.
+	if (id == 'b3aae34498d5bf19b5b2e2af') then
+		-- HUGE FIXME.. not an idea solution
+		--if (msg == 91) then -- we got table information from MSDP handler
+			-- store information in our own msdp table
+			--key = string.sub(text, 0, string.find(text,",",0,true)-1)  -- parse the variable key
+			--val = utils.base64decode(string.sub(text, string.find(text,",",0,true)+1, string.len(text))) -- parse the variable value
+			--msdp[key] = val -- store it
+		--end
+		
+		if (msg == 45) then
+			room_exits = text
+			if room_name == nil then
+				Note("Room_name not defined")
+			else
+				Note(room_name)
+				SetVariable("room_name", room_name)
+			end
+		end
+		if (msg == 46) then
+			room_name = text
+			if room_name == nil then
+				Note("Room_name not defined")
+			else
+				Note(room_name)
+				SetVariable("room_name", room_name)
+			end
+		end
+		if (msg == 47) then
+			uid = text
+			if uid == nil then
+				Note("Uid not defined")
+			else
+				room_name = ColoursToStyles(GetVariable("room_name"))
+				Note(uid)
+				if not rooms[uid] then
+					Note("Set New Room")
+					rooms[uid] = {name = room_name, exits = {} }
+				end
+				
+				-- if we changed rooms assume that our last movement sent us here
+			    if uid ~= current_room 
+					and current_room
+					and last_direction_moved then
+				-- previous room led here
+				rooms [current_room].exits [last_direction_moved] = uid 
+				-- assume inverse direction leads back
+				rooms [uid].exits [inverse_direction [last_direction_moved]] = current_room
+			    end -- if
+			  
+			    -- this is now our current room
+			    current_room = uid
+			  
+			    -- draw this room
+			    mapper.draw (current_room)
+			end		
+		end
+  end
+end
+
+-- -----------------------------------------------------------------
+-- try to detect when we send a movement command
+-- -----------------------------------------------------------------
+function OnPluginSent (sText)
+  last_direction_moved = valid_direction [sText]
+end -- OnPluginSent
+
+]]>
+</script>
+</muclient>
