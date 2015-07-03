@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Thursday, July 02, 2015, 8:21 AM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +13,6 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:56"
   >
   <variable name="height">600</variable>
   <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowflags">2</variable>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Thursday, July 02, 2015, 8:21 AM -->
+<!-- Saved on Friday, July 03, 2015, 5:33 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,10 +14,10 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:56"
+   date_saved="2015-07-03 17:33:40"
   >
-  <variable name="AC">LTg2NQ==</variable>
-  <variable name="AFFECTS">c25lYWsCMjIwMQ==</variable>
+  <variable name="AC">LTE5MA==</variable>
+  <variable name="AFFECTS"></variable>
   <variable name="ALIGNMENT">MA==</variable>
   <variable name="BLADEPOWER">MA==</variable>
   <variable name="CHA">MTg=</variable>
@@ -31,12 +31,12 @@
   <variable name="CON">MjU=</variable>
   <variable name="CONPERM">MjI=</variable>
   <variable name="CURRENTAMMO">MA==</variable>
-  <variable name="DAMROLL">MjU=</variable>
-  <variable name="DEX">MTE=</variable>
+  <variable name="DAMROLL">MjM=</variable>
+  <variable name="DEX">MTY=</variable>
   <variable name="DEXPERM">MTI=</variable>
   <variable name="GRENADEROUNDS">MA==</variable>
-  <variable name="HEALTH">NDkzMQ==</variable>
-  <variable name="HEALTHMAX">NDkzMQ==</variable>
+  <variable name="HEALTH">MjYwMA==</variable>
+  <variable name="HEALTHMAX">MjYwMA==</variable>
   <variable name="HITROLL">MzA=</variable>
   <variable name="INT">MjA=</variable>
   <variable name="INTPERM">MjA=</variable>
@@ -60,8 +60,8 @@
   <variable name="MONEYBANK">MA==</variable>
   <variable name="MONEYINV">MA==</variable>
   <variable name="MONEYTOTAL">MA==</variable>
-  <variable name="MOVEMENT">MjQ0MA==</variable>
-  <variable name="MOVEMENTMAX">MjQ0MA==</variable>
+  <variable name="MOVEMENT">MTk5MA==</variable>
+  <variable name="MOVEMENTMAX">MTk5MA==</variable>
   <variable name="MSDPDebug">0</variable>
   <variable name="OOCBREAK">MA==</variable>
   <variable name="OOCLIMIT">Ng==</variable>
@@ -71,9 +71,9 @@
   <variable name="PILOTING">MA==</variable>
   <variable name="PLANET"></variable>
   <variable name="RACE">SHV0dA==</variable>
-  <variable name="ROOMEXITS">bm9ydGgCTwFlYXN0Ak8Bd2VzdAJDAXNvdXRoZWFzdAJD</variable>
-  <variable name="ROOMNAME">Jk9BIGNvcnJpZG9yIG9uIHRoZSB0b3AgZmxvb3Igb2YgdGhlIFBhbGFjZQ==</variable>
-  <variable name="ROOMVNUM">MTM5MjQ=</variable>
+  <variable name="ROOMEXITS">bm9ydGgCTwFlYXN0Ak8Bd2VzdAJP</variable>
+  <variable name="ROOMNAME">JlJDb21tZXJjaWFsIERpc3RyaWN0IC0tICZ6Wnlob21hYXJpIEF2ZW51ZQ==</variable>
+  <variable name="ROOMVNUM">MTM1MjM=</variable>
   <variable name="SERVERID"></variable>
   <variable name="SERVERTIME">MA==</variable>
   <variable name="SHIELDENERGY">MA==</variable>

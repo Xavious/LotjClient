@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Thursday, July 02, 2015, 8:21 AM -->
+<!-- Saved on Friday, July 03, 2015, 5:33 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -8,7 +8,7 @@
 <world
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:27"
+   date_saved="2015-07-03 17:33:37"
 
    auto_say_override_prefix="-"
    auto_say_string="say "
@@ -62,7 +62,7 @@
    keypad_enable="y"
    line_information="y"
    log_output="y"
-   max_output_lines="5000"
+   max_output_lines="500000"
    mud_can_change_link_colour="y"
    mud_can_change_options="y"
    note_text_colour="#040000"
@@ -108,7 +108,7 @@
 <triggers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:27"
+   date_saved="2015-07-03 17:33:37"
   >
 </triggers>
 
@@ -117,7 +117,7 @@
 <aliases
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:27"
+   date_saved="2015-07-03 17:33:37"
   >
 </aliases>
 
@@ -126,7 +126,7 @@
 <timers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:27"
+   date_saved="2015-07-03 17:33:37"
   >
 </timers>
 
@@ -135,7 +135,7 @@
 <macros
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:27"
+   date_saved="2015-07-03 17:33:37"
   >
 
   <macro name="up" type="send_now" >
@@ -229,7 +229,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:27"
+   date_saved="2015-07-03 17:33:37"
   >
 </variables>
 
@@ -238,7 +238,7 @@
 <colours
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:27"
+   date_saved="2015-07-03 17:33:37"
   >
 
 <ansi>
@@ -295,7 +295,7 @@
 <keypad
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:27"
+   date_saved="2015-07-03 17:33:37"
   >
 
   <key name="0" >
@@ -409,7 +409,7 @@
 <printing
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-02 08:21:27"
+   date_saved="2015-07-03 17:33:37"
   >
 
 <ansi>
@@ -442,4 +442,11 @@
 <include name="LotJFlight.xml" plugin="y" />
 <include name="LotJResearch.xml" plugin="y" />
 <include name="LotJMSDPHandler.xml" plugin="y" />
+<include name="Lotj_Mapper.xml" plugin="y" />
+<include name="Lotj_Client.xml" plugin="y" />
+<include name="LotJ_Copy_colour_codes.xml" plugin="y" />
+<include name="LotJArmor.xml" plugin="y" />
+<include name="LotJBuildship.xml" plugin="y" />
+<include name="LotJStudy.xml" plugin="y" />
+<include name="Lotj_Auto_Vote.xml" plugin="y" />
 </muclient>

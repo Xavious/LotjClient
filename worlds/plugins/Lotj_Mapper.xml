@@ -2,11 +2,11 @@
 <!DOCTYPE muclient>
 <muclient>
 <plugin
-   name="Example_Mapper"
-   author="Nick Gammon"
+   name="Lotj_Mapper"
+   author="Xavious"
    id="63e6909083318cf63707c044"
    language="Lua"
-   purpose="Example mapper"
+   purpose="Automap areas using MSDP"
    save_state="y"
    date_written="2014-10-22"
    requires="4.61"
@@ -25,6 +25,18 @@
   <alias
    script="OnHelp"
    match="mapper help"
+   enabled="y"
+  >
+  </alias>
+  <alias
+   script="mapper.hide"
+   match="mapper hide"
+   enabled="y"
+  >
+  </alias>
+  <alias
+   script="mapper.show"
+   match="mapper show"
    enabled="y"
   >
   </alias>
@@ -126,6 +138,14 @@ function OnPluginInstall ()
               }
                
   mapper.mapprint (string.format ("MUSHclient mapper installed, version %0.1f", mapper.VERSION))
+  
+  require "serialize"  -- needed to serialize table to string
+  rooms = {}  -- ensure table exists, if not loaded from variable
+
+  -- seed random number generator
+  math.randomseed (os.time ())
+
+  assert (loadstring (GetVariable ("rooms") or "")) ()
 end -- OnPluginInstall
 
 -- -----------------------------------------------------------------
@@ -152,22 +172,34 @@ function OnPluginBroadcast (msg, id, name, text)
 			--val = utils.base64decode(string.sub(text, string.find(text,",",0,true)+1, string.len(text))) -- parse the variable value
 			--msdp[key] = val -- store it
 		--end
-		
+		require "tprint"
 		if (msg == 45) then
 			room_exits = text
-			if room_name == nil then
+			if room_exits == nil then
 				Note("Room_name not defined")
 			else
-				Note(room_name)
-				SetVariable("room_name", room_name)
+				--Mud separates MSDP ROOMEXITS with hex 01(start of text) and hex 02 (end of text) to separate exits in a string.
+				room_exits = utils.tohex(room_exits)
+				--Note(room_exits)
+				room_exits = string.gsub(room_exits, "024F01", "20")
+				room_exits = string.gsub(room_exits, "024301", "20")
+				room_exits = string.gsub(room_exits, "024F", "")
+				room_exits = string.gsub(room_exits, "0243", "")
+				room_exits = utils.fromhex(room_exits)
+				--Note(room_exits)
+				result = SetVariable("room_exits", room_exits)
 			end
 		end
 		if (msg == 46) then
-			room_name = text
+			--styles = ColoursToStyles(text)
+			--tprint(styles)
+			--ansi = stylesToANSI(styles)
+			--Note(ansi)
+			room_name = strip_colours(text)
 			if room_name == nil then
 				Note("Room_name not defined")
 			else
-				Note(room_name)
+				--Note(room_name)
 				SetVariable("room_name", room_name)
 			end
 		end
@@ -176,11 +208,20 @@ function OnPluginBroadcast (msg, id, name, text)
 			if uid == nil then
 				Note("Uid not defined")
 			else
-				room_name = ColoursToStyles(GetVariable("room_name"))
-				Note(uid)
+				--Note(uid)
 				if not rooms[uid] then
-					Note("Set New Room")
+					--Note("Set New Room")
+					room_name = GetVariable("room_name")
+					--Note(room_exits)
 					rooms[uid] = {name = room_name, exits = {} }
+					--Note("Setting exits:")
+					room_exits = GetVariable("room_exits")
+					room_exits = utils.split(room_exits, " ")
+					--tprint(room_exits)
+					for key, value in pairs(room_exits) do
+						--Note(valid_direction[value])
+						rooms[uid].exits [valid_direction[value]] = 0
+					end
 				end
 				
 				-- if we changed rooms assume that our last movement sent us here
@@ -204,11 +245,25 @@ function OnPluginBroadcast (msg, id, name, text)
 end
 
 -- -----------------------------------------------------------------
+-- Save the map
+-- -----------------------------------------------------------------
+function OnPluginSaveState ()
+  SetVariable ("rooms", serialize.save ("rooms"))
+end -- function OnPluginSaveState
+
+-- -----------------------------------------------------------------
 -- try to detect when we send a movement command
 -- -----------------------------------------------------------------
 function OnPluginSent (sText)
   last_direction_moved = valid_direction [sText]
 end -- OnPluginSent
+
+-- -----------------------------------------------------------------
+-- Hide the window
+-- -----------------------------------------------------------------
+function OnPluginDisable()
+	mapper.hide()
+end
 
 ]]>
 </script>

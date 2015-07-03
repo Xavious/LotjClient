@@ -5,7 +5,7 @@
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
 
-<!-- Plugin state saved. Plugin: "LotJResearch". World: "Legends of the Jedi". -->
+<!-- Plugin state saved. Plugin: "LotJBuildship". World: "Legends of the Jedi". -->
 
 <muclient>
 
@@ -16,6 +16,10 @@
    world_file_version="15"
    date_saved="2015-07-03 17:33:40"
   >
-  <variable name="colorMode">1</variable>
+  <variable name="circuitspart">circuits</variable>
+  <variable name="enginespart">engine</variable>
+  <variable name="hullpart">hull</variable>
+  <variable name="profiles">profiles = {}</variable>
+  <variable name="weaponspart">weapons</variable>
 </variables>
 </muclient>

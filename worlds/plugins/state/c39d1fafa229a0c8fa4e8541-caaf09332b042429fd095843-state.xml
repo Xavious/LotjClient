@@ -5,7 +5,7 @@
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
 
-<!-- Plugin state saved. Plugin: "LotJResearch". World: "Legends of the Jedi". -->
+<!-- Plugin state saved. Plugin: "Lotj_Auto_Vote". World: "Legends of the Jedi". -->
 
 <muclient>
 
@@ -16,6 +16,8 @@
    world_file_version="15"
    date_saved="2015-07-03 17:33:40"
   >
-  <variable name="colorMode">1</variable>
+  <variable name="password"></variable>
+  <variable name="user"></variable>
+  <variable name="vote_time">17</variable>
 </variables>
 </muclient>
