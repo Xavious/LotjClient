@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Friday, July 03, 2015, 7:27 PM -->
+<!-- Saved on Friday, July 03, 2015, 7:39 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-03 19:27:14"
+   date_saved="2015-07-03 19:39:58"
   >
   <variable name="AC">LTE5MA==</variable>
   <variable name="AFFECTS"></variable>
@@ -60,7 +60,7 @@
   <variable name="MONEYBANK">MA==</variable>
   <variable name="MONEYINV">MA==</variable>
   <variable name="MONEYTOTAL">MA==</variable>
-  <variable name="MOVEMENT">MTk5MA==</variable>
+  <variable name="MOVEMENT">MTk4MQ==</variable>
   <variable name="MOVEMENTMAX">MTk5MA==</variable>
   <variable name="MSDPDebug">0</variable>
   <variable name="OOCBREAK">MA==</variable>
@@ -71,9 +71,9 @@
   <variable name="PILOTING">MA==</variable>
   <variable name="PLANET"></variable>
   <variable name="RACE">SHV0dA==</variable>
-  <variable name="ROOMEXITS">bm9ydGgCTwFlYXN0Ak8Bd2VzdAJP</variable>
-  <variable name="ROOMNAME">JlJDb21tZXJjaWFsIERpc3RyaWN0IC0tICZ6Wnlob21hYXJpIEF2ZW51ZQ==</variable>
-  <variable name="ROOMVNUM">MTM1MjM=</variable>
+  <variable name="ROOMEXITS">ZWFzdAJPAXdlc3QCQw==</variable>
+  <variable name="ROOMNAME">Jk9BbiBhbnRlY2hhbWJlciBmaWxsZWQgd2l0aCAmWWdpJldsZCZZZWQgJk9lbWJlbGxpc2htZW50</variable>
+  <variable name="ROOMVNUM">MTM5MTE=</variable>
   <variable name="SERVERID"></variable>
   <variable name="SERVERTIME">MA==</variable>
   <variable name="SHIELDENERGY">MA==</variable>
