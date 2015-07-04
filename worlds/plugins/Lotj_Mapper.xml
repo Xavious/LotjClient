@@ -164,85 +164,54 @@ end
 dofile(GetPluginInfo(GetPluginID(), 20) .. "lotj_colors.lua")
 function OnPluginBroadcast (msg, id, name, text)
 	-- Look for MSDP Handler.
-	if (id == 'b3aae34498d5bf19b5b2e2af') then
-		-- HUGE FIXME.. not an idea solution
-		--if (msg == 91) then -- we got table information from MSDP handler
-			-- store information in our own msdp table
-			--key = string.sub(text, 0, string.find(text,",",0,true)-1)  -- parse the variable key
-			--val = utils.base64decode(string.sub(text, string.find(text,",",0,true)+1, string.len(text))) -- parse the variable value
-			--msdp[key] = val -- store it
-		--end
+	if (id == 'b3aae34498d5bf19b5b2e2af' and msg == 91) then
 		require "tprint"
-		if (msg == 45) then
-			room_exits = text
-			if room_exits == nil then
-				Note("Room_name not defined")
-			else
-				--Mud separates MSDP ROOMEXITS with hex 01(start of text) and hex 02 (end of text) to separate exits in a string.
-				room_exits = utils.tohex(room_exits)
-				--Note(room_exits)
-				room_exits = string.gsub(room_exits, "024F01", "20")
-				room_exits = string.gsub(room_exits, "024301", "20")
-				room_exits = string.gsub(room_exits, "024F", "")
-				room_exits = string.gsub(room_exits, "0243", "")
-				room_exits = utils.fromhex(room_exits)
-				--Note(room_exits)
-				result = SetVariable("room_exits", room_exits)
-			end
-		end
-		if (msg == 46) then
-			--styles = ColoursToStyles(text)
-			--tprint(styles)
-			--ansi = stylesToANSI(styles)
-			--Note(ansi)
-			room_name = strip_colours(text)
-			if room_name == nil then
-				Note("Room_name not defined")
-			else
-				--Note(room_name)
-				SetVariable("room_name", room_name)
-			end
-		end
-		if (msg == 47) then
-			uid = text
+		if (text == "ROOMVNUM") then
+			uid = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM"))
+			--Note(uid)
 			if uid == nil then
 				Note("Uid not defined")
 			else
 				--Note(uid)
 				if not rooms[uid] then
 					--Note("Set New Room")
-					room_name = GetVariable("room_name")
-					--Note(room_exits)
+					room_name = strip_colours(utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMNAME")))
+					--Note(room_name)
 					rooms[uid] = {name = room_name, exits = {} }
 					--Note("Setting exits:")
-					room_exits = GetVariable("room_exits")
+					room_exits = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMEXITS"))
+					--Note(room_exits)
+					--Mud separates MSDP ROOMEXITS with hex 01(start of text) and hex 02 (end of text) to separate exits in a string.
+					room_exits = utils.tohex(room_exits)
+					--Note(room_exits)
+					room_exits = string.gsub(room_exits, "024F01", "20")
+					room_exits = string.gsub(room_exits, "024301", "20")
+					room_exits = string.gsub(room_exits, "024F", "")
+					room_exits = string.gsub(room_exits, "0243", "")
+					room_exits = utils.fromhex(room_exits)
+					--Note(room_exits)
 					room_exits = utils.split(room_exits, " ")
 					--tprint(room_exits)
 					for key, value in pairs(room_exits) do
 						--Note(valid_direction[value])
 						rooms[uid].exits [valid_direction[value]] = 0
 					end
-				end
-				
+				end --End room if
 				-- if we changed rooms assume that our last movement sent us here
-			    if uid ~= current_room 
-					and current_room
-					and last_direction_moved then
-				-- previous room led here
-				rooms [current_room].exits [last_direction_moved] = uid 
-				-- assume inverse direction leads back
-				rooms [uid].exits [inverse_direction [last_direction_moved]] = current_room
-			    end -- if
-			  
+			    if uid ~= current_room and current_room	and last_direction_moved then
+					-- previous room led here
+					rooms [current_room].exits [last_direction_moved] = uid 
+					-- assume inverse direction leads back
+					rooms [uid].exits [inverse_direction [last_direction_moved]] = current_room
+			    end -- if  uid
 			    -- this is now our current room
 			    current_room = uid
-			  
 			    -- draw this room
 			    mapper.draw (current_room)
-			end		
-		end
-  end
-end
+			end	-- if uid	
+		end --if ROOMVNUM
+    end -- if id
+end -- OnPluginBroadcast
 
 -- -----------------------------------------------------------------
 -- Save the map

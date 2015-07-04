@@ -135,22 +135,12 @@ function StoreVariable (MSDP_var, MSDP_val)
 		--if (MSDPDebug > 1) then ColourNote("darkorange", "", tprint(msdp) or "") end
 		-- This is messy but I could not find another way.
 		--BroadcastPlugin(91,MSDP_var .. "," .. utils.base64encode(MSDP_val))
+		SetVariable(MSDP_var, utils.base64encode(MSDP_val))
 		BroadcastPlugin(91,MSDP_var) -- broadcasts variable name so other plugins can properly test
-
-		if(MSDP_var == "ROOMEXITS") then
-			BroadcastPlugin(45, MSDP_val)
-		end
-		if(MSDP_var == "ROOMNAME") then
-			BroadcastPlugin(46, MSDP_val)
-		end
-		if(MSDP_var == "ROOMVNUM") then
-			BroadcastPlugin(47, MSDP_val)
-		end
 		
 		-- testing variable storage/calls from other plugins
 		-- variables are first base-64 encoded to preserve any non-printable characters
 		-- when retrieving these variables, use utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", key)
-		SetVariable(MSDP_var, utils.base64encode(MSDP_val))
   	if MSDPDebug > 0 then ColourNote ("darkorange", "", MSDP_var..":"..msdp[MSDP_var]) end
 	end -- if
 end -- function StoreVariable
