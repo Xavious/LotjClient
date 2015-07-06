@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Friday, July 03, 2015, 7:27 PM -->
+<!-- Saved on Monday, July 06, 2015, 4:55 AM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -8,7 +8,7 @@
 <world
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-03 19:27:14"
+   date_saved="2015-07-06 04:55:21"
 
    auto_say_override_prefix="-"
    auto_say_string="say "
@@ -108,7 +108,7 @@
 <triggers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-03 19:27:14"
+   date_saved="2015-07-06 04:55:21"
   >
 </triggers>
 
@@ -117,7 +117,7 @@
 <aliases
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-03 19:27:14"
+   date_saved="2015-07-06 04:55:21"
   >
 </aliases>
 
@@ -126,7 +126,7 @@
 <timers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-03 19:27:14"
+   date_saved="2015-07-06 04:55:21"
   >
 </timers>
 
@@ -135,7 +135,7 @@
 <macros
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-03 19:27:14"
+   date_saved="2015-07-06 04:55:21"
   >
 
   <macro name="up" type="send_now" >
@@ -229,7 +229,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-03 19:27:14"
+   date_saved="2015-07-06 04:55:21"
   >
 </variables>
 
@@ -238,7 +238,7 @@
 <colours
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-03 19:27:14"
+   date_saved="2015-07-06 04:55:21"
   >
 
 <ansi>
@@ -295,7 +295,7 @@
 <keypad
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-03 19:27:14"
+   date_saved="2015-07-06 04:55:21"
   >
 
   <key name="0" >
@@ -409,7 +409,7 @@
 <printing
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-03 19:27:14"
+   date_saved="2015-07-06 04:55:21"
   >
 
 <ansi>
@@ -449,4 +449,5 @@
 <include name="LotJBuildship.xml" plugin="y" />
 <include name="LotJStudy.xml" plugin="y" />
 <include name="Lotj_Client.xml" plugin="y" />
+<include name="LotJCargo.xml" plugin="y" />
 </muclient>

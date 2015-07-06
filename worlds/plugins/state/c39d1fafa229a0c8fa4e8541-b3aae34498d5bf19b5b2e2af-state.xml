@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Saturday, July 04, 2015, 2:04 PM -->
+<!-- Saved on Monday, July 06, 2015, 4:55 AM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-04 14:04:57"
+   date_saved="2015-07-06 04:55:23"
   >
   <variable name="AC">LTY1MA==</variable>
   <variable name="AFFECTS"></variable>
@@ -26,17 +26,17 @@
   <variable name="CLAN">SHV0dCBDYXJ0ZWw=</variable>
   <variable name="CLASS">Q29tYmF0</variable>
   <variable name="COMMANDS">BSBMSVNUIFJFUE9SVCBSRVNFVCBTRU5EIFVOUkVQT1JUBg==</variable>
-  <variable name="COMMCHANNEL">MA==</variable>
+  <variable name="COMMCHANNEL">MTgwMA==</variable>
   <variable name="COMMENCRYPT">MA==</variable>
   <variable name="CON">MjU=</variable>
   <variable name="CONPERM">MjE=</variable>
   <variable name="CURRENTAMMO">MA==</variable>
   <variable name="DAMROLL">NDA=</variable>
-  <variable name="DEX">MjQ=</variable>
+  <variable name="DEX">MjI=</variable>
   <variable name="DEXPERM">MjM=</variable>
   <variable name="GRENADEROUNDS">MA==</variable>
-  <variable name="HEALTH">NDQ5Ng==</variable>
-  <variable name="HEALTHMAX">NDU4Ng==</variable>
+  <variable name="HEALTH">NDU5NQ==</variable>
+  <variable name="HEALTHMAX">NDU5NQ==</variable>
   <variable name="HITROLL">NDQ=</variable>
   <variable name="INT">MjM=</variable>
   <variable name="INTPERM">MjM=</variable>
@@ -46,21 +46,21 @@
   <variable name="LEVELESPIONAGE">ODY=</variable>
   <variable name="LEVELFORCE">MA==</variable>
   <variable name="LEVELHUNTING">NDc=</variable>
-  <variable name="LEVELLEADERSHIP">MTMy</variable>
+  <variable name="LEVELLEADERSHIP">MTM0</variable>
   <variable name="LEVELMEDIC">ODQ=</variable>
   <variable name="LEVELPILOTING">NzA=</variable>
   <variable name="LEVELSCIENCE">OTc=</variable>
   <variable name="LEVELSLICER">Mzg=</variable>
   <variable name="LEVELSMUGGLING">NTc=</variable>
-  <variable name="LIGHTTIME">MTUxNg==</variable>
+  <variable name="LIGHTTIME">MA==</variable>
   <variable name="MANA">MA==</variable>
   <variable name="MANAMAX">MA==</variable>
   <variable name="MAXAMMO">MA==</variable>
   <variable name="MEDPACPOWER">MA==</variable>
   <variable name="MONEYBANK">MA==</variable>
-  <variable name="MONEYINV">MjE1MTMz</variable>
-  <variable name="MONEYTOTAL">MjE1MTMz</variable>
-  <variable name="MOVEMENT">MzAxOA==</variable>
+  <variable name="MONEYINV">MA==</variable>
+  <variable name="MONEYTOTAL">MA==</variable>
+  <variable name="MOVEMENT">MzI5MA==</variable>
   <variable name="MOVEMENTMAX">MzI5MA==</variable>
   <variable name="MSDPDebug">0</variable>
   <variable name="OOCBREAK">MA==</variable>
@@ -71,12 +71,12 @@
   <variable name="PILOTING">MA==</variable>
   <variable name="PLANET"></variable>
   <variable name="RACE">RmFsbGVlbg==</variable>
-  <variable name="ROOMEXITS">c291dGgCTw==</variable>
-  <variable name="ROOMNAME">JngmWSZ6KCZDLSAmd0FkYXNjYSBHcmFuZCBIb3RlbCAmY1smV1Jvb20gMTAxJmNdICZDLSZ6KQ==</variable>
-  <variable name="ROOMVNUM">MTAxNDQ=</variable>
+  <variable name="ROOMEXITS">bm9ydGgCTwFlYXN0Ak8Bc291dGgCTw==</variable>
+  <variable name="ROOMNAME">Jk9BIHZvbHVtaW5vdXMgY29ycmlkb3Igd2l0aGluIHRoZSBQYWxhY2U=</variable>
+  <variable name="ROOMVNUM">MTM5MTc=</variable>
   <variable name="SERVERID"></variable>
   <variable name="SERVERTIME">MA==</variable>
-  <variable name="SHIELDENERGY">MTkwMA==</variable>
+  <variable name="SHIELDENERGY">MA==</variable>
   <variable name="SHIPENERGY">MA==</variable>
   <variable name="SHIPGALX">MA==</variable>
   <variable name="SHIPGALY">MA==</variable>

@@ -15,7 +15,7 @@
 
 <description trim="y">
 <![CDATA[
- Description here.
+ Lotj auto-mapper
 ]]>
 </description>
 
@@ -121,10 +121,96 @@ function get_room (uid)
 		room.borderpenwidth = 2
 	end
 	
-	room.area = "The Swamp"
+	room.area = "Unknown"
 	room.hovermessage = room.name
 	return room
 end -- get_room
+
+-- -----------------------------------------------------------------
+-- Delete a room
+-- -----------------------------------------------------------------
+function delete_room(room, uid)
+	if(uid == current_room) then
+		ColourNote ("black", "yellow", "Not the room you are in!")
+	else
+		rooms[uid] = nil
+		table.remove(rooms, uid)
+		current_room = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM"))
+		mapper.draw(current_room)
+		ColourNote ("black", "yellow", "     ----- Room Deleted -----     ")
+	end --if
+end --delete_room
+
+-- -----------------------------------------------------------------
+-- Reset a room's exits
+-- -----------------------------------------------------------------
+function reset_exits(room, uid)
+
+	rooms[uid].exits = nil
+	--table.remove(rooms[uid].exits, uid)
+	current_room = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM"))
+	mapper.draw(current_room)
+	ColourNote ("black", "yellow", "     ----- Exits Reset -----     ")
+end --delete_room
+
+-- -----------------------------------------------------------------
+-- Right-Click Room
+-- -----------------------------------------------------------------
+function room_click (uid, flags)
+
+  -- check we got room at all
+  if not uid then
+    return nil
+  end -- if
+
+  -- look it up
+  local room = rooms [uid]
+
+  if not room then
+    return
+  end -- if still not there
+
+  local function checkmark (which)
+    if rooms [uid] [which] then
+      return "+"
+    else
+      return ""
+    end -- if
+  end -- checkmark
+
+  local handlers = {
+		{ name = "Delete Room", func = delete_room} ,
+		{ name = "Reset Exits", func = reset_exits} ,
+      --{ name = "Edit bookmark", func = room_edit_bookmark} ,
+      --{ name = "-", } ,
+      --{ name = "Add Exit",    func = room_add_exit} ,
+      --{ name = "Change Exit", func = room_change_exit} ,
+      --{ name = "Delete Exit", func = room_delete_exit} ,
+      --{ name = "-", } ,
+      --{ name = checkmark ("shop")  .. "Shop",         func = room_toggle_shop } ,
+      --{ name = checkmark ("train") .. "Trainer",      func = room_toggle_train } ,
+      --{ name = checkmark ("inn")   .. "Inn",          func = room_toggle_inn } ,
+      --{ name = checkmark ("guild") .. "Guildmaster",  func = room_toggle_guild } ,
+     } -- handlers
+
+  local t, tf = {}, {}
+  for _, v in pairs (handlers) do
+    table.insert (t, v.name)
+    tf [v.name] = v.func
+  end -- for
+
+  local choice = WindowMenu (mapper.win,
+                            WindowInfo (mapper.win, 14),
+                            WindowInfo (mapper.win, 15),
+                            table.concat (t, "|"))
+
+  local f = tf [choice]
+
+  if f then
+    f (room, uid)
+  end -- if handler found
+
+end -- room_click
 
 -- -----------------------------------------------------------------
 -- Plugin Install
@@ -133,6 +219,7 @@ function OnPluginInstall ()
   -- initialize mapper
   mapper.init { 
             config = config,      -- ie. colours, sizes
+			room_click = room_click,    -- called on RH click on room square
             get_room = get_room,  -- info about room (uid)
 			show_help  = OnHelp,   -- to show help
               }
@@ -182,21 +269,27 @@ function OnPluginBroadcast (msg, id, name, text)
 					room_exits = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMEXITS"))
 					--Note(room_exits)
 					--Mud separates MSDP ROOMEXITS with hex 01(start of text) and hex 02 (end of text) to separate exits in a string.
-					room_exits = utils.tohex(room_exits)
-					--Note(room_exits)
-					room_exits = string.gsub(room_exits, "024F01", "20")
-					room_exits = string.gsub(room_exits, "024301", "20")
-					room_exits = string.gsub(room_exits, "024F", "")
-					room_exits = string.gsub(room_exits, "0243", "")
-					room_exits = utils.fromhex(room_exits)
-					--Note(room_exits)
-					room_exits = utils.split(room_exits, " ")
-					--tprint(room_exits)
-					for key, value in pairs(room_exits) do
-						--Note(valid_direction[value])
-						rooms[uid].exits [valid_direction[value]] = 0
-					end
-				end --End room if
+					if room_exits ~= nil and room_exits ~= '' then
+						room_exits = utils.tohex(room_exits)
+						--Note("Room exits:'"..room_exits.."'")
+						room_exits = string.gsub(room_exits, "024F01", "20")
+						room_exits = string.gsub(room_exits, "024301", "20")
+						room_exits = string.gsub(room_exits, "024F", "")
+						room_exits = string.gsub(room_exits, "0243", "")
+						room_exits = utils.fromhex(room_exits)
+						--Note(room_exits)
+						room_exits = utils.split(room_exits, " ")
+						--tprint(room_exits)
+						for key, value in pairs(room_exits) do
+							--Note(valid_direction[value])
+							if valid_direction[value] ~= nil then
+								if rooms[uid].exits [valid_direction[value]] == nil then
+									rooms[uid].exits [valid_direction[value]] = 0
+								end
+							end
+						end
+					end --if room_exits not nil
+				end --if not rooms
 				-- if we changed rooms assume that our last movement sent us here
 			    if uid ~= current_room and current_room	and last_direction_moved then
 					-- previous room led here
