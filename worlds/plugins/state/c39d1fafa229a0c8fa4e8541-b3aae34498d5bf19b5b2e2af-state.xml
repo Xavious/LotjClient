@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Monday, July 06, 2015, 4:55 AM -->
+<!-- Saved on Monday, July 06, 2015, 9:41 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-06 04:55:23"
+   date_saved="2015-07-06 21:41:40"
   >
   <variable name="AC">LTY1MA==</variable>
   <variable name="AFFECTS"></variable>
@@ -26,13 +26,13 @@
   <variable name="CLAN">SHV0dCBDYXJ0ZWw=</variable>
   <variable name="CLASS">Q29tYmF0</variable>
   <variable name="COMMANDS">BSBMSVNUIFJFUE9SVCBSRVNFVCBTRU5EIFVOUkVQT1JUBg==</variable>
-  <variable name="COMMCHANNEL">MTgwMA==</variable>
+  <variable name="COMMCHANNEL">MA==</variable>
   <variable name="COMMENCRYPT">MA==</variable>
   <variable name="CON">MjU=</variable>
   <variable name="CONPERM">MjE=</variable>
   <variable name="CURRENTAMMO">MA==</variable>
   <variable name="DAMROLL">NDA=</variable>
-  <variable name="DEX">MjI=</variable>
+  <variable name="DEX">MjQ=</variable>
   <variable name="DEXPERM">MjM=</variable>
   <variable name="GRENADEROUNDS">MA==</variable>
   <variable name="HEALTH">NDU5NQ==</variable>
@@ -71,9 +71,9 @@
   <variable name="PILOTING">MA==</variable>
   <variable name="PLANET"></variable>
   <variable name="RACE">RmFsbGVlbg==</variable>
-  <variable name="ROOMEXITS">bm9ydGgCTwFlYXN0Ak8Bc291dGgCTw==</variable>
+  <variable name="ROOMEXITS">bm9ydGgCTwF3ZXN0Ak8=</variable>
   <variable name="ROOMNAME">Jk9BIHZvbHVtaW5vdXMgY29ycmlkb3Igd2l0aGluIHRoZSBQYWxhY2U=</variable>
-  <variable name="ROOMVNUM">MTM5MTc=</variable>
+  <variable name="ROOMVNUM">MTM5MTg=</variable>
   <variable name="SERVERID"></variable>
   <variable name="SERVERTIME">MA==</variable>
   <variable name="SHIELDENERGY">MA==</variable>

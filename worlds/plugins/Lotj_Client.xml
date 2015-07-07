@@ -133,7 +133,10 @@ function OnHelp ()
 	ColourNote ("black", "orange", "build a map as you walk around. The mouse wheel     ")
 	ColourNote ("black", "orange", "allows for zooming in and out. Hovering over rooms  ")
 	ColourNote ("black", "orange", "will show the name and clicking on them will plot a ")
-	ColourNote ("black", "orange", "path to the chosen room.                            ")
+	ColourNote ("black", "orange", "path to the chosen room. Right clicking on rooms    ")
+	ColourNote ("black", "orange", "will bring up options like delete or clear exits.   ")
+	ColourNote ("black", "orange", "Other options found by clicking the * menu icon at  ")
+	ColourNote ("black", "orange", "the bottom left.                                    ")
 end
 
 ]]>
