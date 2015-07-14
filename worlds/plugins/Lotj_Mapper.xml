@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient[
-  <!ENTITY show_database_mods "true" >
+<!ENTITY show_database_mods "true" >
 ]>
 <muclient>
 <plugin
@@ -155,6 +155,49 @@ room_in_database = {}
 automap = "true"
 area = "Unknown"
 
+-- -----------------------------------------------------------------
+-- these commands will be considered "room changing" commands
+-- -----------------------------------------------------------------
+local valid_direction = {
+  n = "n",
+  s = "s",
+  e = "e",
+  w = "w",
+  u = "u",
+  d = "d",
+  ne = "ne",
+  sw = "sw",
+  nw = "nw",
+  se = "se",
+  north = "n",
+  south = "s",
+  east = "e",
+  west = "w",
+  up = "u",
+  down = "d",
+  northeast = "ne",
+  northwest = "nw",
+  southeast = "se",
+  southwest = "sw",
+  ['in'] = "in",
+  out = "out",
+  }  -- end of valid_direction
+  
+-- for calculating the way back
+local inverse_direction = {
+  n = "s",
+  s = "n",
+  e = "w",
+  w = "e",
+  u = "d",
+  d = "u",
+  ne = "sw",
+  sw = "ne",
+  nw = "se",
+  se = "nw",
+  ['in'] = "out",
+  out = "in",
+  }  -- end of inverse_direction  
 
 -- -----------------------------------------------------------------
 -- Mapper Functions
@@ -353,7 +396,7 @@ function fix_up_exit ()
         
   if show_database_mods then
     mapper.mapprint ("Fixed exit", last_direction_moved, "from room", from_room, "to be to", current_room)
-  end -- if
+  end -- if 
   
   room.exits [last_direction_moved] = current_room
     
@@ -479,50 +522,6 @@ function create_tables ()
   ]])
       
 end -- function create_tables
-
--- -----------------------------------------------------------------
--- these commands will be considered "room changing" commands
--- -----------------------------------------------------------------
-local valid_direction = {
-  n = "n",
-  s = "s",
-  e = "e",
-  w = "w",
-  u = "u",
-  d = "d",
-  ne = "ne",
-  sw = "sw",
-  nw = "nw",
-  se = "se",
-  north = "n",
-  south = "s",
-  east = "e",
-  west = "w",
-  up = "u",
-  down = "d",
-  northeast = "ne",
-  northwest = "nw",
-  southeast = "se",
-  southwest = "sw",
-  ['in'] = "in",
-  out = "out",
-  }  -- end of valid_direction
-  
--- for calculating the way back
-local inverse_direction = {
-  n = "s",
-  s = "n",
-  e = "w",
-  w = "e",
-  u = "d",
-  d = "u",
-  ne = "sw",
-  sw = "ne",
-  nw = "se",
-  se = "nw",
-  ['in'] = "out",
-  out = "in",
-  }  -- end of inverse_direction  
 
   default_config = {
   -- assorted colours

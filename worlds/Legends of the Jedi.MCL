@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Sunday, July 12, 2015, 10:24 PM -->
+<!-- Saved on Tuesday, July 14, 2015, 5:51 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -8,7 +8,7 @@
 <world
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-12 22:24:41"
+   date_saved="2015-07-14 17:51:56"
 
    auto_say_override_prefix="-"
    auto_say_string="say "
@@ -72,6 +72,7 @@
    pixel_offset="1"
    port="5656"
    proxy_port="1080"
+   script_errors_to_output_window="y"
    send_file_delay_per_lines="1"
    send_mxp_afk_response="y"
    show_connect_disconnect="y"
@@ -108,7 +109,7 @@
 <triggers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-12 22:24:41"
+   date_saved="2015-07-14 17:51:56"
   >
 </triggers>
 
@@ -117,7 +118,7 @@
 <aliases
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-12 22:24:41"
+   date_saved="2015-07-14 17:51:56"
   >
 </aliases>
 
@@ -126,7 +127,7 @@
 <timers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-12 22:24:41"
+   date_saved="2015-07-14 17:51:56"
   >
 </timers>
 
@@ -135,7 +136,7 @@
 <macros
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-12 22:24:41"
+   date_saved="2015-07-14 17:51:56"
   >
 
   <macro name="up" type="send_now" >
@@ -229,7 +230,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-12 22:24:41"
+   date_saved="2015-07-14 17:51:56"
   >
 </variables>
 
@@ -238,7 +239,7 @@
 <colours
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-12 22:24:41"
+   date_saved="2015-07-14 17:51:56"
   >
 
 <ansi>
@@ -295,7 +296,7 @@
 <keypad
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-12 22:24:41"
+   date_saved="2015-07-14 17:51:56"
   >
 
   <key name="0" >
@@ -409,7 +410,7 @@
 <printing
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-12 22:24:41"
+   date_saved="2015-07-14 17:51:56"
   >
 
 <ansi>

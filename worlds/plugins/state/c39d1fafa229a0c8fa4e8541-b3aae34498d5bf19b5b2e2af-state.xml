@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Monday, July 13, 2015, 8:16 PM -->
+<!-- Saved on Tuesday, July 14, 2015, 5:51 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-13 20:16:08"
+   date_saved="2015-07-14 17:51:56"
   >
   <variable name="AC">LTg2NQ==</variable>
   <variable name="AFFECTS"></variable>
@@ -26,8 +26,8 @@
   <variable name="CLAN">SHV0dCBDYXJ0ZWw=</variable>
   <variable name="CLASS">TGVhZGVyc2hpcA==</variable>
   <variable name="COMMANDS">BSBMSVNUIFJFUE9SVCBSRVNFVCBTRU5EIFVOUkVQT1JUBg==</variable>
-  <variable name="COMMCHANNEL">NjI0</variable>
-  <variable name="COMMENCRYPT">NDgy</variable>
+  <variable name="COMMCHANNEL">MA==</variable>
+  <variable name="COMMENCRYPT">MA==</variable>
   <variable name="CON">MjU=</variable>
   <variable name="CONPERM">MjI=</variable>
   <variable name="CURRENTAMMO">MA==</variable>
@@ -37,7 +37,7 @@
   <variable name="GRENADEROUNDS">MA==</variable>
   <variable name="HEALTH">NTMxMg==</variable>
   <variable name="HEALTHMAX">NTMxMg==</variable>
-  <variable name="HITROLL">MzA=</variable>
+  <variable name="HITROLL">NDY=</variable>
   <variable name="INT">MjA=</variable>
   <variable name="INTPERM">MjA=</variable>
   <variable name="LEVELCOMBAT">ODA=</variable>
@@ -60,7 +60,7 @@
   <variable name="MONEYBANK">MA==</variable>
   <variable name="MONEYINV">MA==</variable>
   <variable name="MONEYTOTAL">MA==</variable>
-  <variable name="MOVEMENT">MjE5MA==</variable>
+  <variable name="MOVEMENT">MjE3OA==</variable>
   <variable name="MOVEMENTMAX">MjE5MA==</variable>
   <variable name="MSDPDebug">0</variable>
   <variable name="OOCBREAK">MA==</variable>
@@ -71,9 +71,9 @@
   <variable name="PILOTING">MA==</variable>
   <variable name="PLANET"></variable>
   <variable name="RACE">SHV0dA==</variable>
-  <variable name="ROOMEXITS">bm9ydGgCTwFzb3V0aAJP</variable>
-  <variable name="ROOMNAME">JnpBIGxhcmdlIHBlbnRob3VzZQ==</variable>
-  <variable name="ROOMVNUM">NjMyNA==</variable>
+  <variable name="ROOMEXITS">c291dGgCTwF3ZXN0Ak8=</variable>
+  <variable name="ROOMNAME">JlBUJnBoZSAmQ0omWWUmQ3cmWWUmQ2wgJlBIJnBvdGVsJkc=</variable>
+  <variable name="ROOMVNUM">MTQwMjI=</variable>
   <variable name="SERVERID"></variable>
   <variable name="SERVERTIME">MA==</variable>
   <variable name="SHIELDENERGY">MA==</variable>

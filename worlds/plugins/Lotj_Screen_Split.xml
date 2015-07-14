@@ -23,15 +23,6 @@
   </timer>
 </timers>
 
-<triggers>
-  <trigger
-   enabled="y"
-   match="*"
-   script="chat_handler"
-   sequence="100"
-  >
-  </trigger>
-</triggers>
 
 
 <!--  Script  -->
@@ -59,7 +50,7 @@ FONT_SIZE = GetInfo(243)
 WINDOW_POSITION = 10  
 
 -- colours
-WINDOW_BACKGROUND_COLOUR = 0
+WINDOW_BACKGROUND_COLOUR = 0x000000
 
 -- offset of text from edge
 TEXT_INSET = 5
@@ -113,8 +104,18 @@ function Display_Line (line, styles)
 end -- Display_Line
 
 -- here on chat line
-function chat_handler (name, line, wildcards, styles)
-
+--function chat_handler (name, line, wildcards, styles)
+function OnPluginScreendraw (type, log, line)
+  --require "tprint"
+  local line, total_lines
+  total_lines = GetLinesInBufferCount ()
+  for line = total_lines - 20, total_lines do
+    FillWindow(GetLineInfo (line, 1), GetStyleInfo(line))
+  end
+  
+end 
+ 
+function FillWindow(line, styles)
   -- blank existing window contents
   WindowRectOp (win, 2, 0, 0, 0, 0, WINDOW_BACKGROUND_COLOUR)
   WindowRectOp (win, 5, 0, 0, 0, 0, 5, 15)
