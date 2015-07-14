@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Wednesday, July 08, 2015, 11:06 PM -->
+<!-- Saved on Monday, July 13, 2015, 8:16 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-08 23:06:20"
+   date_saved="2015-07-13 20:16:08"
   >
   <variable name="WINDOW_HEIGHT">131</variable>
   <variable name="WINDOW_NAME">Communication Log</variable>

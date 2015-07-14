@@ -43,7 +43,7 @@ USAGE:
   <trigger enabled="n" name="exclaim1" match="*exclaim*'*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="exclaim2" match="'*'*exclaim*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="clan" match="*{*}<*>[*]*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
-  <trigger enabled="n" name="clan2" match="$\[(Outgoing|Incoming) Transmission (to|from) (.*)\](.*)" regexp="y" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="clan2" match="\[(Outgoing|Incoming) Transmission (to|from) (.*)\](.*)" regexp="y" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="comms" match="CommNet*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="broadcast" match="Broadcasting Network*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   
@@ -163,6 +163,7 @@ SetTriggerOption("ask2", "enabled", show_say)
 SetTriggerOption("exclaim1", "enabled", show_say)
 SetTriggerOption("exclaim2", "enabled", show_say)
 SetTriggerOption("clan", "enabled", show_clan)
+SetTriggerOption("clan2", "enabled", show_clan)
 SetTriggerOption("comms", "enabled", show_comms)
 SetTriggerOption("broadcast", "enabled", show_broadcast)
 SetTriggerOption("buzz", "enabled", show_buzz)
@@ -182,6 +183,7 @@ SetTriggerOption("ask2", "omit_from_output", say_echo)
 SetTriggerOption("exclaim1", "omit_from_output", say_echo)
 SetTriggerOption("exclaim2", "omit_from_output", say_echo)
 SetTriggerOption("clan", "omit_from_output", clan_echo)
+SetTriggerOption("clan2", "omit_from_output", clan_echo)
 SetTriggerOption("comms", "omit_from_output", comms_echo)
 SetTriggerOption("ooc", "omit_from_output", ooc_echo)
 SetTriggerOption("immooc", "omit_from_output", ooc_echo)

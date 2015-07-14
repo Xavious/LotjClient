@@ -43,13 +43,22 @@ mapper zoom out     --> zoom out
 mapper zoom in      --> zoom in
 mapper hide         --> hide map
 mapper show         --> show map
+mapper area <name>  --> set the name of the area 
 mapper toggle       --> turns room creation on/off (Best to have off once mapped.)
                     --> moving too quickly can cause room exits to build wrong
 
 RIGHT-CLICK ROOM OPTIONS
 
-Delete Room         --> deletes the targeted room
-Reset Exits         --> removes all exits from target room
+Add Exit            --> Adds exit for a direction
+Change Exit         --> Change an exit direction 
+Delete Exit         --> Delete an exit for a direction
+Edit Bookmark       --> Edit notes for a room
+Toggle Room Flag    --> Set flags for a room (eg. Workshop, Hotel, etc.)
+
+FINDING THINGS
+
+mapper bookmarks    --> show nearby rooms that you bookmarked
+mapper find <text>  --> full-text search  (eg. library, plaza, etc. *Uses Room Title*)
 
 ]]>
 </description>
@@ -96,6 +105,33 @@ Reset Exits         --> removes all exits from target room
    enabled="y"
   >
   </alias>
+  
+  <alias
+   match="^mapper book\w*$"
+   regexp="y"
+   enabled="y"
+   sequence="100"
+   script="map_bookmarks"
+  >
+  </alias>
+  
+ <alias
+   match="^mapper find ([\w* %d/&quot;]+)$"
+   enabled="y"
+   sequence="100"
+   script="map_find"
+   regexp="y"
+  > 
+  </alias> 
+
+ <alias
+   match="mapper area *"
+   enabled="y"
+   sequence="100"
+   script="map_area"
+  > 
+  </alias>    
+  
 </aliases>
 
 
@@ -106,14 +142,341 @@ Reset Exits         --> removes all exits from target room
 
 -- mapper module
 require "mapper"
-
--- configuration table
-config = { 
-	OUR_ROOM_COLOUR         = { name = "Our room",  colour =  ColourNameToRGB "black", },
-}  
+require "serialize"  -- needed to serialize table to string
+require "checkplugin"
+require "tprint"
 
 rooms = { }
+room_not_in_database = {}
+room_in_database = {}
 automap = "true"
+area = "Unknown"
+
+
+-- -----------------------------------------------------------------
+-- Mapper Functions
+-- -----------------------------------------------------------------
+function map_bookmarks (name, line, wildcards)
+
+  local rooms = {}
+  local count = 0
+  
+  -- build table of special places (with info in them)
+  for row in db_bm:nrows(string.format ("SELECT uid, notes FROM bookmarks")) do
+     rooms [row.uid] = capitalize (row.notes)
+     count = count + 1
+  end   -- finding room
+  
+  -- find such places
+  mapper.find (
+    function (uid) 
+      local room = rooms [uid] 
+      if room then
+        rooms [uid] = nil
+      end -- if
+      return room, next (rooms) == nil  -- room will be type of info (eg. shop)
+    end,  -- function
+    show_vnums,  -- show vnum?
+    count,       -- how many to expect
+    false        -- don't auto-walk
+    )
+        
+end -- map_bookmarks
+
+function map_find (name, line, wildcards)
+ 
+  local rooms = {}
+  local count = 0
+  
+  -- find matching rooms using FTS3
+  for row in db:nrows(string.format ("SELECT uid, name FROM rooms_lookup WHERE rooms_lookup MATCH %s", fixsql (wildcards [1]))) do
+     rooms [row.uid] = true
+     count = count + 1
+  end   -- finding room
+  
+  -- see if nearby
+  mapper.find (
+    function (uid) 
+      local room = rooms [uid] 
+      if room then
+        rooms [uid] = nil
+      end -- if
+      return room, next (rooms) == nil
+    end,  -- function
+    show_vnums,  -- show vnum?
+    count,      -- how many to expect
+    false       -- don't auto-walk
+    )
+  
+end -- map_find
+
+function map_area (name, line, wildcards)
+	SetVariable("area", wildcards[1])
+	mapper.mapprint("Area set to",wildcards[1])
+end
+-- -----------------------------------------------------------------
+-- Database Functions
+-- -----------------------------------------------------------------
+function dbcheck (code)
+
+ if code ~= sqlite3.OK and    -- no error
+    code ~= sqlite3.ROW and   -- completed OK with another row of data
+    code ~= sqlite3.DONE then -- completed OK, no more rows
+    local err = db:errmsg ()  -- the rollback will change the error message
+    db:exec ("ROLLBACK")      -- rollback any transaction to unlock the database
+    error (err, 2)            -- show error in caller's context
+  end -- if
+
+end -- dbcheck 
+
+function fixsql (s)
+  
+  if s then
+    return "'" .. (string.gsub (s, "'", "''")) .. "'" -- replace single quotes with two lots of single quotes
+  else
+    return "NULL"
+  end -- if
+end -- fixsql
+
+function fixbool (b)
+  if b then
+    return 1
+  else
+    return 0
+  end -- if
+end -- fixbool
+
+function save_room_to_database (uid, title)
+  
+  assert (uid, "No UID supplied to save_room_to_database")
+  
+  dbcheck (db:execute (string.format (
+        "INSERT INTO rooms (uid, name, area, date_added) VALUES (%s, %s, '0', DATETIME('NOW'));",
+          fixsql (uid), 
+          fixsql (title)
+        )))
+        
+  dbcheck (db:execute (string.format ([[
+        INSERT INTO rooms_lookup (uid, name) VALUES (%s, %s);
+      ]], fixsql  (uid),       
+          fixsql  (title) 
+          )))
+        
+  room_not_in_database [uid] = false
+  
+  if show_database_mods then
+    mapper.mapprint ("Added room", uid, "to database. Name:", title)
+  end -- if
+  
+end -- function save_room_to_database
+
+function save_exits_to_database (uid, exits)
+  
+  local room = rooms [uid]
+  
+  db:exec ("BEGIN TRANSACTION;") 
+
+  for dir in string.gmatch (exits, "[^,]+") do
+
+    -- fix up in and out
+    dir = ({ ['i'] = "in", o = "out", }) [dir] or dir
+    
+    dbcheck (db:execute (string.format ([[
+      INSERT INTO exits (dir, fromuid, touid, date_added) 
+          VALUES (%s, %s, %s, DATETIME('NOW'));
+    ]], fixsql  (dir),  -- direction (eg. "n")
+        fixsql  (uid),         -- from current room
+        fixsql  (0)     -- destination room (not known)
+        )))
+    if show_database_mods then
+      mapper.mapprint ("Added exit", dir, "from room", uid, "to database.")
+    end -- if
+    
+    room.exits [dir] = "0"
+    
+  end -- for each exit
+  
+  db:exec ("COMMIT;") 
+  
+end -- function save_room_to_database
+
+function save_full_exits_to_database (uid, exits)
+  
+  local room = rooms [uid]
+  
+  db:exec ("BEGIN TRANSACTION;") 
+
+  for exit in string.gmatch (exits, "[^,]+") do
+
+    dir, touid = string.match (exit, "^(%a+)%((%d+)%)$")
+    
+    if dir then
+      -- fix up in and out
+      dir = ({ ['i'] = "in", o = "out", }) [dir] or dir
+      
+      dbcheck (db:execute (string.format ([[
+        INSERT INTO exits (dir, fromuid, touid, date_added) 
+            VALUES (%s, %s, %s, DATETIME('NOW'));
+      ]], fixsql  (dir),  -- direction (eg. "n")
+          fixsql  (uid),  -- from current room
+          fixsql  (touid) -- destination room 
+          )))
+      if show_database_mods then
+        mapper.mapprint ("Added exit", dir, "from room", uid, "to room", touid, "to database.")
+      end -- if
+      
+      room.exits [dir] = touid
+    else
+      mapper.maperror ("Cannot make sense of:", exit)
+    end -- if can decode
+    
+  end -- for each exit
+  
+  db:exec ("COMMIT;") 
+  
+end -- function save_full_exits_to_database
+
+function fix_up_exit ()
+
+  local room = rooms [from_room]
+  
+  dbcheck (db:execute (string.format ([[
+      UPDATE exits SET touid = %s WHERE fromuid = %s AND dir = %s;
+    ]], 
+        fixsql  (current_room),     -- destination room
+        fixsql  (from_room),       -- from previous room
+        fixsql  (last_direction_moved)  -- direction (eg. "n")
+        )))
+        
+  if show_database_mods then
+    mapper.mapprint ("Fixed exit", last_direction_moved, "from room", from_room, "to be to", current_room)
+  end -- if
+  
+  room.exits [last_direction_moved] = current_room
+    
+  last_direction_moved = nil
+  from_room = nil
+  
+end -- fix_up_exit
+
+function save_info_to_database (uid, s)
+  local room = rooms [uid]
+
+  dbcheck (db:execute (string.format ([[
+      UPDATE rooms SET info = %s WHERE uid = %s;
+    ]], 
+        fixsql  (s),     -- info
+        fixsql  (uid)    -- room
+        )))
+     
+  room.info = s   
+  
+  if show_database_mods then
+    mapper.mapprint ("Fixed room", uid, "to have info:", s)
+  end -- if
+end -- save_info_to_database
+
+function load_room_from_database (uid)
+
+  local room
+ 
+  assert (uid, "No UID supplied to load_room_from_database")
+  
+  -- if not in database, don't look again
+  if room_not_in_database [uid] then
+    return nil
+  end -- no point looking
+  
+  for row in db:nrows(string.format ("SELECT * FROM rooms WHERE uid = %s", fixsql (uid))) do
+     room = {
+       name = row.name,
+       area = row.area,
+       info = row.info,
+       notes = row.notes,
+       exits = {} }
+      
+    for exitrow in db:nrows(string.format ("SELECT * FROM exits WHERE fromuid = %s", fixsql (uid))) do
+       room.exits [exitrow.dir] = tostring (exitrow.touid)
+    end -- for each exit
+    
+  end   -- finding room
+
+  if room then
+    rooms [uid] = room
+    for row in db_bm:nrows(string.format ("SELECT * FROM bookmarks WHERE uid = %s", fixsql (uid))) do
+      rooms [uid].notes = row.notes
+    end   -- finding room
+        
+    return room
+  end -- if found
+  
+  room_not_in_database [uid] = true
+  return nil
+    
+end -- load_room_from_database
+
+function create_tables ()
+  -- create rooms table
+  dbcheck (db:execute[[
+  
+  PRAGMA foreign_keys = ON;
+  PRAGMA journal_mode = WAL;
+   
+  CREATE TABLE IF NOT EXISTS rooms (
+      roomid        INTEGER PRIMARY KEY AUTOINCREMENT,
+      uid           TEXT NOT NULL,   -- vnum or how the MUD identifies the room
+      name          TEXT,            -- name of room
+      area          TEXT,            -- which area
+      info          TEXT,            -- eg. shop,postoffice
+      notes         TEXT,            -- player notes
+      date_added    DATE,            -- date added to database
+      UNIQUE (uid)
+    );
+  CREATE INDEX IF NOT EXISTS info_index ON rooms (info);
+  CREATE INDEX IF NOT EXISTS area_index ON rooms (area);
+
+  CREATE TABLE IF NOT EXISTS exits (
+      exitid      INTEGER PRIMARY KEY AUTOINCREMENT,
+      dir         TEXT    NOT NULL, -- direction, eg. "n", "s"
+      fromuid     STRING  NOT NULL, -- exit from which room (in rooms table)
+      touid       STRING  NOT NULL, -- exit to which room (in rooms table)
+      date_added  DATE,             -- date added to database
+      FOREIGN KEY(fromuid) REFERENCES rooms(uid)
+    );
+  CREATE INDEX IF NOT EXISTS fromuid_index ON exits (fromuid);
+  CREATE INDEX IF NOT EXISTS touid_index   ON exits (touid);
+  
+  ]])
+  
+  -- check if rooms_lookup table exists
+  local table_exists
+  for a in db:nrows "SELECT * FROM sqlite_master WHERE name = 'rooms_lookup' AND type = 'table'" do
+    table_exists = true
+  end  -- for
+  
+  if not table_exists then
+    dbcheck (db:execute "CREATE VIRTUAL TABLE rooms_lookup USING FTS3(uid, name);")
+    -- in case we only deleted the rooms_lookup table to save space in the download
+    dbcheck (db:execute "INSERT INTO rooms_lookup (uid, name) SELECT uid, name FROM rooms;")
+  end -- if
+  
+  -- create bookmarks and terrain colours table in separate database
+  dbcheck (db_bm:execute[[
+  
+  PRAGMA foreign_keys = ON;
+  
+  CREATE TABLE IF NOT EXISTS bookmarks (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      uid         TEXT    NOT NULL,   -- vnum of room
+      notes       TEXT,               -- user notes
+      date_added  DATE,               -- date added to database
+      UNIQUE (uid)
+    );
+    
+  ]])
+      
+end -- function create_tables
+
 -- -----------------------------------------------------------------
 -- these commands will be considered "room changing" commands
 -- -----------------------------------------------------------------
@@ -166,6 +529,7 @@ local inverse_direction = {
   EXIT_COLOUR_UP_DOWN     = { name = "Exit up/down",      colour =  ColourNameToRGB "darkmagenta", },
   OUR_ROOM_COLOUR         = { name = "Our room",          colour =  ColourNameToRGB "black", },
   UNKNOWN_ROOM_COLOUR     = { name = "Unknown room",      colour =  ColourNameToRGB "#00CACA", },
+  -- room flag colours
   SHOP_FILL_COLOUR        = { name = "Shop",              colour =  ColourNameToRGB "darkolivegreen", },
   LIBRARY_FILL_COLOUR     = { name = "Library",           colour =  ColourNameToRGB "purple", },
   BANK_FILL_COLOUR        = { name = "Bank",              colour =  ColourNameToRGB "yellow", },
@@ -173,14 +537,18 @@ local inverse_direction = {
   HOTEL_FILL_COLOUR       = { name = "Hotel",             colour =  ColourNameToRGB "red", },
   TRAINER_FILL_COLOUR     = { name = "Trainer",           colour =  ColourNameToRGB "lightgreen" },
   PAD_FILL_COLOUR         = { name = "Landing Pad",       colour =  ColourNameToRGB "orange" },
+  COMMAND_FILL_COLOUR     = { name = "Command",           colour =  ColourNameToRGB "steelblue" },
+  ALPHA_FILL_COLOUR       = { name = "Alpha",             colour =  ColourNameToRGB "white" },
+  BRAVO_FILL_COLOUR       = { name = "Bravo",             colour =  ColourNameToRGB "gray" },
+  CHARLIE_FILL_COLOUR     = { name = "Charlie",           colour =  ColourNameToRGB "black" },
 
-  ROOM_NAME_TEXT          = { name = "Room name text",    colour = ColourNameToRGB "#BEF3F1", },
-  ROOM_NAME_FILL          = { name = "Room name fill",    colour = ColourNameToRGB "#105653", },
-  ROOM_NAME_BORDER        = { name = "Room name box",     colour = ColourNameToRGB "black", },
+  --ROOM_NAME_TEXT          = { name = "Room name text",    colour = ColourNameToRGB "#BEF3F1", },
+  --ROOM_NAME_FILL          = { name = "Room name fill",    colour = ColourNameToRGB "#105653", },
+  --ROOM_NAME_BORDER        = { name = "Room name box",     colour = ColourNameToRGB "black", },
 
-  AREA_NAME_TEXT          = { name = "Area name text",    colour = ColourNameToRGB "#BEF3F1",},
-  AREA_NAME_FILL          = { name = "Area name fill",    colour = ColourNameToRGB "#105653", },
-  AREA_NAME_BORDER        = { name = "Area name box",     colour = ColourNameToRGB "black", },
+  --AREA_NAME_TEXT          = { name = "Area name text",    colour = ColourNameToRGB "#BEF3F1",},
+  --AREA_NAME_FILL          = { name = "Area name fill",    colour = ColourNameToRGB "#105653", },
+  --AREA_NAME_BORDER        = { name = "Area name box",     colour = ColourNameToRGB "black", },
 
   FONT = { name =  get_preferred_font {"Dina",  "Lucida Console",  "Fixedsys", "Courier", "Sylfaen",} ,
            size = 8
@@ -199,20 +567,19 @@ local inverse_direction = {
   LAST_VISIT_TIME = { time = 60 * 3 },
 
   } -- end of default_config
-  
+ 
+-- -----------------------------------------------------------------
+-- Toggle a room flag On/Off (Called from Right+Click Menu)
+-- ----------------------------------------------------------------- 
 function room_toggle_thing (room, uid, fieldname, description)
-	Note("Enter Toggle.....")
-	rooms [uid] [fieldname] = not rooms [uid] [fieldname]
-
-  if rooms [uid] [fieldname] then
-	Note("marked")
-    mapper.mapprint ("Room", uid, "marked as " .. description)
-  else
-	Note("unmarked")
-    mapper.mapprint ("Room", uid, "not " .. description .. " any more")
-  end
-
-  mapper.draw (current_room)
+	if room.info == fieldname then
+		save_info_to_database(uid, null)
+		mapper.mapprint ("Room", uid, fieldname.." flag removed.")
+	else
+		save_info_to_database (uid, fieldname)
+		mapper.mapprint ("Room", uid, "marked as " .. description)
+	end
+	mapper.draw (current_room)
 
 end -- room_toggle_thing
 
@@ -243,90 +610,354 @@ end -- room_toggle_guild
 function room_toggle_pad (room, uid)
   room_toggle_thing (room, uid, "pad", "a landing pad")
 end -- room_toggle_guild
+
+function room_toggle_command (room, uid)
+  room_toggle_thing (room, uid, "command", "a command room")
+end -- room_toggle_guild
+
+function room_toggle_alpha (room, uid)
+  room_toggle_thing (room, uid, "alpha", "alpha")
+end -- room_toggle_guild
+
+function room_toggle_bravo (room, uid)
+  room_toggle_thing (room, uid, "bravo", "bravo")
+end -- room_toggle_guild
+
+function room_toggle_charlie (room, uid)
+  room_toggle_thing (room, uid, "charlie", "charlie")
+end -- room_toggle_guild
+
 -- -----------------------------------------------------------------
 -- mapper 'get_room' callback - it wants to know about room uid
 -- -----------------------------------------------------------------
 function get_room (uid)
 
-	room = rooms[uid]
-	if not room then
-		return nil
-	end
+  -- check we got room at all
+  if not uid then
+   -- return nil
+  end -- if
+  
+  -- look it up
+  local ourroom = rooms [uid]
+  
+  -- not cached - see if in database
+  if not ourroom then
+    ourroom = load_room_from_database (uid)
+    rooms [uid] = ourroom -- cache for later
+  end -- not in cache
+  
+  if not ourroom then
+     return nil
+  end -- if
+
+  local room = copytable.deep (ourroom)
+  
+  -- build hover message 
+  areaname = GetVariable("area")
+  if areaname then
+	room.area = areaname
+  else
+	room.area = "Unknown"
+  end
 	
+  
+  local info = ""
+  if room.info then
+    info = "\nFlags: " .. capitalize (room.info)
+  end -- if info known
+  
+  local notes = ""
+  if room.notes then
+    notes = "\nBookmark: " .. room.notes
+  end -- if notes
+     
+  --room.hovermessage = room.name
+  room.hovermessage = string.format (
+      "%s\nRoom # %s%s%s",
+      room.name, 
+      uid,
+      info,
+      notes
+      -- depth,
+      -- table.concat (path, ",")
+      )
+
+  room.fillcolour = 0xff0000
 	room.bordercolour = config.ROOM_COLOUR.colour
 	room.borderpen = miniwin.pen_solid 
 	room.borderpenwidth = 1
 	room.fillbrush = miniwin.brush_null  -- no fill
 	--pattern  = miniwin.brush_fine_pattern
-	pattern = miniwin.brush_solid
-	--room.fillbrush = miniwin.brush_medium_pattern
-	--room.fillbrush = miniwin.brush_coarse_pattern 
-	
-	if uid == current_room then
-		room.bordercolour = config.OUR_ROOM_COLOUR.colour
-		room.borderpenwidth = 2
-	end
-	
-	if rooms[uid]["pad"] then
+	--pattern = miniwin.brush_solid
+	--pattern = miniwin.brush_medium_pattern
+	--pattern = miniwin.brush_coarse_pattern
+
+	--pattern = miniwin.brush_hatch_horizontal
+	--pattern = miniwin.brush_hatch_vertical
+	--pattern = miniwin.brush_hatch_forwards_diagonal
+	--pattern = miniwin.brush_hatch_backwards_diagonal
+	--pattern = miniwin.brush_hatch_cross
+	--pattern = miniwin.brush_hatch_cross_diagonal
+	pattern = miniwin.brush_fine_pattern
+	--pattern = miniwin.brush_medium_pattern
+	--pattern = miniwin.brush_coarse_pattern
+	--pattern = miniwin.brush_waves_horizontal
+	--pattern = miniwin.brush_waves_vertical	
+              
+  -- special room fill colours
+  
+  --Room Flag Colors/Patterns
+  if room.info then
+	if string.match (room.info, "pad") then
 		room.fillcolour = config.PAD_FILL_COLOUR.colour
 		room.fillbrush = pattern
-	elseif rooms[uid]["bank"] then
+	elseif string.match (room.info, "bank") then
 		room.fillcolour = config.BANK_FILL_COLOUR.colour
 		room.fillbrush = pattern
-	elseif rooms[uid]["workshop"] then
+	elseif string.match (room.info, "workshop") then
 		room.fillcolour = config.WORKSHOP_FILL_COLOUR.colour
 		room.fillbrush = pattern
-	elseif rooms[uid]["library"] then
+	elseif string.match (room.info, "library") then
 		room.fillcolour = config.LIBRARY_FILL_COLOUR.colour
 		room.fillbrush = pattern
-	elseif rooms[uid]["hotel"] then
+	elseif string.match (room.info, "hotel") then
 		room.fillcolour = config.HOTEL_FILL_COLOUR.colour
 		room.fillbrush = pattern
-	elseif rooms[uid]["trainer"] then
+	elseif string.match (room.info, "trainer") then
 		room.fillcolour = config.TRAINER_FILL_COLOUR.colour
 		room.fillbrush = pattern
-	elseif rooms[uid]["shop"] then
+	elseif string.match (room.info, "shop") then
 		room.fillcolour = config.SHOP_FILL_COLOUR.colour
 		room.fillbrush = pattern
+	elseif string.match (room.info, "command") then
+		room.fillcolour = config.COMMAND_FILL_COLOUR.colour
+		room.fillbrush = pattern
+	elseif string.match (room.info, "alpha") then
+		room.fillcolour = config.ALPHA_FILL_COLOUR.colour
+		room.fillbrush = miniwin.pen_solid 
+	elseif string.match (room.info, "bravo") then
+		room.fillcolour = config.BRAVO_FILL_COLOUR.colour
+		room.fillbrush = miniwin.pen_solid 
+	elseif string.match (room.info, "charlie") then
+		room.fillcolour = config.CHARLIE_FILL_COLOUR.colour
+		room.fillbrush = miniwin.pen_solid 
 	else
 		room.fillcolour = config.ROOM_COLOUR.colour
 	end
-	--system = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "SHIPSYSNAME"))
-	--if system ~= nil then
-		--room.area = system
-	--else
-		room.area = "Unknown"
-	--end
-	room.hovermessage = room.name
-	return room
+  end 
+
+  --Colors/Patterns for the room we are standing in.     
+  if uid == current_room then
+    room.bordercolour = config.OUR_ROOM_COLOUR.colour
+    room.borderpenwidth = 2
+  end -- 
+  
+  return room  
 end -- get_room
 
 -- -----------------------------------------------------------------
--- Delete a room
+-- Add room exit (Called from Right+Click Menu)
 -- -----------------------------------------------------------------
-function delete_room(room, uid)
-	if(uid == current_room) then
-		ColourNote ("black", "yellow", "Not the room you are in!")
-	else
-		rooms[uid] = nil
-		table.remove(rooms, uid)
-		current_room = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM"))
-		mapper.draw(current_room)
-		ColourNote ("black", "yellow", "     ----- Room Deleted -----     ")
-	end --if
-end --delete_room
+function room_add_exit (room, uid)
+
+local available =  {
+  n = "North",
+  s = "South",
+  e = "East",
+  w = "West",
+  u = "Up",
+  d = "Down",
+  ne = "Northeast",
+  sw = "Southwest",
+  nw = "Northwest",
+  se = "Southeast",
+  ['in'] = "In",
+  out = "Out",
+  }  -- end of available
+
+  -- remove existing exits
+  for k in pairs (room.exits) do
+    available [k] = nil
+  end -- for
+  
+  if next (available) == nil then
+    utils.msgbox ("All exits already used.", "No free exits!", "ok", "!", 1)
+    return
+  end -- not known
+  
+  local chosen_exit = utils.listbox ("Choose exit to add", "Exits ...", available )
+  if not chosen_exit then
+    return
+  end
+  
+  exit_destination = utils.inputbox ("Enter destination room identifier (number) for " .. available [chosen_exit], room.name, "")
+
+  if not exit_destination then
+    return
+  end -- cancelled
+  
+    -- look it up
+  local dest_room = rooms [exit_destination]
+  
+  -- not cached - see if in database
+  if not dest_room then
+    dest_room = load_room_from_database (exit_destination)
+    rooms [exit_destination] = dest_room -- cache for later
+  end -- not in cache
+  
+  if not dest_room then
+    utils.msgbox ("Room " .. exit_destination .. " does not exist.", "Room does not exist!", "ok", "!", 1)
+    return
+  end -- if still not there
+
+  dbcheck (db:execute (string.format ([[
+    INSERT INTO exits (dir, fromuid, touid, date_added) 
+        VALUES (%s, %s, %s, DATETIME('NOW'));
+  ]], fixsql  (chosen_exit),  -- direction (eg. "n")
+      fixsql  (uid),  -- from current room
+      fixsql  (exit_destination) -- destination room 
+      )))
+  if show_database_mods then
+    mapper.mapprint ("Added exit", available [chosen_exit], "from room", uid, "to room", exit_destination, "to database.")
+  end -- if
+  
+  -- update in-memory table
+  rooms [uid].exits [chosen_exit] = exit_destination
+  
+  mapper.draw (current_room)
+   
+end -- room_add_exit
 
 -- -----------------------------------------------------------------
--- Reset a room's exits
+-- Deletes Room Exit (Called from Right+Click Menu)
 -- -----------------------------------------------------------------
-function reset_exits(room, uid)
+function room_delete_exit (room, uid)
 
-	rooms[uid].exits = nil
-	--table.remove(rooms[uid].exits, uid)
-	current_room = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM"))
-	mapper.draw(current_room)
-	ColourNote ("black", "yellow", "     ----- Exits Reset -----     ")
-end --delete_room
+local available =  {
+  n = "North",
+  s = "South",
+  e = "East",
+  w = "West",
+  u = "Up",
+  d = "Down",
+  ne = "Northeast",
+  sw = "Southwest",
+  nw = "Northwest",
+  se = "Southeast",
+  ['in'] = "In",
+  out = "Out",
+  }  -- end of available
+
+  -- remove non-existent exits
+  for k in pairs (available) do
+    if room.exits [k] then
+      available [k] = available [k] .. " --> " .. room.exits [k] 
+    else
+      available [k] = nil
+    end -- if not a room exit
+  end -- for
+  
+  if next (available) == nil then
+    utils.msgbox ("There are no exits from this room.", "No exits!", "ok", "!", 1)
+    return
+  end -- not known
+  
+  local chosen_exit = utils.listbox ("Choose exit to delete", "Exits ...", available )
+  if not chosen_exit then
+    return
+  end
+
+  dbcheck (db:execute (string.format ([[
+    DELETE FROM exits WHERE dir = %s AND fromuid = %s;
+  ]], fixsql  (chosen_exit),  -- direction (eg. "n")
+      fixsql  (uid)  -- from current room
+      )))
+  if show_database_mods then
+    mapper.mapprint ("Deleted exit", available [chosen_exit], "from room", uid, "from database.")
+  end -- if
+  
+  -- update in-memory table
+  rooms [uid].exits [chosen_exit] = nil
+  
+  mapper.draw (current_room)
+   
+end -- room_delete_exit
+
+-- -----------------------------------------------------------------
+-- Changes Room Exit (Called from Right+Click Menu)
+-- -----------------------------------------------------------------
+function room_change_exit (room, uid)
+
+local available =  {
+  n = "North",
+  s = "South",
+  e = "East",
+  w = "West",
+  u = "Up",
+  d = "Down",
+  ne = "Northeast",
+  sw = "Southwest",
+  nw = "Northwest",
+  se = "Southeast",
+  ['in'] = "In",
+  out = "Out",
+  }  -- end of available
+
+  -- remove non-existent exits
+  for k in pairs (available) do
+    if room.exits [k] then
+      available [k] = available [k] .. " --> " .. room.exits [k] 
+    else
+      available [k] = nil
+    end -- if not a room exit
+  end -- for
+  
+  if next (available) == nil then
+    utils.msgbox ("There are no exits from this room.", "No exits!", "ok", "!", 1)
+    return
+  end -- not known
+  
+  local chosen_exit = utils.listbox ("Choose exit to change destination of:", "Exits ...", available )
+  if not chosen_exit then
+    return
+  end
+
+  exit_destination = utils.inputbox ("Enter destination room identifier (number) for " .. available [chosen_exit], room.name, "")
+
+  if not exit_destination then
+    return
+  end -- cancelled
+  
+    -- look it up
+  local dest_room = rooms [exit_destination]
+  
+  -- not cached - see if in database
+  if not dest_room then
+    dest_room = load_room_from_database (exit_destination)
+    rooms [exit_destination] = dest_room -- cache for later
+  end -- not in cache
+  
+  if not dest_room then
+    utils.msgbox ("Room " .. exit_destination .. " does not exist.", "Room does not exist!", "ok", "!", 1)
+    return
+  end -- if still not there
+    
+  dbcheck (db:execute (string.format ([[
+    UPDATE exits SET touid = %s WHERE dir = %s AND fromuid = %s;
+  ]], fixsql  (exit_destination),
+      fixsql  (chosen_exit),  -- direction (eg. "n")
+      fixsql  (uid)  -- from current room
+      )))
+      
+  if show_database_mods then
+    mapper.mapprint ("Modified exit", available [chosen_exit], "from room", uid, "to be to room", exit_destination, "in database.")
+  end -- if
+  
+  -- update in-memory table
+  rooms [uid].exits [chosen_exit] = exit_destination
+  mapper.draw (current_room)
+   
+end -- room_change_exit
 
 -- -----------------------------------------------------------------
 -- Right-Click Room
@@ -346,7 +977,7 @@ function room_click (uid, flags)
   end -- if still not there
 
   local function checkmark (which)
-    if rooms [uid] [which] then
+    if rooms [uid].info == which then
       return "+"
     else
       return ""
@@ -354,32 +985,33 @@ function room_click (uid, flags)
   end -- checkmark
 
   local handlers = {
-		{ name = "Delete Room", func = delete_room} ,
-		{ name = "Reset Exits", func = reset_exits} ,
+        { name = "Add Exit",    func = room_add_exit} ,
+        { name = "Change Exit", func = room_change_exit} ,
+		{ name = "Delete Exit", func = room_delete_exit} ,
+        { name = "Edit bookmark", func = room_edit_bookmark} ,
 		{ name = "-", } ,
-        { name = checkmark ("shop")  .. "Shop",         func = room_toggle_shop } ,
+		{ name = "^Utility Markers", } ,
+		{ name = "-", } ,
+        { name = checkmark ("shop")    .. "Shop",         func = room_toggle_shop } ,
         { name = checkmark ("trainer") .. "Trainer",      func = room_toggle_trainer } ,
-        { name = checkmark ("hotel")   .. "Hotel",          func = room_toggle_hotel } ,
-        { name = checkmark ("bank") .. "Bank",  func = room_toggle_bank } ,
-		{ name = checkmark ("library") .. "Library",  func = room_toggle_library } ,
-		{ name = checkmark ("workshop") .. "Workshop",  func = room_toggle_workshop } ,
-		{ name = checkmark ("pad") .. "Landing Pad",  func = room_toggle_pad } ,
-      --{ name = "Edit bookmark", func = room_edit_bookmark} ,
-      --{ name = "-", } ,
-      --{ name = "Add Exit",    func = room_add_exit} ,
-      --{ name = "Change Exit", func = room_change_exit} ,
-      --{ name = "Delete Exit", func = room_delete_exit} ,
-      --{ name = "-", } ,
-      --{ name = checkmark ("shop")  .. "Shop",         func = room_toggle_shop } ,
-      --{ name = checkmark ("train") .. "Trainer",      func = room_toggle_train } ,
-      --{ name = checkmark ("inn")   .. "Inn",          func = room_toggle_inn } ,
-      --{ name = checkmark ("guild") .. "Guildmaster",  func = room_toggle_guild } ,
+        { name = checkmark ("hotel")   .. "Hotel",        func = room_toggle_hotel } ,
+        { name = checkmark ("bank")    .. "Bank",         func = room_toggle_bank } ,
+		{ name = checkmark ("library") .. "Library",      func = room_toggle_library } ,
+		{ name = checkmark ("workshop").. "Workshop",     func = room_toggle_workshop } ,
+		{ name = checkmark ("pad")     .. "Landing Pad",  func = room_toggle_pad } ,
+		{ name = checkmark ("command") .. "Command",      func = room_toggle_command } ,
+		{ name = "-", } ,
+		{ name = "^Waypoint Markers", } ,
+		{ name = "-", } ,
+		{ name = checkmark ("alpha")   .. "Alpha",        func = room_toggle_alpha } ,
+		{ name = checkmark ("bravo")   .. "Bravo",        func = room_toggle_bravo } ,
+		{ name = checkmark ("charlie") .. "Charlie",      func = room_toggle_charlie } ,
      } -- handlers
 
   local t, tf = {}, {}
   for _, v in pairs (handlers) do
     table.insert (t, v.name)
-    tf [v.name] = v.func
+	tf[string.match(v.name, "[^\+]+")] = v.func --Get rid of the + sign from the function menu table.
   end -- for
 
   local choice = WindowMenu (mapper.win,
@@ -394,6 +1026,190 @@ function room_click (uid, flags)
   end -- if handler found
 
 end -- room_click
+
+-- -----------------------------------------------------------------
+-- Plugin Help
+-- -----------------------------------------------------------------
+function OnHelp ()
+  mapper.mapprint (string.format ("[MUSHclient mapper, version %0.1f]", mapper.VERSION))
+  mapper.mapprint (world.GetPluginInfo (world.GetPluginID (), 3))
+end
+
+-- -----------------------------------------------------------------
+-- Turn Mapping On/Off to prevent corrupting rooms (Called from Alias: "mapper toggle")
+-- -----------------------------------------------------------------
+function OnToggleMapping()
+	if GetVariable("automap") == "true" then
+		SetVariable("automap", "false")
+		ColourNote ("black", "yellow", "AutoMapping: Off")
+	else
+		SetVariable("automap", "true")
+		ColourNote ("black", "yellow", "AutoMapping: On")
+	end
+end
+
+-- -----------------------------------------------------------------
+-- Edit Bookmarks
+-- -----------------------------------------------------------------
+function room_edit_bookmark (room, uid)
+
+  local notes, found
+  
+  for row in db_bm:nrows(string.format ("SELECT * FROM bookmarks WHERE uid = %s", fixsql (uid))) do
+    notes = row.notes
+    found = true
+  end   -- finding room
+  
+  if found then  
+    newnotes = utils.inputbox ("Modify room comment (clear it to delete from database)", room.name, notes)
+  else
+    newnotes = utils.inputbox ("Enter room comment (creates a bookmark for this room)", room.name, notes)
+  end -- if
+  
+  if not newnotes then
+    return
+  end -- if cancelled 
+  
+  if newnotes == "" then
+    if not found then
+      mapper.mapprint ("No comment entered, bookmark not saved.")
+      return
+    else
+      dbcheck (db_bm:execute (string.format (
+        "DELETE FROM bookmarks WHERE uid = %s;",
+          fixsql (uid)
+        )))
+      mapper.mapprint ("Bookmark for room", uid, "deleted. Was previously:", notes)
+      rooms [uid].notes = nil
+      return
+    end -- if
+  end -- if
+  
+  if notes == newnotes then
+    return -- no change made
+  end -- if
+  
+  if found then
+    dbcheck (db_bm:execute (string.format (
+        "UPDATE bookmarks SET notes = %s, date_added = DATETIME('NOW') WHERE uid = %s;",
+          fixsql (newnotes),
+          fixsql (uid)
+        )))
+     mapper.mapprint ("Bookmark for room", uid, "changed to:", newnotes)
+   else
+    dbcheck (db_bm:execute (string.format (
+        "INSERT INTO bookmarks (uid, notes, date_added) VALUES (%s, %s, DATETIME('NOW'));",
+          fixsql (uid), 
+          fixsql (newnotes)
+        )))
+     mapper.mapprint ("Bookmark added to room", uid, ":", newnotes)
+   end -- if    
+   
+   rooms [uid].notes = newnotes
+   
+end -- room_edit_bookmark
+
+-- -----------------------------------------------------------------
+-- Got VNUM (Called from Broadcast)
+-- -----------------------------------------------------------------
+-- here when location changes, eg. : Room.Num 7476
+function got_room_number (s)
+  
+  local room_number = s
+    
+  if not room_number then
+    return
+  end -- no room number
+
+  current_room = room_number
+  mapper.draw (room_number)
+  
+  if expected_exit == "0" and from_room then
+    fix_up_exit ()
+  end -- exit was wrong
+
+end -- got_room_number
+
+-- -----------------------------------------------------------------
+-- Got Room Name (Called from Broadcast)
+-- -----------------------------------------------------------------
+-- we got a room name, eg. : Room.Brief On the edge of a great plain
+function got_room_name (s)
+  local brief = s
+  
+  if not current_room then
+   return
+  end -- don't have room
+   
+  local room = rooms [current_room]
+  
+  -- not cached - see if in database
+  if not room then
+    room = load_room_from_database (current_room)
+  end -- not in cache
+  
+  if not room then
+    save_room_to_database (current_room, brief)
+    mapper.draw (current_room)    -- redraw room with name
+  end -- if room not there
+  
+end -- got_room_name
+
+-- -----------------------------------------------------------------
+-- Got Room Exits (Called from Broadcast)
+-- -----------------------------------------------------------------
+-- we got room exits, eg. : Room.Exits ne,sw,nw
+function got_room_exit (s)
+   
+  -- don't do if we are expecting full exits at some stage
+  if full_exits_found then
+    return
+  end -- if
+
+  local exits = string.match (s, "^([%a,]+)$")
+   
+  if not (current_room and exits) then
+    return
+  end -- if
+  
+  local room = rooms [current_room]
+  
+  -- not cached - see if in database
+  if not room then
+    room = load_room_from_database (current_room)
+  end -- not in cache
+  
+  if room and next (room.exits) == nil then
+    save_exits_to_database (current_room, exits)
+    mapper.draw (current_room)    -- redraw room with exits
+  end -- need to save exits
+
+
+end -- got_room_exit
+
+-- -----------------------------------------------------------------
+-- Got Room Flags (Called from Right-Click Option Flags)
+-- -----------------------------------------------------------------
+-- we got room info, eg. : shops,postoffice
+function got_info (s)
+  
+  if not current_room then
+    return
+  end -- if
+  
+  local room = rooms [current_room]
+  
+  -- not cached - see if in database
+  if not room then
+    room = load_room_from_database (current_room)
+  end -- not in cache
+  
+  if room and room.info == nil then
+    save_info_to_database (current_room, s)
+    mapper.draw (current_room)    -- redraw room with info
+  end -- need to save environment
+
+end -- got_info
 
 -- -----------------------------------------------------------------
 -- Plugin Install
@@ -419,106 +1235,67 @@ function OnPluginInstall ()
                
   mapper.mapprint (string.format ("MUSHclient mapper installed, version %0.1f", mapper.VERSION))
   
-  require "serialize"  -- needed to serialize table to string
-  rooms = {}  -- ensure table exists, if not loaded from variable
+  
+    -- open databases on disk 
+  db    = assert (sqlite3.open(GetInfo (66) .. Trim (WorldAddress ()) .. "_" .. WorldPort () .. ".db"))
+  db_bm = assert (sqlite3.open(GetInfo (66) .. Trim (WorldAddress ()) .. "_" .. WorldPort () .. "_bookmarks.db"))
+  
+  create_tables ()    -- create database structure if necessary
+  
+  
   automap = GetVariable("automap")
 
   -- seed random number generator
   math.randomseed (os.time ())
 
-  assert (loadstring (GetVariable ("rooms") or "")) ()
 end -- OnPluginInstall
 
 -- -----------------------------------------------------------------
--- Plugin Help
+-- MSDP Handler Broadcast
 -- -----------------------------------------------------------------
-function OnHelp ()
-  mapper.mapprint (string.format ("[MUSHclient mapper, version %0.1f]", mapper.VERSION))
-  mapper.mapprint (world.GetPluginInfo (world.GetPluginID (), 3))
-end
-
-function OnToggleMapping()
-	if GetVariable("automap") == "true" then
-		SetVariable("automap", "false")
-		ColourNote ("black", "yellow", "AutoMapping: Off")
-	else
-		SetVariable("automap", "true")
-		ColourNote ("black", "yellow", "AutoMapping: On")
-	end
-end
-
-require "checkplugin"
-function OnPluginListChanged()
-	do_plugin_check_now ("b3aae34498d5bf19b5b2e2af", "LotJMSDPHandler") -- check we have MSDP handler plugin
-end
-
 dofile(GetPluginInfo(GetPluginID(), 20) .. "lotj_colors.lua")
 function OnPluginBroadcast (msg, id, name, text)
-	-- Look for MSDP Handler.
-	if (id == 'b3aae34498d5bf19b5b2e2af' and msg == 91) then
-		require "tprint"
-		if (text == "ROOMVNUM") then
-			uid = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM"))
-			--Note(uid)
-			if uid == nil then
-				Note("Uid not defined")
-			elseif GetVariable("automap") == "false" then
-				current_room = uid
-				mapper.draw(current_room)
-			else
-				--Note(uid)
-				if not rooms[uid] then
-					--Note("Set New Room")
-					room_name = strip_colours(utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMNAME")))
-					--Note(room_name)
-					rooms[uid] = {name = room_name, exits = {} }
-					--Note("Setting exits:")
-					room_exits = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMEXITS"))
-					--Note(room_exits)
-					--Mud separates MSDP ROOMEXITS with hex 01(start of text) and hex 02 (end of text) to separate exits in a string.
-					if room_exits ~= nil and room_exits ~= '' then
-						room_exits = utils.tohex(room_exits)
-						--Note("Room exits:'"..room_exits.."'")
-						room_exits = string.gsub(room_exits, "024F01", "20")
-						room_exits = string.gsub(room_exits, "024301", "20")
-						room_exits = string.gsub(room_exits, "024F", "")
-						room_exits = string.gsub(room_exits, "0243", "")
-						room_exits = utils.fromhex(room_exits)
-						--Note(room_exits)
-						room_exits = utils.split(room_exits, " ")
-						--tprint(room_exits)
-						for key, value in pairs(room_exits) do
-							--Note(valid_direction[value])
-							if valid_direction[value] ~= nil then
-								if rooms[uid].exits [valid_direction[value]] == nil then
-									rooms[uid].exits [valid_direction[value]] = 0
-								end
-							end
-						end
-					end --if room_exits not nil
-				end --if not rooms
-				-- if we changed rooms assume that our last movement sent us here
-			    if uid ~= current_room and current_room	and last_direction_moved then
-					-- previous room led here
-					rooms [current_room].exits [last_direction_moved] = uid 
-					-- assume inverse direction leads back
-					rooms [uid].exits [inverse_direction [last_direction_moved]] = current_room
-			    end -- if  uid
-			    -- this is now our current room
-			    current_room = uid
-			    -- draw this room
-			    mapper.draw (current_room)
-			end	-- if uid	
-		end --if ROOMVNUM
-    end -- if id
-end -- OnPluginBroadcast
+  if id == "b3aae34498d5bf19b5b2e2af" then
+    if (text == "ROOMVNUM") then
+		uid = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM"))
+		if GetVariable("automap") == "false" then
+			current_room = uid
+			mapper.draw(current_room)
+		else
+		--Note("VNUM:"..utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM")))
+			got_room_number(uid)
+			got_room_name(strip_colours(utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMNAME"))))
+			room_exits = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMEXITS"))
+			if room_exits ~= nil and room_exits ~= '' then
+				room_exits = utils.tohex(room_exits)
+				--Note("Room exits:'"..room_exits.."'")
+				room_exits = string.gsub(room_exits, "024F01", "2C")
+				room_exits = string.gsub(room_exits, "024301", "2C")
+				room_exits = string.gsub(room_exits, "024F", "")
+				room_exits = string.gsub(room_exits, "0243", "")
+				room_exits = utils.fromhex(room_exits)
+				--Note(room_exits)
+				exits = utils.split(room_exits, ",")
+				--tprint(room_exits)
+				room_exits = ""
+				for key, value in pairs(exits) do
+					--Note(valid_direction[value])
+					room_exits = room_exits..valid_direction[value]..","
+				end
+				room_exits = string.sub(room_exits, 1, string.len(room_exits)-1)
+				got_room_exit(room_exits)
+			end --if room_exits not nil
+		end--if autopmap == false
+	end
+  end -- if ATCP message
+end
 
 -- -----------------------------------------------------------------
 -- Save the map
 -- -----------------------------------------------------------------
 function OnPluginSaveState ()
   SetVariable ("config", serialize.save("config"))
-  SetVariable ("rooms", serialize.save ("rooms"))
+  --SetVariable ("rooms", serialize.save ("rooms"))
   mapper.save_state (win)
 end -- function OnPluginSaveState
 
@@ -526,8 +1303,25 @@ end -- function OnPluginSaveState
 -- try to detect when we send a movement command
 -- -----------------------------------------------------------------
 function OnPluginSent (sText)
-  last_direction_moved = valid_direction [sText]
-end -- OnPluginSent
+  if valid_direction [sText] then
+    last_direction_moved = valid_direction [sText]
+    --print ("Just moved", last_direction_moved)
+    if current_room and rooms [current_room] then
+      expected_exit = rooms [current_room].exits [last_direction_moved]
+      if expected_exit then
+        from_room = current_room
+      end -- if
+     --print ("expected exit for this direction is to room", expected_exit)
+    end -- if
+  end -- if 
+end -- function
+
+-- -----------------------------------------------------------------
+-- Make sure we have the MSDP Handler
+-- -----------------------------------------------------------------
+function OnPluginListChanged()
+	do_plugin_check_now ("b3aae34498d5bf19b5b2e2af", "LotJMSDPHandler") -- check we have MSDP handler plugin
+end
 
 -- -----------------------------------------------------------------
 -- Hide the window
@@ -535,6 +1329,10 @@ end -- OnPluginSent
 function OnPluginDisable()
 	mapper.hide()
 end
+
+function OnPluginClose ()
+	mapper.hide()
+end -- OnPluginClose
 
 ]]>
 </script>

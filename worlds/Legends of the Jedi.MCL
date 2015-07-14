@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Wednesday, July 08, 2015, 11:06 PM -->
+<!-- Saved on Sunday, July 12, 2015, 10:24 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -8,7 +8,7 @@
 <world
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-08 23:06:11"
+   date_saved="2015-07-12 22:24:41"
 
    auto_say_override_prefix="-"
    auto_say_string="say "
@@ -108,7 +108,7 @@
 <triggers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-08 23:06:11"
+   date_saved="2015-07-12 22:24:41"
   >
 </triggers>
 
@@ -117,7 +117,7 @@
 <aliases
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-08 23:06:11"
+   date_saved="2015-07-12 22:24:41"
   >
 </aliases>
 
@@ -126,7 +126,7 @@
 <timers
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-08 23:06:11"
+   date_saved="2015-07-12 22:24:41"
   >
 </timers>
 
@@ -135,7 +135,7 @@
 <macros
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-08 23:06:11"
+   date_saved="2015-07-12 22:24:41"
   >
 
   <macro name="up" type="send_now" >
@@ -229,7 +229,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-08 23:06:11"
+   date_saved="2015-07-12 22:24:41"
   >
 </variables>
 
@@ -238,7 +238,7 @@
 <colours
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-08 23:06:11"
+   date_saved="2015-07-12 22:24:41"
   >
 
 <ansi>
@@ -295,7 +295,7 @@
 <keypad
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-08 23:06:11"
+   date_saved="2015-07-12 22:24:41"
   >
 
   <key name="0" >
@@ -409,7 +409,7 @@
 <printing
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-08 23:06:11"
+   date_saved="2015-07-12 22:24:41"
   >
 
 <ansi>
@@ -438,7 +438,6 @@
 <include name="lotj_repaint_buffer.xml" plugin="y" />
 <include name="LotJStarMap.xml" plugin="y" />
 <include name="LotJCalc.xml" plugin="y" />
-<include name="lotj_channels_ic.xml" plugin="y" />
 <include name="lotj_channels_ooc.xml" plugin="y" />
 <include name="LotJFlight.xml" plugin="y" />
 <include name="LotJResearch.xml" plugin="y" />
@@ -451,4 +450,5 @@
 <include name="Lotj_Client.xml" plugin="y" />
 <include name="LotJCargo.xml" plugin="y" />
 <include name="Lotj_Screen_Split.xml" plugin="y" />
+<include name="lotj_channels_ic.xml" plugin="y" />
 </muclient>
