@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!DOCTYPE muclient>
+<!DOCTYPE muclient[
+  <!ENTITY show_database_mods "true" >
+]>
 <muclient>
 <plugin
    name="Lotj_Mapper"
@@ -138,6 +140,7 @@ mapper find <text>  --> full-text search  (eg. library, plaza, etc. *Uses Room T
 <!--  Script  -->
 
 <script>
+local show_database_mods = &show_database_mods;
 <![CDATA[
 
 -- mapper module
