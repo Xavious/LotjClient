@@ -110,7 +110,9 @@ function OnPluginScreendraw (type, log, line)
   local line, total_lines
   total_lines = GetLinesInBufferCount ()
   for line = total_lines - 20, total_lines do
-    FillWindow(GetLineInfo (line, 1), GetStyleInfo(line))
+	if GetStyleInfo(line) and GetLineInfo(line, 1) then
+      FillWindow(GetLineInfo (line, 1), GetStyleInfo(line))
+	end
   end
   
 end 
