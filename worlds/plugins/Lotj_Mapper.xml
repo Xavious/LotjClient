@@ -1234,7 +1234,7 @@ function OnPluginInstall ()
 			show_help  = OnHelp,   -- to show help
 			toggle_mapping = OnToggleMapping -- Turn auto mapping on or off.
               }
-               
+  config.EXIT_COLOUR_IN_OUT = nil			  
   mapper.mapprint (string.format ("MUSHclient mapper installed, version %0.1f", mapper.VERSION))
   
   
@@ -1282,7 +1282,9 @@ function OnPluginBroadcast (msg, id, name, text)
 				room_exits = ""
 				for key, value in pairs(exits) do
 					--Note(valid_direction[value])
-					room_exits = room_exits..valid_direction[value]..","
+					if valid_direction[value] then
+						room_exits = room_exits..valid_direction[value]..","
+					end
 				end
 				room_exits = string.sub(room_exits, 1, string.len(room_exits)-1)
 				got_room_exit(room_exits)
