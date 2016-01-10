@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Tuesday, July 28, 2015, 10:24 PM -->
+<!-- Saved on Sunday, January 10, 2016, 3:04 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,8 +14,10 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-28 22:24:28"
+   date_saved="2016-01-10 15:04:18"
   >
+  <variable name="font_name">Courier New</variable>
+  <variable name="font_size">10</variable>
   <variable name="height">600</variable>
   <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowflags">2</variable>
   <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowmode">0</variable>
@@ -28,7 +30,7 @@
     systems[1].name = "Corusca Sector"
     systems[1].bottom = 147
     systems[1].planet = "Coruscant"
-    systems[1].right = 73
+    systems[1].right = 82
     systems[1].left = 10
     systems[1].top = 131
   systems[2] = {}
@@ -37,8 +39,8 @@
     systems[2].name = "Corellian System"
     systems[2].bottom = 232.73913043478
     systems[2].planet = "Corellia"
-    systems[2].right = 170
-    systems[2].left = 120
+    systems[2].right = 160.59223300971
+    systems[2].left = 96.592233009709
     systems[2].top = 216.73913043478
   systems[3] = {}
     systems[3].y = 5
@@ -46,8 +48,8 @@
     systems[3].name = "Calamari System"
     systems[3].bottom = 121.78260869565
     systems[3].planet = "Dac"
-    systems[3].right = 235
-    systems[3].left = 211
+    systems[3].right = 208.74757281553
+    systems[3].left = 184.74757281553
     systems[3].top = 105.78260869565
   systems[4] = {}
     systems[4].y = 23
@@ -55,8 +57,8 @@
     systems[4].name = "Kanz System"
     systems[4].bottom = 31
     systems[4].planet = "Lorrd"
-    systems[4].right = 170.66666666667
-    systems[4].left = 136.66666666667
+    systems[4].right = 156.16504854369
+    systems[4].left = 116.16504854369
     systems[4].top = 15
   systems[5] = {}
     systems[5].y = -73
@@ -64,8 +66,8 @@
     systems[5].name = "Gaulus Sector"
     systems[5].bottom = 515.17391304348
     systems[5].planet = "Ryloth"
-    systems[5].right = 790
-    systems[5].left = 750
+    systems[5].right = 720.55339805825
+    systems[5].left = 672.55339805825
     systems[5].top = 499.17391304348
   systems[6] = {}
     systems[6].y = -92
@@ -73,8 +75,8 @@
     systems[6].name = "Arkanis Sector"
     systems[6].bottom = 585
     systems[6].planet = "Tatooine"
-    systems[6].right = 641
-    systems[6].left = 585
+    systems[6].right = 569.52427184466
+    systems[6].left = 505.52427184466
     systems[6].top = 569
   systems[7] = {}
     systems[7].y = -40
@@ -82,8 +84,8 @@
     systems[7].name = "Anoat Sector"
     systems[7].bottom = 348.73913043478
     systems[7].planet = "Bespin"
-    systems[7].right = 790
-    systems[7].left = 747
+    systems[7].right = 720.55339805825
+    systems[7].left = 672.55339805825
     systems[7].top = 332.73913043478
   systems[8] = {}
     systems[8].y = -65
@@ -91,8 +93,8 @@
     systems[8].name = "Y'toub System"
     systems[8].bottom = 474.82608695652
     systems[8].planet = "Nal Hutta"
-    systems[8].right = 711.33333333333
-    systems[8].left = 653.33333333333
+    systems[8].right = 634.1067961165
+    systems[8].left = 562.1067961165
     systems[8].top = 458.82608695652
   systems[9] = {}
     systems[9].y = -48
@@ -100,8 +102,8 @@
     systems[9].name = "Mytaranor Sector"
     systems[9].bottom = 389.08695652174
     systems[9].planet = "Kashyyyk"
-    systems[9].right = 460.5
-    systems[9].left = 401.5
+    systems[9].right = 410.49514563107
+    systems[9].left = 346.49514563107
     systems[9].top = 373.08695652174
   systems[10] = {}
     systems[10].y = -30
@@ -109,9 +111,18 @@
     systems[10].name = "Alderaan System"
     systems[10].bottom = 298.30434782609
     systems[10].planet = "Alderaan"
-    systems[10].right = 390.66666666667
-    systems[10].left = 332.66666666667
-    systems[10].top = 282.30434782609</variable>
+    systems[10].right = 349.91262135922
+    systems[10].left = 285.91262135922
+    systems[10].top = 282.30434782609
+  systems[11] = {}
+    systems[11].y = 5
+    systems[11].x = 103
+    systems[11].name = "Horuset"
+    systems[11].bottom = 121.78260869565
+    systems[11].planet = "Korriban"
+    systems[11].right = 790
+    systems[11].left = 726
+    systems[11].top = 105.78260869565</variable>
   <variable name="width">800</variable>
 </variables>
 </muclient>

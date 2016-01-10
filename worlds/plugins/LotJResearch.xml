@@ -2,7 +2,7 @@
 <!DOCTYPE muclient> 
 <!--  Saved on Sunday, July 04, 2012, 5:39 AM   -->  
 <muclient>
-<plugin name="LotJResearch" author="@Johnson" id="0b90ce53347f37f34ff36fcf" language="Lua" purpose="Automatic Researching" save_state="y" requires="4.40" version="1.76">
+<plugin name="LotJResearch" author="@Johnson" id="0b90ce53347f37f34ff36fcf" language="Lua" purpose="Automatic Researching" save_state="y" requires="4.40" version="1.77">
 <description trim="y">
 <![CDATA[ 'ResearchHelp' - To see the commands available in the game.
 
@@ -25,7 +25,7 @@ Automatically populate and research items that need to be researched.
   <trigger name="ResearchScience" script="researchNext" match="^You can\'t learn about that in books\. Go find a teacher\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
   <trigger name="ResearchSuccess" script="research" match="^You finish your studies and feel much more skilled\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
   <trigger name="ResearchFailure" script="research" match="^You study for hours on end, but fail to gather any knowledge\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
-  <!-- trigger name="ResearchResumeAFK" script="resumeResearchFromAFK" match="^You may now bot again\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" -->
+  <trigger name="ResearchResumeAFK" script="resumeResearchFromAFK" match="^You may now bot again\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
   <trigger name="ResearchGrabThree" script="grabAdd" match="^([\s\w,-]+)(\s+\d+)\%([\s\w,-]+)(\s+\d+)\%([\s\w,-]+)(\s+\d+)\%(\s?)*$" regexp="y" enabled="n" omit_from_output="y" omit_from_log="y" group="ResearchColour" sequence="100" />
   <trigger name="ResearchGrabTwo" script="grabAdd" match="^([\s\w,-]+)(\s+\d+)\%([\s\w,-]+)(\s+\d+)\%(\s?)*$" regexp="y" enabled="n" omit_from_output="y" omit_from_log="y" group="ResearchColour" sequence="100" />
   <trigger name="ResearchGrabOne" script="grabAdd" match="^([\s\w,-]+)(\s+\d+)\%(\s?)*$" regexp="y" enabled="n" omit_from_output="y" omit_from_log="y" group="ResearchColour" sequence="100" />
@@ -295,13 +295,12 @@ function clearList()
 	toggleOff()
 end
 
--- it's not even legal to bot research, why did I add this in the first place??
--- taking it out until it becomes legal.
---function resumeResearchFromAFK(name, line, args)
---	Send("afk")
---	Send("bot start")
---	research()
---end
+-- botting research is now legal, woo hooo!!
+function resumeResearchFromAFK(name, line, args)
+	Send("afk")
+	Send("bot start")
+	research()
+end
 
 function displayList(name, line, args)
    ColourNote("silver","","Research List Contains: ")

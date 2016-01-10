@@ -140,6 +140,7 @@ mapper find <text>  --> full-text search  (eg. library, plaza, etc. *Uses Room T
 <!--  Script  -->
 
 <script>
+dofile(GetPluginInfo(GetPluginID(), 20) .. "LotJMSDPHelper.lua")
 local show_database_mods = &show_database_mods;
 <![CDATA[
 
@@ -1259,15 +1260,15 @@ dofile(GetPluginInfo(GetPluginID(), 20) .. "lotj_colors.lua")
 function OnPluginBroadcast (msg, id, name, text)
   if id == "b3aae34498d5bf19b5b2e2af" then
     if (text == "ROOMVNUM") then
-		uid = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM"))
+		uid = getmsdp("ROOMVNUM")
 		if GetVariable("automap") == "false" then
 			current_room = uid
 			mapper.draw(current_room)
 		else
-		--Note("VNUM:"..utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM")))
+		--Note("VNUM:"..utils.base64decode(getmsdp("ROOMVNUM")))
 			got_room_number(uid)
-			got_room_name(strip_colours(utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMNAME"))))
-			room_exits = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMEXITS"))
+			got_room_name(strip_colours(getmsdp("ROOMNAME")))
+			room_exits = getmsdp("ROOMEXITS")
 			if room_exits ~= nil and room_exits ~= '' then
 				room_exits = utils.tohex(room_exits)
 				--Note("Room exits:'"..room_exits.."'")

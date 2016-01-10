@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Tuesday, July 28, 2015, 10:24 PM -->
+<!-- Saved on Sunday, January 10, 2016, 3:04 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
 
-<!-- Plugin state saved. Plugin: "MSDP_handler". World: "Legends of the Jedi". -->
+<!-- Plugin state saved. Plugin: "LotJMSDPHandler". World: "Legends of the Jedi". -->
 
 <muclient>
 
@@ -14,44 +14,44 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2015-07-28 22:24:28"
+   date_saved="2016-01-10 15:04:18"
   >
-  <variable name="AC">LTE1NA==</variable>
+  <variable name="AC">LTUw</variable>
   <variable name="AFFECTS"></variable>
   <variable name="ALIGNMENT">MA==</variable>
   <variable name="BLADEPOWER">MA==</variable>
-  <variable name="CHA">MTY=</variable>
-  <variable name="CHAPERM">MTY=</variable>
-  <variable name="CHARACTERNAME">RW5vY2g=</variable>
-  <variable name="CLAN">TnVvbiBlIFNhZnlkIE1hcmF1ZGVycw==</variable>
-  <variable name="CLASS">U211Z2dsaW5n</variable>
+  <variable name="CHA">MTM=</variable>
+  <variable name="CHAPERM">MTM=</variable>
+  <variable name="CHARACTERNAME">VG9rdQ==</variable>
+  <variable name="CLAN"></variable>
+  <variable name="CLASS">Qm91bnR5IGh1bnRpbmc=</variable>
   <variable name="COMMANDS">BSBMSVNUIFJFUE9SVCBSRVNFVCBTRU5EIFVOUkVQT1JUBg==</variable>
-  <variable name="COMMCHANNEL">MzIwMA==</variable>
+  <variable name="COMMCHANNEL">MA==</variable>
   <variable name="COMMENCRYPT">MA==</variable>
-  <variable name="CON">MjM=</variable>
-  <variable name="CONPERM">MjM=</variable>
+  <variable name="CON">MjU=</variable>
+  <variable name="CONPERM">MjU=</variable>
   <variable name="CURRENTAMMO">MA==</variable>
-  <variable name="DAMROLL">MzI=</variable>
-  <variable name="DEX">MjQ=</variable>
-  <variable name="DEXPERM">MjA=</variable>
+  <variable name="DAMROLL">MTU=</variable>
+  <variable name="DEX">MjI=</variable>
+  <variable name="DEXPERM">MTc=</variable>
   <variable name="GRENADEROUNDS">MA==</variable>
-  <variable name="HEALTH">MjMwMA==</variable>
-  <variable name="HEALTHMAX">MjMwMA==</variable>
-  <variable name="HITROLL">MzQ=</variable>
-  <variable name="INT">MjE=</variable>
-  <variable name="INTPERM">MjE=</variable>
-  <variable name="LEVELCOMBAT">MTA5</variable>
-  <variable name="LEVELDIPLOMACY">NA==</variable>
-  <variable name="LEVELENGINEERING">NDE=</variable>
-  <variable name="LEVELESPIONAGE">MjI=</variable>
+  <variable name="HEALTH">MTE4OQ==</variable>
+  <variable name="HEALTHMAX">MzM3MA==</variable>
+  <variable name="HITROLL">MTQ=</variable>
+  <variable name="INT">MTE=</variable>
+  <variable name="INTPERM">MTE=</variable>
+  <variable name="LEVELCOMBAT">MTUw</variable>
+  <variable name="LEVELDIPLOMACY">MQ==</variable>
+  <variable name="LEVELENGINEERING">MQ==</variable>
+  <variable name="LEVELESPIONAGE">NA==</variable>
   <variable name="LEVELFORCE">MA==</variable>
-  <variable name="LEVELHUNTING">NTc=</variable>
-  <variable name="LEVELLEADERSHIP">Mjg=</variable>
-  <variable name="LEVELMEDIC">ODM=</variable>
-  <variable name="LEVELPILOTING">MTE0</variable>
-  <variable name="LEVELSCIENCE">NzU=</variable>
-  <variable name="LEVELSLICER">Mjc=</variable>
-  <variable name="LEVELSMUGGLING">MTUw</variable>
+  <variable name="LEVELHUNTING">MTUw</variable>
+  <variable name="LEVELLEADERSHIP">NjY=</variable>
+  <variable name="LEVELMEDIC">NDQ=</variable>
+  <variable name="LEVELPILOTING">MTM=</variable>
+  <variable name="LEVELSCIENCE">MQ==</variable>
+  <variable name="LEVELSLICER">NA==</variable>
+  <variable name="LEVELSMUGGLING">MTc=</variable>
   <variable name="LIGHTTIME">MA==</variable>
   <variable name="MANA">MA==</variable>
   <variable name="MANAMAX">MA==</variable>
@@ -60,20 +60,20 @@
   <variable name="MONEYBANK">MA==</variable>
   <variable name="MONEYINV">MA==</variable>
   <variable name="MONEYTOTAL">MA==</variable>
-  <variable name="MOVEMENT">MjA3OQ==</variable>
-  <variable name="MOVEMENTMAX">MjA3OQ==</variable>
+  <variable name="MOVEMENT">MjYx</variable>
+  <variable name="MOVEMENTMAX">MjY5MA==</variable>
   <variable name="MSDPDebug">0</variable>
   <variable name="OOCBREAK">MA==</variable>
   <variable name="OOCLIMIT">Ng==</variable>
   <variable name="OPPONENTHEALTH">MA==</variable>
-  <variable name="OPPONENTHEALTHMAX">MA==</variable>
+  <variable name="OPPONENTHEALTHMAX">MTAw</variable>
   <variable name="OPPONENTNAME"></variable>
   <variable name="PILOTING">MA==</variable>
   <variable name="PLANET"></variable>
-  <variable name="RACE">VCdzdXJy</variable>
-  <variable name="ROOMEXITS">bm9ydGgCTwFzb3V0aHdlc3QCTw==</variable>
-  <variable name="ROOMNAME">JngmWSZPQSBDaXJjdWxhciBXcm9zaHlyJnctJk93b29kIFdhbGt3YXkgJndbICZ6Undvb2tycm9ycm8gV2VzdCZ3IF0mdw==</variable>
-  <variable name="ROOMVNUM">MTYwNzA=</variable>
+  <variable name="RACE">V2hpcGhpZA==</variable>
+  <variable name="ROOMEXITS">ZWFzdAJP</variable>
+  <variable name="ROOMNAME">JnpBIFBhZGRlZCBTcGFycmluZyBDaGFtYmVy</variable>
+  <variable name="ROOMVNUM">MTg4MQ==</variable>
   <variable name="SERVERID"></variable>
   <variable name="SERVERTIME">MA==</variable>
   <variable name="SHIELDENERGY">MA==</variable>
@@ -96,11 +96,11 @@
   <variable name="SHIPSYSZ">MA==</variable>
   <variable name="SNIPPETVERSION">Nw==</variable>
   <variable name="STR">MjQ=</variable>
-  <variable name="STRPERM">MjI=</variable>
+  <variable name="STRPERM">MjQ=</variable>
   <variable name="TOPLEVEL">MTAw</variable>
   <variable name="WIMPY">MA==</variable>
-  <variable name="WIS">MjI=</variable>
-  <variable name="WISPERM">MjI=</variable>
+  <variable name="WIS">MTE=</variable>
+  <variable name="WISPERM">MTE=</variable>
   <variable name="WORLDTIME">MA==</variable>
 </variables>
 </muclient>
