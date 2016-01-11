@@ -12,7 +12,7 @@ MUSHclient is a Windows application, but can also run on Linux or Mac using WINE
 
 ##Launching/Using the Client
 - Open the extracted folder which will be called "LotjClient" by default and double click the yellow lamp icon "MUSHclient.exe"
-- The client should now open and automatically connect to Legends of the Jedi. At this point you can arrange the mini windows however you like and begin using all the bells and whistles LotjClient has to offer. (*Don't forget to click the save buttont o save your window positions and other settings*)
+- The client should now open and automatically connect to Legends of the Jedi. At this point you can arrange the mini windows however you like and begin using all the bells and whistles LotjClient has to offer. (*Don't forget to click the save button to save your window positions and other settings*)
 - You can type "**client help**" to get an introductory help screen that will explain various plugins and also reference help commands for a specific plugin. (*These plugins were written by different people and are not necessarily uniform*)
 
 ##Change Log
