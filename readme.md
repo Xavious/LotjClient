@@ -16,6 +16,9 @@ MUSHclient is a Windows application, but can also run on Linux or Mac using WINE
 - You can type "**client help**" to get an introductory help screen that will explain various plugins and also reference help commands for a specific plugin. (*These plugins were written by different people and are not necessarily uniform*)
 
 ##Change Log
+- 2016/01/14
+  - Remove screen split on scroll plugin from the default configuration.
+  - Removed the autovoter from the default configuration. Users will now have to manually add it to the functionality. The browswer pop-up comes off a bit intrusive and was alarming some players.
 - 2016/01/10 
   - Updated Johnson's plugins to the latest version. 
   - Updated the mapper to use MSDPHelper as an abstraction layer for interfacing with the MSDPHandler (This works a lot better @Johnson, well done!).
