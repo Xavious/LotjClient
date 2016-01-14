@@ -17,7 +17,7 @@ MUSHclient is a Windows application, but can also run on Linux or Mac using WINE
 
 ##Change Log
 - 2016/01/14
-  - Remove screen split on scroll plugin from the default configuration.
+  - Removed screen split on scroll plugin from the default configuration.
   - Removed the autovoter from the default configuration. Users will now have to manually add it to the functionality. The browswer pop-up comes off a bit intrusive and was alarming some players.
 - 2016/01/10 
   - Updated Johnson's plugins to the latest version. 
