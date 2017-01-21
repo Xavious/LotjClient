@@ -21,6 +21,7 @@ Automatically calculate hyperjumps to the specified sector.
   <trigger enabled="n" group="CalcCap" match="^Coordinates\: (.*) (.*) (.*)$" name="CoordCap" script="setCoords" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
   <trigger enabled="n" group="GagAll" match="^(.*)$" name="GagAll" regexp="y" keep_evaluating="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
   <trigger enabled="n" group="CalcCap" match="^Use \'SHOWPLANET \<planet\> RESOURCES\' for current resources\.$" name="CalcEnd" regexp="y" omit_from_log="y" omit_from_output="y" script="calculate" sequence="100"></trigger>
+  <trigger enabled="n" group="CalcStart" match="^You have failed.$" script="repeatCalc" regexp="y" sequence="100" />
 	
 	<!-- triggers relating to space capturing -->
 	<trigger name="StoreSpaceCoordinate" match="^(.*) (\-?\d+) (\-?\d+) (\-?\d+)(.*)?$" script="spaceCapStore" omit_from_output="y" keep_evaluating="y" group="SpaceCap" enabled="n" regexp="y" sequence="100" />
@@ -46,6 +47,7 @@ local coordX = 0
 local coordY = 0
 local coordZ = 0
 SetVariable("planetname", "")
+local calcArgs = ""
 
 
 local spaceCoords = {}
@@ -91,7 +93,12 @@ function spaceCapCalc(name, line, args)
 	ColourNote("red","black","Invalid argument given to lcalc: ".. args[1])
 end
 
-function showPlanet(name, list, args)
+function repeatCalc(name, line, args) -- we failed a showplanet, do it again
+  showPlanet(calcArgs)
+end
+
+function showPlanet(name, line, args)
+  calcArgs = args
   if not args or args[1] == "" then -- we entered "calc" with no args, so pass it through
     Send("calculate")
     return
