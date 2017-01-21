@@ -140,6 +140,7 @@ function showplanetFailure(name, list, args)
 	toggleOff()
 	gagOff()
 	ColourNote("red", "", "Planet lookup failed.")
+	Send("calculate "..GetVariable("planetname"))
 end
 
 function planetCheck(name, list, args)
