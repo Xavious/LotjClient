@@ -2,7 +2,7 @@
 <!DOCTYPE muclient> 
 <!--  Saved on Sunday, July 04, 2012, 6:29 PM   -->  
 <muclient>
-<plugin name="LotJCalc" author="@Johnson" id="b2c06b3dcc775c0ede861316" language="Lua" purpose="Calculate Sectors Easily" save_state="y" requires="4.40" version="1.06">
+<plugin name="LotJCalc" author="@Johnson" id="b2c06b3dcc775c0ede861316" language="Lua" purpose="Calculate Sectors Easily" save_state="y" requires="4.40" version="1.07">
 <description trim="y">
 <![CDATA[ 
 Automatically calculate hyperjumps to the specified sector.
@@ -30,8 +30,8 @@ Automatically calculate hyperjumps to the specified sector.
   </triggers>
 <!--   Aliases    --> 
 <aliases>
-  <alias name="calculate" script="showPlanet" match="^calculate (.*)$" enabled="y" regexp="y" group="LotJCalc" sequence="100"></alias>
-  <alias name="calc" script="showPlanet" match="^calc (.*)$" enabled="y" regexp="y" group="LotJCalc" sequence="100"></alias>
+  <alias match="^calculate (.*)$" script="showPlanet" enabled="y" regexp="y" ignore_case="y" group="LotJCalc" sequence="100" />
+  <alias match="^calc (.*)$" script="showPlanet"  enabled="y" regexp="y" ignore_case="y" group="LotJCalc" sequence="100" />
 	
 	<!-- aliases relating to space coord capturing -->
 	<alias name="CoordCapStart" match="rad" script="spaceCapStart" enabled="y" group="FlightCmd" ignore_case="y" sequence="100" />
@@ -40,6 +40,7 @@ Automatically calculate hyperjumps to the specified sector.
 <!--   Script    --> 
 <script>
 <![CDATA[ 
+
 local planets = {}
 local planetname = ""
 local systemname = ""
@@ -48,6 +49,7 @@ local coordY = 0
 local coordZ = 0
 SetVariable("planetname", "")
 local calcArgs = ""
+
 
 
 local spaceCoords = {}
@@ -94,7 +96,7 @@ function spaceCapCalc(name, line, args)
 end
 
 function repeatCalc(name, line, args) -- we failed a showplanet, do it again
-  showPlanet(calcArgs)
+  showPlanet(name, line, calcArgs)
 end
 
 function showPlanet(name, line, args)
@@ -129,10 +131,14 @@ function showPlanet(name, line, args)
   end
   -- add option to enter calc x y x y z for uncharted sectors here
   if (args[1] ~= nil and args[1] ~= "stop") then -- we entered a standard planetname
-		planetname = Trim(args[1])
-		SetVariable("planetname", planetname)
-		SendNoEcho("showplanet '" .. planetname .. "'")
-		EnableTriggerGroup("CalcStart", true)
+    if #utils.split(args[1], " ") > 2 then -- more than 2 arguments, pass it through unaltered
+      Send("calculate "..args[1])
+    else
+      planetname = Trim(args[1]:gsub("'", ""):gsub("\"", "")) -- rip out quotes
+      SetVariable("planetname", planetname)
+      Send("showplanet '" .. planetname .. "'")
+      EnableTriggerGroup("CalcStart", true)
+    end
 	else
 		Note("Invalid planet name!")
 	end
@@ -147,7 +153,7 @@ function showplanetFailure(name, list, args)
 	toggleOff()
 	gagOff()
 	ColourNote("red", "", "Planet lookup failed.")
-	Send("calculate "..GetVariable("planetname"))
+  Send("calculate "..table.concat(calcArgs, " "))
 end
 
 function planetCheck(name, list, args)
