@@ -1,7 +1,7 @@
 # LotjClient
 
 ## What is it?
-LotjClient is a mud client tailored for Legends of the Jedi, a text based RPG based in the Star Wars universe. The foundation for the client is MUSHclient, a mud client developed by Nick Gammon, that has had additional functionality added and configured specifically for LOTJ using community made plugins.
+LotjClient is a mud client tailored for Legends of the Jedi, a text based RPG based in the Star Wars universe. The foundation for the client is [MUSHclient](https://www.gammon.com.au), a mud client developed by Nick Gammon, that has had additional functionality added and configured specifically for LOTJ using community made plugins.
 
 ## Installation
 MUSHclient is a Windows application, but can also run on Linux or Mac using WINE. 
