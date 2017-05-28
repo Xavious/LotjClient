@@ -16,6 +16,10 @@ MUSHclient is a Windows application, but can also run on Linux or Mac using WINE
 - You can type "**client help**" to get an introductory help screen that will explain various plugins and also reference help commands for a specific plugin. (*These plugins were written by different people and are not necessarily uniform*)
 
 ## Change Log
+- 2017/05/27
+  - Updated several of Johnson's plugins that were out of sync with his repository
+  - Updated state data for the galaxy map to reflect the current timeline
+  - Fixed a bug in the automapper that would throw an error when deleting a room with exits stubs that were not resolved to a real room yet.
 - 2016/01/14
   - Removed screen split on scroll plugin from the default configuration.
   - Removed the autovoter from the default configuration. Users will now have to manually add it to the functionality. The browswer pop-up comes off a bit intrusive and was alarming some players.
