@@ -2,7 +2,7 @@
 <!DOCTYPE muclient> 
 <!--  Saved on Sunday, July 04, 2012, 5:39 AM   -->  
 <muclient>
-<plugin name="LotJArmor" author="@Johnson" id="0bcd44221164545213c36fcf" language="Lua" purpose="Armor Crafting Made Easy" save_state="y" requires="4.40" version="1.81">
+<plugin name="LotJArmor" author="@Johnson" id="0bcd44221164545213c36fcf" language="Lua" purpose="Armor Crafting Made Easy" save_state="y" requires="4.40" version="1.82">
 <description trim="y">
 <![CDATA[ 
 'ArmorHelp'    - To see commands related to automatic armor stitching.
@@ -15,6 +15,8 @@ This script can do several things, and is divided into sections that control eac
 2) Automatic enhancing of armor that's already made.
 3) Automatic crafting of armor from start to finish, including automatic enhancing and automatic stitching.
   -You must have all materials in your inventory before you begin automatic crafting.
+  
+Bactacheck will now grab your current prompt string to correctly figure out your max HP for comparing bacta values in armor.
 
   ]]> 
   </description>
@@ -24,11 +26,12 @@ This script can do several things, and is divided into sections that control eac
 <!--   Triggers    --> 
 <triggers>
 	<!-- Armor Stitching Triggers -->
-	<trigger name="stitchComplete" script="makeArmor" match="^You finish working on (.*)\.$" regexp="y" enabled="n" group="AutoArmor" sequence="100" />
+	<trigger name="stitchComplete" script="stitch" match="^You finish working on (.*)\.$" regexp="y" enabled="n" group="AutoArmor" sequence="100" />
 	<trigger name="armorComplete" script="makeNextArmor" match="^You hold up your finished piece of (.*) armor\!$" regexp="y" enabled="n" group="AutoArmor" sequence="100" />
 	<trigger name="ArmorBotting" script="resumeArmorFromAFK" match="You may now bot again." enabled="n" group="AutoArmor" sequence="100" />
-	<trigger name="ArmorOnConnect" script="makeArmor" match="^Show what to whom\?$" enabled="n" regexp="y" group="AutoArmor" omit_from_output="y" omit_from_log="y" sequence="100" />
-	<trigger name="BactaCheck" script="bactaNew" match="[*/*|*/*]*" enabled="n" group="BactaCheck" sequence="100" />
+	<trigger name="ArmorOnConnect" script="stitch" match="^Show what to whom\?$" enabled="n" regexp="y" group="AutoArmor" omit_from_output="y" omit_from_log="y" sequence="100" />
+  <trigger name="StartPromptGrab" script="promptGrabStart" match="Your current prompt string:" enabled="n" regexp="n" sequence="100" />
+  <trigger name="promptGrab" script="promptGrab" match="^(.*)$" enabled="n" regexp="y" sequence="100" />
 	<!-- Armor Enhancing Triggers -->
 	<trigger name="enhanceFailed" script="enhanceArmor" match="^You hold up the enhanced armor only to find that you failed\.$" regexp="y" enabled="n" group="AutoEnhance" sequence="100" />
 	<trigger name="enhanceComplete" script="enhanceNext" match="^You finish adding your (.*) to the armor\.$" regexp="y" enabled="n" group="AutoEnhance" sequence="100" />
@@ -55,7 +58,7 @@ This script can do several things, and is divided into sections that control eac
 	<alias name="ArmorAuto" script="armorAuto" match="^armorAuto( +(.*))?$" enabled="y" group="AutoArmorCmd" regexp="y" ignore_case="y" sequence="100" />
 	<alias name="ArmorList" script="displayList" match="armorList" enabled="y" group="AutoArmorCmd" send_to="1" ignore_case="y" sequence="100" />
 	<alias name="ArmorStart" script="armorStart" match="armorStart" enabled="y" group="AutoArmorCmd" send_to="1" ignore_case="y" sequence="100" />
-	<alias name="makearmor" script="makeArmor" match="^makearmor( +(.*))?$" enabled="y" group="AutoArmor" regexp="y" ignore_case="y" sequence="100" /> 
+	<alias name="makearmor" script="makeArmor" match="^makearmor(?:\s+(.*))?$" enabled="y" group="AutoArmor" regexp="y" ignore_case="y" sequence="100" /> 
 	<alias name="makeNextArmor" script="makeNextArmor" match="armorNext" enabled="y" group="AutoArmorCmd" ignore_case="y" send_to="1" sequence="100" />
 	<alias name="DisplayArmorHelp" script="displayArmorHelp" match="armorhelp" enabled="y" group="AutoArmorCmd" ignore_case="y" send_to="1" sequence="100" />
 	<alias name="BactaCheck" script="switchBacta" match="^bactaCheck( +(.*))?$" enabled="y" group="AutoArmorCmd" regexp="y" ignore_case="y" sequence="100" />
@@ -85,8 +88,10 @@ This script can do several things, and is divided into sections that control eac
 <!--   Script    --> 
 <script>
 <![CDATA[ 
+
 armorList = {}
 currentPos = 1
+stitching = ""
 autoArmor = false
 enhanceList = {}
 autoEnhance = false
@@ -110,14 +115,87 @@ newarmor = {
 	}
 bactaCheck = false
 previousBacta = 0
+promptString = GetVariable("promptString") or ""
+re = ""
+
+
+function promptGrabStart()
+  EnableTrigger("promptGrab", true)
+end
+function promptGrab(name, line, args)
+  EnableTrigger("StartPromptGrab", false)
+  EnableTrigger("promptGrab", false)
+  if args[1] ~= "" then
+    promptString = args[1]
+  else
+    ColourNote("red","","Invalid prompt detected, aborting grab procedure!")
+    toggleOff()
+    return
+  end
+  promptString = promptString:gsub("&.", "")  -- rip out color codes
+  
+  local foundMaxHP = promptString:find("%%H") -- position of max HP token
+  if foundMaxHP == nil then -- didn't find max hp prompt token... abort
+    ColourNote("red","","Unable to find max HP prompt token. Please use a prompt with %H somewhere for bactacheck to work.")
+    toggleOff()
+    return
+  end
+  
+  local starting = promptString:reverse():find("_%%", #promptString-foundMaxHP) or 0 -- search string in reverse for first occurrence of newline token before max HP token
+  if starting > 0 then
+    starting = (#promptString - starting)+2
+  end
+  local ending = promptString:find("%%_", foundMaxHP) or #promptString -- search string forward for first occurrence of newline token after max HP token
+  if ending < #promptString then
+    ending = ending - 1
+  end
+  promptString = promptString:sub(starting, ending) -- crop promptString to only the line containing max HP
+  promptString = promptString:gsub("[^%%%a_%s]", "\\%1") -- replace every character that isn't a prompt token with a literal
+  promptString = promptString:gsub("%%H", "(?P<maxhp>.+)") -- replace max HP token with regexp token
+  promptString = promptString:gsub("%%.", "(.+)?") -- replace all tokens with conditional regexp wildcards
+  promptString = "^"..promptString.."$" -- add before and after tokens for regexp prompt
+  ColourNote("red","","Prompt cropped to max HP line and converted to regular expression: ","silver","",promptString)
+  re = rex.new(promptString)
+end
+function OnPluginSaveState()
+  SetVariable("promptString", promptString)
+end
+
+function OnPluginLineReceived(s) -- we're going to use this to search for prompt lines to check bacta
+  if bactaCheck then
+    local st, e, t = re:match(s)
+    if st ~= nil and t ~= nil then -- found prompt string
+      if t.maxhp ~= nil and tonumber(t.maxhp) then
+        -- put stuff here for checking bacta
+        if (math.abs(previousBacta - tonumber(t.maxhp)) > 0) then
+          ColourNote("red","","LotJArmor Bactacheck: ","silver","",math.abs(previousBacta - tonumber(t.maxhp)))
+        end
+        previousBacta = tonumber(t.maxhp)
+      end
+    end
+  end
+  return true -- finish and display the line
+end
 
 function makeArmor(name, line, args)
-	if (armorList[currentPos]) then
-		Send("makearmor ".. armorList[currentPos])
-	else
-		Note("Armor list empty, aborting!")
-		toggleOff()
-	end
+  args = utils.split(args[1], " ")
+  if args[1] ~= nil and args[1] ~= "" and #args == 1 then -- entered one argument, start stitching that item
+		stitching = Trim(args[1])
+  elseif stitching ~= "" then
+    -- do nothing here so we will fall back to stitch()
+  elseif armorList[currentPos] then -- no argument, armor list has valid item, stitch it
+    stitching = armorList[currentPos]
+  else -- no argument, no valid item in list
+    Send("makearmor "..table.concat(args, " ")) -- pass through whatever we typed here
+    return
+  end
+  stitch()
+end
+
+function stitch(name, line, args)
+  if stitching ~= "" and stitching ~= nil then
+    Send("makearmor ".. stitching)
+  end
 end
 
 function armorStart(name, line, args)
@@ -140,6 +218,9 @@ end
 
 function toggleOff(name, line, args)
 	autoArmor = false
+  bactaCheck = false
+  promptString = ""
+  ColourNote("red","","Prompt string cleared.")
 	EnableTriggerGroup("AutoArmor", false)
 	EnableTriggerGroup("AutoAFK", false)
 	Note("AutoArmor deactivated.")
@@ -159,7 +240,8 @@ function makeNextArmor(name, line, args)
 		Note("Armormaking complete.")      -- finished
 		toggleOff()
 	else                                    -- middle of list
-		makeArmor()  -- finally, make armor
+		stitching = armorList[currentPos]
+    stitch()    -- finally, make armor
 	end
 end
 
@@ -192,6 +274,7 @@ end
 function clearList(name, line, args)
 	armorList = {}
 	Note("Armor list cleared.")
+  previousBacta = 0
 	currentPos = 0
 	toggleOff()
 end
@@ -207,7 +290,7 @@ function resumeArmorFromAFK(name, line, args)
 		Send("afk")
 	end
 	Send("bot start")
-	makeArmor()
+	stitch()
 end
 
 function displayList(name, line, args)
@@ -470,6 +553,13 @@ function newArmorAdd(name, line, args)
 	newarmor.keyword  = utils.inputbox("Keyword for armor?", "Keyword", "armor", "Courier", 9)
 	newarmor.enhance  = utils.inputbox("Autoenhancing?", "Enhance?", "yes", "Courier", 9)
 	newarmor.work     = utils.inputbox("Autostitching?", "Stitch?", "yes", "Courier", 9)
+  
+  if not newarmor.material or not newarmor.wearloc or not newarmor.cover or not newarmor.desc or not newarmor.restring
+      or not newarmor.underlay or not newarmor.coating or not newarmor.keyword or not newarmor.enhance or not newarmor.work then
+    ColourNote("red","","Cancel detected, aborting.")
+    return
+  end
+  
 	if ((newarmor.underlay ~= "") and (newarmor.enhance == "yes")) then
 		Execute("eadd " .. newarmor.keyword .. " " .. newarmor.underlay)
 	end
@@ -591,17 +681,15 @@ function displayNAHelp(name, line, args)
    Note("\n")
 end -- function
 
-function bactaNew(name, line, args)
-	if (math.abs(previousBacta - tonumber(args[2])) > 0) then
-		Note(math.abs(previousBacta - tonumber(args[2])))
-	end
-	previousBacta = tonumber(args[2])
-end
-
 function toggleBactaOn(name, line, args)
 	bactaCheck = true
 	EnableTriggerGroup("BactaCheck", true)
 	Note("BactaCheck activated.")
+  if promptString == "" then -- we need to populate our prompt
+    ColourNote("red","","We need to know the current prompt for bactacheck to work correctly.")
+    Send("prompt")
+    EnableTrigger("StartPromptGrab", true)
+  end
 end
 
 function toggleBactaOff(name, line, args)

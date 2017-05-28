@@ -8,7 +8,7 @@
 <muclient>
 <plugin
    name="LotJBuildship"
-   author="@Ilyena and @Flek"
+   author="@Ilyena, @Flek and @Johnson"
    id="48dbd8f76a18f61774974d3a"
    language="Lua"
    purpose="Making ship building easier"
@@ -48,7 +48,7 @@ Step 2: "upgradeStart"
 
 Method 3: -- create a preset but push it to the upgrade stack without saving
 Step 1: "upgradeProfileName GR123"
-Step 2: "upgradeProfilePartAdd autoblatser -5"
+Step 2: "upgradeProfilePartAdd autoblaster -5"
 Step 3: "upgradeProfilePartAdd speed 20"
 Step 4: "upgradePush" -- this command pushes everything we had in our profile into the upgrade stack, bypassing the need to save or load any presets
 Step 5: "upgradeStart"
@@ -162,10 +162,12 @@ This string adds as many ships as you specify with a single command.
 </timers>
 
 <!--  Script  -->
-
-
 <script>
 <![CDATA[
+
+AUTHOR = GetPluginInfo(GetPluginID(), 2) -- author info
+VERSION = GetPluginInfo(GetPluginID(), 19) -- version info
+
 shipParts = {"hull", "circuits", "weapons", "engines"}
 partNames = {
 	GetVariable("hullpart") or "hull", 
@@ -310,7 +312,7 @@ function upgradeProfileRem(name, line, args)
       ColourNote("yellow","","Removed '" .. v.name .. "' from profiles list.")
       table.remove(profiles, i)
     else
-      if (#profile.mods == i) then
+      if (#profiles == i) then
         ColourNote("red","","Part '" .. args[1] .. "' not found in profiles list.")
       end
     end
@@ -699,10 +701,10 @@ function setPartname(name, line, wildcards)
 	elseif (wildcards[1] == "circuits") then
 		partNames[2] = wildcards[2]
 		ColourNote("lawngreen","black","Part type '" .. shipParts[2] .. "' coupled with '" .. partNames[2] .. "'")
-	elseif (wildcards[1] == "engines") then
+	elseif (wildcards[1] == "weapons") then
 		partNames[3] = wildcards[2]
 		ColourNote("lawngreen","black","Part type '" .. shipParts[3] .. "' coupled with '" .. partNames[3] .. "'")
-	elseif (wildcards[1] == "weapons") then
+	elseif (wildcards[1] == "engines") then
 		partNames[4] = wildcards[2]
 		ColourNote("lawngreen","black","Part type '" .. shipParts[4] .. "' coupled with '" .. partNames[4] .. "'")
 	else
@@ -932,14 +934,14 @@ local buildcommands = { { name = "buildAdd", desc = "Adds a new ship to the ship
 function buildHelp(name, line, args)
   local found = false
   if args[1] == "" then -- show general help
-    ColourNote("white","black","LotJBuildship v 1.0 by Johnson. Enter 'buildhelp <command>' for more detailed information.")
+    ColourNote("white","black","LotJBuildship v"..VERSION.." by "..AUTHOR..". Enter 'buildhelp <command>' for more detailed information.")
     for a, b in ipairs(buildcommands) do -- commands
       local command = b
       ColourNote("silver","black",string.format("%-20s", command.name).." : "..command.desc)
     end
     Note("")
   else -- entered something
-    ColourNote("white","black","LotJBuildship v 1.0 by Johnson. Enter 'buildhelp' for more general information.")
+    ColourNote("white","black","LotJBuildship v"..VERSION.." by "..AUTHOR..". Enter 'buildhelp' for more general information.")
 
     for a, b in ipairs(buildcommands) do -- scroll through commands
     
@@ -1062,14 +1064,14 @@ local upgradecommands = { { name = "upgradeProfileName", desc = "Changes the nam
 function upgradeHelp(name, line, args)
   local found = false
   if args[1] == "" then -- show general help
-    ColourNote("white","black","LotJUpgrade v 1.0 by Johnson. Enter 'upgradehelp <command>' for more detailed information.")
+    ColourNote("white","black","LotJUpgrade v"..VERSION.." by "..AUTHOR..". Enter 'upgradehelp <command>' for more detailed information.")
     for a, b in ipairs(upgradecommands) do -- commands
       local command = b
       ColourNote("silver","black",string.format("%-20s", command.name).." : "..command.desc)
     end
     Note("")
   else -- entered something
-    ColourNote("white","black","LotJUpgrade v 1.0 by Johnson. Enter 'upgradehelp' for more general information.")
+    ColourNote("white","black","LotJUpgrade v"..VERSION.." by "..AUTHOR..". Enter 'upgradehelp' for more general information.")
 
     for a, b in ipairs(upgradecommands) do -- scroll through commands
     

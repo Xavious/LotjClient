@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE muclient>
+<!-- Saved on Saturday, May 27, 2017, 8:09 PM -->
+<!-- MuClient version 4.94 -->
+<!-- Written by Nick Gammon -->
+<!-- Home Page: http://www.mushclient.com/ -->
+
+<!-- Plugin state saved. Plugin: "Lotj_Voter". World: "Legends of the Jedi". -->
+
+<muclient>
+
+<!-- variables -->
+
+<variables
+   muclient_version="4.94"
+   world_file_version="15"
+   date_saved="2017-05-27 20:09:13"
+  >
+  <variable name="auto">off</variable>
+  <variable name="hour">0</variable>
+  <variable name="password">Undefined</variable>
+  <variable name="username">Undefined</variable>
+</variables>
+</muclient>

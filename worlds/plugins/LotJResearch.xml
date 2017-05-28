@@ -23,7 +23,7 @@ Automatically populate and research items that need to be researched.
   <trigger name="ResearchFlurry" script="researchNext" match="^Go learn it the hard way\, sissy\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
   <trigger name="ResearchForce" script="researchNext" match="^You\'re not going to learn force spells from a book\. Trust me\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
   <trigger name="ResearchScience" script="researchNext" match="^You can\'t learn about that in books\. Go find a teacher\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
-  <trigger name="ResearchSuccess" script="research" match="^You finish your studies and feel much more skilled\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
+  <trigger name="ResearchSuccess" script="researchSuccess" match="^You finish your studies and feel much more skilled\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
   <trigger name="ResearchFailure" script="research" match="^You study for hours on end, but fail to gather any knowledge\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
   <trigger name="ResearchResumeAFK" script="resumeResearchFromAFK" match="^You may now bot again\.$" enabled="n" group="AutoResearch" regexp="y" sequence="100" />
   <trigger name="ResearchGrabThree" script="grabAdd" match="^([\s\w,-]+)(\s+\d+)\%([\s\w,-]+)(\s+\d+)\%([\s\w,-]+)(\s+\d+)\%(\s?)*$" regexp="y" enabled="n" omit_from_output="y" omit_from_log="y" group="ResearchColour" sequence="100" />
@@ -51,17 +51,22 @@ Automatically populate and research items that need to be researched.
 <!--   Script    --> 
 <script>
 <![CDATA[ 
+
 require "pairsbykeys"
-autoResearch = false
-researchList = {}
-currentPos = 1
-currentItem = ""
-grabSkill = ""
-grabPercent = 90
-allSkills = {}
-grab = false
-colorMode = tonumber(GetVariable("colorMode")) or 1
+local autoResearch = false
+local researchList = {}
+local currentPos = 1
+local currentItem = ""
+local grabSkill = ""
+local grabPercent = 90
+local allSkills = {}
+local grab = false
+local colorMode = tonumber(GetVariable("colorMode")) or 1
 local storage = { percent = 0, name = "" }
+
+local darkblue = RGBColourToName(GetNormalColour(5))
+local gray = RGBColourToName(GetBoldColour(1))
+local cyan = RGBColourToName(GetBoldColour(7))
 
 function displayResearchCommands(name, line, args)
    ColourNote("silver","","Research <skill>                       - Resume research or start on skill independent of the list")
@@ -82,7 +87,7 @@ end -- function
 function swapColorMode(name, line, args)
   if colorMode == 1 then
     colorMode = 2
-	  ColourNote("yellow","","Practice list color mode: ","lime", "", string.format("%20s", "alternate"),"silver","",string.format(" %3d", 90),"gray","","%")
+	  ColourNote("yellow","","Practice list color mode: ","lime", "", string.format("%20s", "alternate"),"silver","",string.format(" %3d", 90),gray,"","%")
   elseif colorMode == 2 then
     colorMode = 3
     ColourTell("yellow","","Practice list color mode: ")
@@ -98,12 +103,31 @@ function OnPluginSaveState()
   SetVariable("colorMode", colorMode)
 end
 
+function researchSuccess(name, line, args)
+  if currentItem == "" then -- not using external item
+    local item = researchList[currentPos]
+    if item and item.percent then -- have an item in list
+      if item.percent ~= -1 then -- avoid incrementing manually added skills
+        item.percent = item.percent + 15 -- increment percent after a success
+        if item.percent >= 90 then
+          item.percent = 90
+          researchNext()
+        else
+          research()
+        end
+      else
+        research()
+      end
+    end
+  end
+end
+
 function research()
 	if (currentItem ~= "") then
 		Send("research " .. currentItem)
 	else
 		if (researchList[currentPos]) then
-			Send("research ".. researchList[currentPos])
+			Send("research ".. researchList[currentPos].name)
 		else
 			ColourNote("yellow","","Research list empty, aborting!")
 			toggleOff()
@@ -120,7 +144,7 @@ end
 
 function contains(list, item)
 	for k, v in ipairs(list) do
-		if v==item then
+		if v.name==item then
 			return k
 		end
 	end
@@ -132,8 +156,7 @@ function researchStart(name, line, args)
 	-- bump research skill to top of the list if it's present
 	local index = contains(researchList, "research")
 	if index then
-		table.remove(researchList, index)
-		table.insert(researchList, 1, "research")
+		table.insert(researchList, 1, table.remove(researchList, index))
 	end
 			
 	if (#researchList > 0) then -- we have stuff to research!
@@ -153,12 +176,12 @@ function grabAdd(name, line, args)
 			grabItem = Trim(v)
 			storage.name = grabItem
 		else			-- arg number is even
-			if (tonumber(Trim(v)) < grabPercent) then
+      storage.percent = tonumber(Trim(v))
+			if storage.percent < grabPercent then
 				if (grab == true) then
-					internalAddItem(grabItem)
+					internalAddItem(storage.name, storage.percent)
 				end
 			end
-			storage.percent = tonumber(Trim(v))
 			allSkills[#allSkills + 1] = storage
 			printSkill(allSkills[#allSkills].name, allSkills[#allSkills].percent)
 			if (math.fmod(i, 5) == 1) then
@@ -183,7 +206,7 @@ function printSkill(name, percent)
 	if colorMode == 1 then
 	  ColourTell(colour, "", string.format("%20s %3d%%", name,percent))
   elseif colorMode == 2 then
-	  ColourTell(colour, "", string.format("%20s", name),"silver","",string.format(" %3d", percent),"gray","","%")
+	  ColourTell(colour, "", string.format("%20s", name),"silver","",string.format(" %3d", percent),gray,"","%")
 	elseif colorMode == 3 then -- room for expansion for more coloring options here (hyperlinks, plaintext, etc)
 	  Hyperlink("radd "..name, string.format("%20s",name), "Add "..name.." to research list.", colour, "", false, true)
 	  ColourTell(colour,"",string.format(" %3d%%",percent))
@@ -227,14 +250,14 @@ function toggleGrabOn(name, line, args)
 		end
 	end
 	EnableTriggerGroup("ResearchGrabber", true)
-	ColourNote("silver","","Grab started. Skill: '","cyan","",grabSkill,"silver","","' Percent: ","cyan","",grabPercent)
+	ColourNote("silver","","Grab started. Skill: '",cyan,"",grabSkill,"silver","","' Percent: ",cyan,"",grabPercent)
 	Send("practice " .. grabSkill)
 end
 
 
 function toggleGrabOff(name, line, args)
   if grab then
-	  ColourNote("silver","","Grab completed. Found ","cyan","",#researchList,"silver",""," items. Type '","cyan","","researchlist","silver","","' to see them.")
+	  ColourNote("silver","","Grab completed. Found ",cyan,"",#researchList,"silver",""," items. Type '",cyan,"","researchlist","silver","","' to see them.")
 	  grab = false
 	  researchStart()
 	end
@@ -243,29 +266,35 @@ function toggleGrabOff(name, line, args)
 end
 
 function researchNext(name, line, args)
-	currentPos = currentPos + 1
-	if (currentPos > #researchList) then  -- reached end of list
-		ColourNote("lime","","Researching complete.")      -- finished
-		toggleOff()
-	else                                    -- middle of list
-		research()  -- finally, research item
-	end
+  if currentItem == "" then -- external item is empty, use the list
+    currentPos = currentPos + 1
+    if (currentPos > #researchList) then  -- reached end of list
+      ColourNote("lime","","Researching complete.")      -- finished
+      toggleOff()
+    else                                    -- middle of list
+      research()  -- finally, research item
+    end
+  else -- finished with external item
+    currentItem = ""
+  end
 end
 
 function addItem(name, line, args)
-	researchList[#researchList + 1] = args[1]
-	ColourNote("silver","","'","cyan","",researchList[#researchList],"silver","","' added to research list.")
+  local item = { name = args[1], percent = -1 }
+	researchList[#researchList + 1] = item
+	ColourNote("silver","","'",cyan,"",researchList[#researchList].name,"silver","","' added to research list.")
 end
 
-function internalAddItem(item)
+function internalAddItem(name, percent)
+  local item = { name = name, percent = percent }
 	researchList[#researchList + 1] = item
 	--Note("'" .. researchList[#researchList] .. "' added to research list. (internal)")
 end
 
 function removeItem(name, line, args)
    for i, v in ipairs(researchList) do
-      if ((string.lower(v) == string.lower(Trim(args[1]))) or (i == tonumber(args[1]))) then
-         ColourNote("silver","","Removed '","cyan","",v,"silver","","' index(","cyan","",i,"silver","",") from research list.")
+      if ((string.lower(v.name) == string.lower(Trim(args[1]))) or (i == tonumber(args[1]))) then
+         ColourNote("silver","","Removed '",cyan,"",v.name,"silver","","' index(",cyan,"",i,"silver","",") from research list.")
          table.remove(researchList, i)
          if (currentPos > i) then  -- if our item is higher in the list than what we remove
          	currentPos = currentPos - 1  -- decrement the pointer to follow the current item
@@ -303,14 +332,16 @@ function resumeResearchFromAFK(name, line, args)
 end
 
 function displayList(name, line, args)
-   ColourNote("silver","","Research List Contains: ")
-   for i, v in ipairs(researchList) do
-      if (i ~= currentPos) then
-         ColourNote("silver","",i..") "..researchList[i])
-      else
-         ColourNote("silver","",i,"lime",""," --]> " .. researchList[i] .. " <[--")
-      end
-   end
+  if #researchList == 0 then
+    ColourNote("red","","Research list, add something first!")
+  else
+    ColourNote(gray,"","[",cyan,"","Research List",gray,"","]")
+    ColourNote(gray,"","-----------------------------------------------")
+    ColourNote(gray,"","[",darkblue,"","ID:",gray,"","] [",darkblue,"","Curr:",gray,"","] [",darkblue,"","Skill:              ",gray,"","] [",darkblue,"","Percent:",gray,"","]")
+    for i, v in ipairs(researchList) do
+      ColourNote(gray,"","[",cyan,"",string.format("%3s", i),gray,"","] [",cyan,"",string.format("%5s", ((i == currentPos and "*") or "")),gray,"","] [",cyan,"",string.format("%-20s", v.name),gray,"","] [",cyan,"",string.format("%-8s", v.percent or 0),gray,"","]")
+    end
+  end
 end
 
 function researchAuto(name, line, args)

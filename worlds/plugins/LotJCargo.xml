@@ -2,10 +2,187 @@
 <!DOCTYPE muclient> 
 <!--  Saved on Wednesday, July 25, 2012, 7:12 PM   -->  
 <muclient>
-<plugin name="LotJCargo" author="@Johnson" id="b4f195e776cff20d17a1abd2" language="Lua" purpose="Cargo Running Made Easy" save_state="y" requires="4.40" version="1.45">
+<plugin name="LotJCargo" author="@Johnson" id="b4f195e776cff20d17a1abd2" language="Lua" purpose="Cargo Running Made Easy" save_state="y" requires="4.40" version="1.50">
 <description trim="y">
 <![CDATA[ 
-'CargoHelp'      - To see the list of commands associated with this plugin.
+
+Usage:
+
+*NOTICE* This plugin has been expanded to allow usage of multiple ships stacked 
+inside each other, referred to as 'parents' and 'children'. Ships must be 
+defined with a 'cargo ship profile' and stored into the cargo ship database before 
+they can be used for running cargo. Once your ship is stored into the database it 
+will remain there so you can easily load up different configurations of ships for 
+cargo running. Example situations follow below.
+
+
+Example 1:
+We want to use a single cargo ship: YG-4210 Transport 'GGCargo'
+
+We must create a 'cargo ship profile' to suit this ship and define necessary info 
+about it.
+
+Step 1:
+'cargoShipProfileSetup'  - This command will prompt you for all the info the plugin
+                           needs to create a 'cargo ship profile'.
+                           In this example it will be: ship name - 'GGCargo'
+                                                       ship type - 'YG-4210 Transport'
+                                                       ship size - '5'
+                                dirs from hatch to pilot's chair - 'e;u;n'
+                                dirs from pilot's chair to hatch - 's;d;w'
+                             dirs from pilot's chair to nav room - ''
+                             dirs from nav room to pilot's chair - ''
+                                  number of hangars on this ship - '0'
+                                  
+This is a lot of info so if you need to cancel out don't worry, you can always enter
+the command to input new fields while retaining what you already entered.
+
+Step 2:
+'cargoShipProfilePush'  - This command will save the working 'cargo ship profile' into
+                          the cargo ship database for repeated usage and clear the working
+                          'cargo ship profile' in case you want to add multiple ship types.
+Step 3:
+'cargoShipAdd GGCargo'  - This command will load the saved 'cargo ship profile' matching
+                              'GGCargo' into the 'cargo ship list'. The 'cargo ship list' is
+                              where we define our desired cargo ship structure. With this usage
+                              ship 'GGCargo' gets added to the list as a single parent with no
+                              children ships contained within, since it has no hangar space
+                              available.
+Step 4:
+'cargoSetup'                - This command will prompt for the needed cargo planet information,
+                              including planet name, resource to be bought, and trafficking 
+                              preference for that planet.
+    - or -
+'cargoPlanets <planet1>,<resource1>,<trafficking>,<planet2>,<resource2>,<trafficking>,...'
+                             - Instead of prompting for the cargo planet information this command
+                               can be used to quickly define a cargo running route. Note: you can 
+                               use 'none' in any of your cargo legs to skip buying cargo from that 
+                               world. This can be used to automate flying a ship from world to world
+                               without cargo pods, for training piloting or when making many short 
+                               jumps in a public taxi, for instance.
+Step 5:
+'cargoStart'                 - This command will begin a cargo session by scanning current cargo
+                               manifests of all cargo ships and selling off unwanted resources while
+                               buying the necessary ones. Note: if the planet you are on doesn't deal
+                               in the resources you have aboard, you'll have to find a planet that does,
+                               or jettison some cargo into space. Note note: This command must be used
+                               while standing outside your ship on the first world in your cargoPlanets list.
+Step 6:
+That's it! If everything was set up correctly the plugin should fly between worlds buying and selling cargo.
+You can pause the script at any time by entering 'cargoauto'. You can clear the script and restart by
+entering 'cargoclear'. Note: to clear your saved cargo ship list, enter 'cargoshipclear'.
+
+
+Example 2:
+We want to use four cargo ships: YG-4210 Transport 'GGCargo1'
+                                 YG-4210 Transport 'GGCargo2'
+                                 YG-4210 Transport 'GGCargo3'
+                                 Praetor-Class Frigate 'GGFrigate'
+                                 
+We must create a 'cargo ship profile' for each ship and define necessary info 
+about them.
+
+Step 1:
+'cargoShipProfileSetup'          - Prompt for information about first cargo ship.
+                           In this example it will be: ship name - 'GGCargo1'
+                                                       ship type - 'YG-4210 Transport'
+                                                       ship size - '5'
+                                dirs from hatch to pilot's chair - 'e;u;n'
+                                dirs from pilot's chair to hatch - 's;d;w'
+                             dirs from pilot's chair to nav room - ''
+                             dirs from nav room to pilot's chair - ''
+                                  number of hangars on this ship - '0'
+
+Step 2:
+'cargoShipProfileSave'            - Save working cargo ship profile 'GGCargo1' into cargo ship database.
+                                    Note that unlike the previous example where we used 'push'
+                                    this time we used 'save' to retain the working cargo ship
+                                    profile to make creating multiple profiles easier.
+
+Step 3:
+'cargoShipProfileName GGCargo2'   - Change the working cargo ship profile name to match the next
+                                    ship while retaining all the other info between shared ship
+                                    types.
+
+Step 4:
+'cargoShipProfileSave'            - Save cargo ship profile 'GGCargo2' while retaining info.
+
+Step 5:
+'cargoShipProfileName GGCargo3'   - Change working cargo ship profile name again, retain other info.
+
+Step 6:
+'cargoShipProfilePush'            - Save cargo ship profile 'GGCargo3' and push it out of the working profile.
+
+Step 7:
+'cargoShipProfileSetup'           - Prompt for information about last cargo ship.
+                           In this example it will be: ship name - 'GGFrigate'
+                                                       ship type - 'Praetor-Class Frigate'
+                                                       ship size - '35'
+                                dirs from hatch to pilot's chair - 'n;4;n'
+                                dirs from pilot's chair to hatch - 's;s;1'
+                             dirs from pilot's chair to nav room - 'u'
+                             dirs from nav room to pilot's chair - 'd'
+                                  number of hangars on this ship - '2'
+                                            capacity of hangar 1 - '5'
+                                dirs from pilot room to hangar 1 - 's;s;3;s;s;s'
+                                     dirs from hangar 1 to hatch - 'n;n;n;n;1'
+                                            capacity of hangar 2 - '10'
+                                dirs from pilot room to hangar 2 - 's;s;3;s;s;u;s'
+                                     dirs from hangar 2 to hatch - 'n;d;n;n;n;1'
+                                     
+Step 8:
+'cargoShipProfilePush'            - Save cargo ship profile 'GGFrigate' and push it out of working profile.
+
+Step 9:
+'cargoShipAdd GGFrigate'    - This command will load the saved 'cargo ship profile' matching
+                              'GGFrigate' into the 'cargo ship list'. The 'cargo ship list' is
+                              where we define our desired cargo ship structure. With this usage
+                              ship 'GGFrigate' gets added to the list as a single parent with no
+                              children.
+
+Step 10:
+'cargoShipAdd GGCargo1 GGFrigate 1'  - This command will load the saved 'cargo ship profile' matching
+                                       'GGCargo1' into the 'cargo ship list' as a child of 'GGFrigate'
+                                       into the first hangar bay.
+
+Step 11:
+'cargoShipAdd GGCargo2 GGFrigate'    - This command will load the saved 'cargo ship profile' matching
+                                       'GGCargo2' into the 'cargo ship list' as a child of 'GGFrigate'
+                                       into the first available hangar bay, in this case bay 2.
+                                      
+Step 12:
+'cargoShipAdd GGCargo3 GGFrigate 2'  - This command will load the saved 'cargo ship profile' matching
+                                       'GGCargo3' into the 'cargo ship list' as a child of 'GGFrigate'
+                                       into the second hangar bay. Both hangar bays are now filled and
+                                       and further attempts to add child ships will fail.
+Step 13:
+'cargoSetup'                - This command will prompt for the needed cargo planet information,
+                              including planet name, resource to be bought, and trafficking 
+                              preference for that planet.
+    - or -
+'cargoPlanets <planet1>,<resource1>,<trafficking>,<planet2>,<resource2>,<trafficking>,...'
+                             - Instead of prompting for the cargo planet information this command
+                               can be used to quickly define a cargo running route. Note: you can 
+                               use 'none' in any of your cargo legs to skip buying cargo from that 
+                               world. This can be used to automate flying a ship from world to world
+                               without cargo pods, for training piloting or when making many short 
+                               jumps in a public taxi, for instance.
+Step 14:
+'cargoStart'                 - This command will begin a cargo session by scanning current cargo
+                               manifests of all cargo ships and selling off unwanted resources while
+                               buying the necessary ones. Note: if the planet you are on doesn't deal
+                               in the resources you have aboard, you'll have to find a planet that does,
+                               or jettison some cargo into space. Note note: This command must be used
+                               while standing outside your ship on the first world in your cargoPlanets list.
+Step 15:
+That's it! If everything was set up correctly the plugin should fly between worlds buying and selling cargo.
+You can pause the script at any time by entering 'cargoauto'. You can clear the script and restart by
+entering 'cargoclear'. Note: to clear your saved cargo ship list, enter 'cargoshipclear'.
+
+More info on all plugin commands can be found using 'cargohelp'.
+
+
+Initial contraband features added by @Domovoi.
 
   ]]> 
   </description>
@@ -34,16 +211,27 @@
 	<trigger enabled="n" group="ResourceCap" match="^Use \'SHOWPLANET \<planet\> RESOURCES\' for current resources\.$" name="ResourceCoordEnd" regexp="y" omit_from_log="y" omit_from_output="y" script="resourceEnd" sequence="100" />
 	<trigger enabled="n" group="ResourceCap" match="^Show what to whom\?$" regexp="y" name="resourceCapEnd" script="resourceEnd" omit_from_log="y" omit_from_output="y" sequence="100" />
 
+  <!-- planet retrieval triggers -->
+  <trigger match="^(.*)$" group="RetrievePlanet" regexp="y" keep_evaluating="y" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger match="^Usage\: showplanet \<planet\>$" script="retrievePlanetFailed" regexp="y" enabled="y" group="RetrievePlanet" sequence="100" />
+  <trigger match="--Planet Data: -------------------------------\nPlanet: (.*)\Z" script="storePlanet" regexp="y" enabled="n" multi_line="y" lines_to_match="2" omit_from_log="y" omit_from_output="y" group="RetrievePlanet" sequence="100" />
+  <trigger match="^Use \'SHOWPLANET \<planet\> RESOURCES\' for current resources\.$" script="updateListPosition" regexp="y" enabled="n" group="RetrievePlanet" sequence="100" />
+  
 	<!-- Automatic cargo triggers -->
 	<trigger name="tradeCargo" script="leftShip" match="^You exit the ship\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
-	<trigger name="soldcargo" script="soldCargo" match="^You sell (.*) units of (.*)\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
+	<trigger name="soldcargo" script="soldCargo" match="^You sell (?P<quantity>.*) units of (?P<resource>.*)\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
 	<trigger name="earnedmoney" script="gainMoney" match="^You earned (.*) credits from the sale and pay (.*) in taxes\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
-	<trigger name="waitSell" script="waitSell" match="^The planets funds can\'t support such a sale\!$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
-	<trigger name="boughtcargo" script="boughtCargo" match="^You purchased (.*) units of (.*)\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
+	<trigger name="waitSell" script="waitSell" match="^The planet\'s funds can\'t support such a sale\!$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
+	<trigger name="boughtcargo" script="boughtCargo" match="^You purchased (?P<quantity>.*) units of (?P<resource>.*)\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
 	<trigger name="lostmoney" script="loseMoney" match="^It cost you (.*) credits total\, (.*) credits in tax\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
 	<trigger name="jumpCompleteTrigger" match="^Hyperjump complete\.$" script="jumpComplete" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
 	<trigger name="badsale" script="errorSelling" match="^You\'re not carrying any of the resource onboard\!$" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
+  <trigger name="contrasellsuccess" script="soldCargo" match="^You find a contact willing to pay (?P<credits>.*) credits to unload (?P<quantity>.*) units of smuggled (?P<resource>.*)\.$" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
+  <trigger name="contrabuysuccess" script="boughtCargo" match="^You pay (?P<credits>.*) credits to have (?P<quantity>.*) units of smuggled (?P<resource>.*) loaded on to your ship\.$" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
+  <trigger name="contrasellfail" script="contraSellFailed" match="^You fail\.\nYou lose your cargo\!\Z" lines_to_match="2" multi_line="y" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
+  <trigger name="contrabuyfail" script="contraBuyFailed" match="^You fail\.\nYou lose your credits\!\Z" lines_to_match="2" multi_line="y" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
 
+  
 	<!-- Ship manifest triggers -->
   <trigger name="beginShipManifest" script="enableShipManifest" match="^Cargo Readout for (.*)\:$" group="ManifestStart" enabled="n" regexp="y" sequence="100" />
   <trigger name="errorwithmanifest" script="errorShipManifest" match="^Only the owner\/pilot\/copilot may view the cargo for that ship\!$" group="ManifestStart" enabled="n" regexp="y" sequence="100" />
@@ -60,15 +248,35 @@
 	<alias name="cargoBestRoute" script="cargoBestRoute" match="^cargobest( +(.*))?$" enabled="y" ignore_case="y" regexp="y" group="LotJCargo" sequence="100" />
 	<alias name="Cargosetup" script="cargoSetup" match="^cargosetup$" enabled="y" ignore_case="y" regexp="y" group="LotJCargo" sequence="100" />
 	<alias name="cargoHelp" script="cargoHelp" match="^cargohelp(\s*(.*))?$" enabled="y" regexp="y" ignore_case="y" group="LotJCargo" sequence="100" />
-	<alias name="cargoStart" script="cargoStart" match="^cargostart(\s*(.*))?" enabled="y" regexp="y" ignore_case="y" group="LotJCargo" sequence="100" />
+	<alias name="cargoStart" script="retrievePlanet" match="^cargostart(\s*(.*))?" enabled="y" regexp="y" ignore_case="y" group="LotJCargo" sequence="100" />
 	<alias name="CargoAuto" match="^cargoauto( +(.*))?$" script="cargoAuto" enabled="y" regexp="y" group="LotJCargo" ignore_case="y" sequence="100" />
 	<alias name="CargoList" script="cargoList" match="cargoList" enabled="y" group="LotJCargo" send_to="1" ignore_case="y" sequence="100" />
 	<alias name="CargoClear" script="cargoClear" match="cargoclear" enabled="y" group="LotJCargo" ignore_case="y" send_to="1" sequence="100" />
 	<alias name="Cargoefficiency" script="displayEfficiency" match="cargoefficiency" enabled="y" group="LotJCargo" ignore_case="y" sequence="100" />
 	<alias name="CargoCycle" script="toggleCycle" match="cargocycle" enabled="y" group="LotJCargo" ignore_case="y" sequence="100" />
-	<alias name="cargosetupplanetcmd" script="cargoSetupPlanets" match="cargoplanets *" enabled="y" group="LotJCargo" ignore_case="y" sequence="100" />
+	<alias name="cargosetupplanetcmd" script="cargoSetupPlanets" match="^cargoplanets(\s*(.*))?$" enabled="y" regexp="y" group="LotJCargo" ignore_case="y" sequence="100" />
 	<alias name="cargosetupshipcmd" script="cargoSetupShipName" match="cargoship *" enabled="y" group="LotJCargo" ignore_case="y" sequence="100" />
 	<alias name="cargomanifestcmd" script="cargoManifest" match="cargomanifest" enabled="y" group="LotJCargo" ignore_case="y" sequence="100" />
+  <alias match="^cargoManifestClear(.*?)?$" script="doClearCargo" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias script="flyNext" match="cargonext" enabled="y" group="LotJCargo" ignore_case="y" sequence="100" />
+  <alias match="^cargoShipProfileList(.*?)?$" script="shipProfileList" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfileName(.*?)?$" script="shipProfileName" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfileSetup(.*?)?$" script="shipProfileSetup" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfileClear(.*?)?$" script="shipProfileClear" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfileLoad(.*?)?$" script="shipProfileLoad" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfileSave(.*?)?$" script="shipProfileSave" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfilePush(.*?)?$" script="shipProfilePush" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipDBList(.*?)?$" script="shipDBList" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipDBRem(.*?)?$" script="shipDBRem" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipDBClear(.*?)?$" script="shipDBClear" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipDBRename(.*?)?$" script="shipDBRename" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipList$" script="shipCargoList" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipAdd(.*?)?$" script="shipCargoAdd" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipRem(.*?)?$" script="shipCargoRem" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipClear?$" script="shipCargoClear" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoLoadShips$" script="loadShips" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoUnloadShips$" script="unloadShips" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoCloseBays$" script="toggleCloseBays" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
 </aliases>
 <timers>
 	<timer name="EfficiencyTimer" script="displayEfficiency" enabled="n" minute="5" group="AutoCargo" />
@@ -78,6 +286,11 @@
 <![CDATA[
 require "tprint"
 require "commas"
+require "serialize"
+require "copytable"
+
+local AUTHOR = GetPluginInfo(GetPluginID(), 2) -- author info
+local VERSION = string.format("%1.2f", GetPluginInfo(GetPluginID(), 19)) -- version info
 local systems = {}
 local tempPlanet = ""
 local tempSystem = ""
@@ -86,14 +299,33 @@ local percent = 0
 local numBodies = 0
 
 local autoCargo = false
-local cPlanets = {}
-local cVar = 0
-local ship = { name="", cargo={} }
+cPlanets = {}
+loadstring(GetVariable("cPlanets") or "")()
+local cVar = GetVariable("cVar") or 0
+local shipnum = GetVariable("shipnum") or 0
+local closeBays = GetVariable("closeBays") == "true"
+local shipProfile = {}
+ships = {}
+loadstring(GetVariable("ships") or "")()
+
 local startTime = 0
 local amountEarned = 0
 local cycle = true
+local tradingCompleted = false
 local hyperCompleted = false
 local scannedCargo = false
+local lastsoldamount = 0
+local lastsoldresource = ""
+local lastboughtamount = 0
+
+shipdb = {}
+loadstring(GetVariable("shipdb") or "")()
+
+local planet = ""
+
+local darkblue = RGBColourToName(GetNormalColour(5))
+local gray = RGBColourToName(GetBoldColour(1))
+local cyan = RGBColourToName(GetBoldColour(7))
 
 -- Activate some settings to ensure proper functioning
 SetOption("enable_aliases", true)
@@ -101,59 +333,678 @@ SetOption("enable_timers", true)
 SetOption("enable_triggers", true)
 SetOption("enable_scripts", true)
 
-function beginManifest(name, line, args)
-  if not args or args[1] == "" then -- entered nothing
-    if not ship.name or ship.name == "" then -- don't have a stored ship name, error out
-      ColourNote("red","","Error: must specify ship name using cargoShip")
+function runDirs(dirs)
+  dirs = splitBy(dirs, ",")
+  dirs = splitBy(dirs, " ")
+  dirs = splitBy(dirs, ";")
+  dirs = splitBy(dirs, "|")
+  for i, v in ipairs(dirs) do
+    if v:lower() ~= "none" then
+      Send(v)
+    end
+  end
+end
+
+function splitBy(str, delim)
+  local ret = {}
+  if type(str) == "string" then
+    return utils.split(str, delim)
+  elseif type(str) == "table" then
+    for i, v in ipairs(str) do
+      for k, j in ipairs(utils.split(v, delim)) do
+        ret[#ret+1] = j
+      end
+    end
+    return ret
+  end
+end
+
+function toggleCloseBays(name, line, args)
+  closeBays = not closeBays
+  ColourNote("yellow","","Automatic closing and opening of hangar bays is "..((closeBays and "ON") or "OFF")..".")
+end
+
+toUnload = {}
+
+function unloadShips(name, line, args)
+  for i, v in ipairs(ships) do
+    toUnload[#toUnload + 1] = v
+  end
+  while #toUnload > 0 do
+    unloadNext(toUnload[1])
+  end
+end
+
+function unloadNext(ship)
+  if shipContainsChildren(ship) then
+    Send("openhatch "..ship.name)
+    Send("board "..ship.name)
+    Send("closehatch")
+    runDirs(ship.dirs["hatchtopilot"])
+    Send("autopilot off")
+    Send("openbay all")
+    Send("autopilot on")
+    for i, v in ipairs(ship.hangars or {}) do
+      if hangarContainsChildren(v) then
+        runDirs(v["pilottohangar"])
+        for k, j in ipairs(v.ships or {}) do
+          toUnload[#toUnload + 1] = j
+          Send("unloadship "..j.name)
+        end
+        runDirs(v["hangartohatch"])
+        runDirs(ship.dirs["hatchtopilot"])
+      end
+    end
+    Send("autopilot off")
+    Send("closebay all")
+    Send("autopilot on")
+    runDirs(ship.dirs["pilottohatch"])
+    Send("openhatch")
+    Send("leaveship")
+    Send("closehatch "..ship.name)
+  end
+  table.remove(toUnload, 1)
+end
+function shipContainsChildren(ship)
+  for i, v in ipairs(ship.hangars or {}) do
+    if v.ships and #v.ships > 0 then
+      return true
+    end
+  end
+  return false
+end
+
+function hangarContainsChildren(hangar)
+  if hangar.ships and #hangar.ships > 0 then
+    return true
+  else
+    return false
+  end
+end
+
+toLoad = {}
+
+function loadShips(name, line, args)
+  for i=getNumCargoShips(), 1, -1 do
+    toLoad[#toLoad + 1] = getShip(i)
+  end
+  while #toLoad > 0 do
+    loadNext(toLoad[1])
+  end
+end
+
+function loadNext(ship)
+  if shipContainsChildren(ship) then
+    Send("openhatch "..ship.name)
+    Send("enter "..ship.name)
+    Send("closehatch")
+    runDirs(ship.dirs["hatchtopilot"])
+    Send("autopilot off")
+    Send("openbay all")
+    Send("autopilot on")
+    runDirs(ship.dirs["pilottohatch"])
+    Send("openhatch")
+    Send("leaveship")
+    Send("closehatch "..ship.name)
+    for i, v in ipairs(ship.hangars or {}) do
+      if hangarContainsChildren(v) then
+        for k, j in ipairs(v.ships or {}) do
+          Send("loadship \""..j.name.."\" \""..ship.name.."\" "..i)
+        end
+      end
+    end
+    Send("openhatch "..ship.name)
+    Send("enter "..ship.name)
+    Send("closehatch")
+    runDirs(ship.dirs["hatchtopilot"])
+    Send("autopilot off")
+    Send("closebay all")
+    Send("autopilot on")
+    runDirs(ship.dirs["pilottohatch"])
+    Send("openhatch")
+    Send("leaveship")
+    Send("closehatch "..ship.name)
+  end
+  table.remove(toLoad, 1)
+end
+
+function shipCargoClear(name, line, args)
+  ships = {}
+  ColourNote("yellow","","Cargo ship list cleared.")
+end
+function shipCargoRem(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+  if #args > 0 then -- user input 1 argument
+    ColourNote("red","","Currently disabled, use shipCargoClear instead!")
+  else
+    ColourNote("red","","Usage: shipCargoRem <ship>")
+    return
+  end
+end
+function shipCargoAdd(name, line, args)
+
+  args = utils.split(Trim(args[1]), " ")
+  if #args > 0 then -- user input 1 word
+    if #args > 1 then -- user input 2 words
+      if #args > 2 then -- user input 3 words
+        if args[1] and args[2] and not tonumber(args[2]) and tonumber(args[3]) then -- this is correct format, 'shipcargoadd child parent hangar'
+          local child = args[1]
+          local parent = args[2]
+          local hangar = tonumber(args[3])
+          internalAddCargoShip(child, parent, hangar)
+        else
+          ColourNote("red","","Usage: shipCargoAdd <child> <parent> <hangar>")
+        end
+        return
+      end
+      -- 2 arguments
+      if args[1] and args[2] and not tonumber(args[2]) then -- format 'shipcargoadd child parent'
+        local child = args[1]
+        local parent = args[2]
+        internalAddCargoShip(child, parent)
+      else
+        ColourNote("red","","Usage: shipCargoAdd <child> <parent> <hangar>")
+      end
       return
-    else -- we have a stored ship name, use it
-      SendNoEcho("listcargo "..ship.name)
+    end
+    -- 1 argument
+    if args[1]~="" then -- format 'shipcargoadd child'
+      local child = args[1]
+      internalAddCargoShip(child)
+    else
+      ColourNote("red","","Usage: shipCargoAdd <child> <parent> <hangar>")
+    end
+    return
+  end
+end
+
+function internalAddCargoShip(child, parent, hangar)
+  childShip = ""
+  parentShip = ""
+  if child then -- child supplied, find it in the shipdb list
+    local childFound = false
+    for i, v in ipairs(shipdb) do
+      if v.name:lower():find(child:lower()) or v.type:lower():find(child:lower()) or (tonumber(child) and tonumber(child) == i) then -- found matching ship
+        childShip = v
+        --ColourNote("yellow","","Child ship '"..v.name.."' found in shipdb.")
+        childFound = true
+        break
+      end
+    end
+    if not childFound then
+      ColourNote("red","","Child ship '"..child.."' not found in shipdb.")
+      return
+    end
+    if parent then -- parent supplied, find it in the current ship list
+      local parentFound = false
+      for i, v in ipairs(ships) do
+        parentShip = checkShip(v, parent)
+        if parentShip then
+          --ColourNote("yellow","","Parent ship '"..parentShip.name.."' found in ship list.")
+          parentFound = true
+          break
+        end
+      end
+      if not parentFound then
+        ColourNote("red","","Parent ship '"..parent.."' not found in ship list.")
+        return
+      end
+      if hangar and tonumber(hangar)>0 then
+        parentShip.hangars = parentShip.hangars or {}
+        if tonumber(hangar) > #parentShip.hangars then -- supplied hangar number is greater than parent possesses
+          ColourNote("red","","Parent '"..parentShip.name.."' doesn't have that many hangars.")
+          return
+        else -- valid hangar, check if there is space
+          local spaceLeft = getHangarLeft(parentShip.hangars[tonumber(hangar)])
+          if tonumber(childShip.size) <= spaceLeft then -- we have room in this hangar
+            local ships = parentShip.hangars[tonumber(hangar)].ships or {}
+            ships[#ships + 1] = copytable.deep(childShip)
+            parentShip.hangars[tonumber(hangar)].ships = copytable.deep(ships)
+            ColourNote("yellow","","Child ship '"..childShip.name.."' added to parent ship '"..parentShip.name.."' hangar "..tonumber(hangar)..".")
+          else
+            ColourNote("red","","Child ship '"..childShip.name.."' won't fit into parent ship '"..parentShip.name.."' hangar "..tonumber(hangar)..".")
+          end
+        end
+      else -- no hangar provided, put child in the first hangar it will fit
+        local childFits = false
+        parentShip.hangars = parentShip.hangars or {}
+        for i, v in ipairs(parentShip.hangars) do
+          v.ships = v.ships or {}
+          local spaceLeft = getHangarLeft(v)
+          if tonumber(childShip.size) <= spaceLeft then -- we have room in this hangar
+            v.ships[#v.ships + 1] = copytable.deep(childShip)
+            ColourNote("yellow","","Child ship '"..childShip.name.."' added to parent ship '"..parentShip.name.."' hangar "..i..".")
+            childFits = true
+            break
+          end
+        end
+        if not childFits then
+          ColourNote("red","","Child ship '"..childShip.name.."' won't fit into parent ship '"..parentShip.name.."'.")
+          return
+        end
+      end
+    else -- no parent entered
+      ships[#ships + 1] = copytable.deep(childShip)
+      ColourNote("yellow","","Ship '"..childShip.name.."' added to cargo ship list with no parent ship.")
+      return
+    end
+  else
+    ColourNote("red","","Error: nothing supplied to internalAddCargoShip()!")
+    return
+  end
+end
+
+function checkShip(ship, search)
+  local found = nil
+  if ship.name:lower():find(search:lower()) or ship.type:lower():find(search:lower()) then -- found matching ship
+    found = ship
+  else
+    for i, v in ipairs(ship.hangars or {}) do
+      for k, j in ipairs(v.ships or {}) do
+        found = checkShip(j, search)
+        if found then return found end
+      end
+    end
+  end
+  return found
+end
+
+function shipCargoList(name, line, args)
+  ColourNote(gray,"","Current cargo ship list (",cyan,"",getNumCargoShips().." ship"..((getNumCargoShips()~=1 and "s") or ""),gray,"","):")
+  for i, v in ipairs(ships) do
+    printShip(0, v)
+  end
+  --tprint(ships)
+end
+
+function printShip(indent, ship)
+  ColourNote(gray,"",string.rep(" ", indent)..((indent>0 and "|->") or "").."[",cyan,"",((ship.type and ship.type) or "not set").." '"..((ship.name and ship.name) or "not set").."'",gray,"","] [",cyan,"","Size:"..((ship.size and ship.size) or 0),gray,"","] [",cyan,"","Hangars:"..((ship.hangars and #ship.hangars) or 0),gray,"","] (",cyan,"",getTotalHangarUsed(ship),gray,"","/",cyan,"",getTotalHangarCapacity(ship),gray,"",")")
+  for i, v in ipairs(ship.hangars or {}) do
+    ColourNote(gray,"",string.rep(" ", indent+2).."[Hangar ",cyan,"",i,gray,"","] (",cyan,"",getHangarUsed(v),gray,"","/",cyan,"",v.capacity,gray,"","):")
+    for k, j in ipairs(v.ships or {}) do
+      printShip(indent+5, j)
+    end
+  end
+end
+
+function getHangarLeft(hangar)
+  local cap = tonumber(hangar.capacity)
+  for i, v in ipairs(hangar.ships or {}) do
+    cap = cap - tonumber(v.size)
+  end
+  return cap
+end
+function getHangarUsed(hangar)
+  local used = 0
+  for i, v in ipairs(hangar.ships or {}) do
+    used = used + tonumber(v.size)
+  end
+  return used
+end
+
+function getTotalHangarCapacity(ship)
+  local cap = 0
+  for i, v in ipairs(ship.hangars or {}) do
+    cap = cap + tonumber(v.capacity)
+  end
+  return cap
+end
+function getTotalHangarLeft(ship)
+  local cap = getHangarCapacity(ship)
+  for i, v in ipairs(ship.hangars or {}) do
+    for k, j in ipairs(v.ships or {}) do
+      cap = cap - tonumber(j.size)
+    end
+  end
+  return cap
+end
+function getTotalHangarUsed(ship)
+  local used = 0
+  for i, v in ipairs(ship.hangars or {}) do
+    for j, j in ipairs(v.ships or {}) do
+      used = used + tonumber(j.size)
+    end
+  end
+  return used
+end
+
+function getNumCargoShips()
+  local count = 0
+  for i, v in ipairs(ships) do
+    count = count + countShip(v)
+  end
+  return count
+end
+
+function countShip(ship)
+  local count = 1
+  for i, v in ipairs(ship.hangars or {}) do
+    for j, k in ipairs(v.ships or {}) do
+      count = count + countShip(k)
+    end
+  end
+  return count
+end
+
+function getShip(num)
+  local num = num or shipnum
+  local count = 0
+  for i, v in ipairs(ships or {}) do
+    ship, count = checkInsideShip(v, count, num)
+    if ship then 
+      return ship 
+    end
+  end
+end
+
+function checkInsideShip(ship, iCount, iNum)
+  local found = nil
+  iCount = iCount + 1
+  if iCount == iNum then -- found matching ship
+    found = ship
+  else
+    for i, v in ipairs(ship.hangars or {}) do
+      for k, j in ipairs(v.ships or {}) do
+        found, iCount = checkInsideShip(j, iCount, iNum)
+        if found then 
+          return found, iCount
+        end
+      end
+    end
+  end
+  return found, iCount
+end
+
+function shipProfileList(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+  local v = shipProfile
+  ColourNote(gray,"","Current working ship profile: ")
+  ColourNote(gray,"","[",cyan,"",((v.type and v.type) or "not set").." '"..((v.name and v.name) or "not set").."'",gray,"","] [",cyan,"","Hangars: "..((v.hangars and #v.hangars) or 0),gray,"","] [",cyan,"","Size: "..((v.size and v.size) or "not set"),gray,"","] [",cyan,"","Dirs: ",((checkShipDirs(v) and "lime") or "red"),"",((checkShipDirs(v) and "set") or "not set"),gray,"","]")
+  ColourNote(gray,"","[Dirs:]")
+  for k, j in pairs(v.dirs or {}) do
+    ColourNote(gray,"","  [",cyan,"",k..":".."'"..j.."'",gray,"","]")
+  end
+  if v.hangars and #v.hangars > 0 then
+    ColourNote(gray,"","[Hangar Dirs:]")
+    for k, j in ipairs(v.hangars or {}) do
+      ColourNote(gray,"","  [",cyan,"","Hangar "..k,gray,"","]")
+      ColourNote(gray,"","    [",cyan,"","pilottohangar:'"..((j["pilottohangar"] and j["pilottohangar"]) or "none").."'",gray,"","]")
+      ColourNote(gray,"","    [",cyan,"","hangartohatch:"..((j["hangartohatch"] and j["hangartohatch"]) or "none").."'",gray,"","]")
+    end
+  end
+  --tprint(shipProfile)
+end
+function shipProfileName(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+  if args[1] ~= "" then -- user input something
+    shipProfile.name = args[1]
+  else -- user input nothing, erase name
+    shipProfile.name = nil
+  end
+  ColourNote("yellow", "", "Ship profile name set to "..((shipProfile.name and shipProfile.name) or "nil")..".")
+end
+function shipProfileSetup(name, line, args)
+  shipProfile.name = utils.inputbox("Enter ship name for this profile", "Ship name", shipProfile.name or "profile1", GetInfo(23), GetInfo(215))
+  shipProfile.type = utils.inputbox("Enter ship type (i.e. YG-4210 Transport, YT-1300 Light Freighter , etc)", "Ship type", shipProfile.type or "YG-1300", GetInfo(23), GetInfo(215))
+  shipProfile.size = utils.inputbox("Enter ship size number (i.e. how many slots this ship takes up in a hangar via help shipsize)", "Ship size", shipProfile.size or "10", GetInfo(23), GetInfo(215))
+  if not shipProfile.dirs then
+    shipProfile.dirs = {}
+  end
+  shipProfile.dirs["hatchtopilot"] = utils.inputbox("Enter dirs from hatch to pilot room", "Hatch to pilot dirs", shipProfile.dirs["hatchtopilot"] or "",  GetInfo(23), GetInfo(215))
+  shipProfile.dirs["pilottohatch"] = utils.inputbox("Enter dirs from pilot room to hatch", "Pilot to hatch dirs", shipProfile.dirs["pilottohatch"] or "",  GetInfo(23), GetInfo(215))
+  shipProfile.dirs["pilottonav"] = utils.inputbox("Enter dirs from pilot room to nav room", "Pilot to nav dirs", shipProfile.dirs["pilottonav"] or "",  GetInfo(23), GetInfo(215))
+  shipProfile.dirs["navtopilot"] = utils.inputbox("Enter dirs from nav room to pilot room", "Nav to pilot dirs", shipProfile.dirs["navtopilot"] or "",  GetInfo(23), GetInfo(215))
+  local numhangars = utils.inputbox("Enter number of hangars on this ship", "Number of hangars", ((shipProfile.hangars and #shipProfile.hangars) or ""),  GetInfo(23), GetInfo(215))
+  if tonumber(numhangars) then
+    if not shipProfile.hangars then
+      shipProfile.hangars = {}
+    end
+    local hangar = {}
+    for i=1, tonumber(numhangars), 1 do
+      if shipProfile.hangars[i] then
+        hangar = copytable.deep(shipProfile.hangars[i])
+      end
+      hangar["capacity"] = utils.inputbox("Enter capacity of hangar "..i, "Capacity of hangar "..i, hangar["capacity"] or "", GetInfo(23), GetInfo(215))
+      hangar["pilottohangar"] = utils.inputbox("Enter dirs from pilot room to hangar "..i, "Pilot to hangar "..i, hangar["pilottohangar"] or "",  GetInfo(23), GetInfo(215))
+      hangar["hangartohatch"] = utils.inputbox("Enter dirs from hangar "..i.." to hatch.", "Hangar "..i.." to hatch", hangar["hangartohatch"] or "",  GetInfo(23), GetInfo(215))
+      shipProfile.hangars[i] = copytable.deep(hangar)
+      hangar = {}
+    end
+  end
+end
+function shipProfileClear(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+  shipProfile = {}
+  ColourNote("yellow","","Ship profile cleared.")
+end
+function shipProfileLoad(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+  if args[1] ~= "" then -- user input something
+    for i, v in ipairs(shipdb) do
+      if v.name:lower():find(args[1]:lower()) or v.type:lower():find(args[1]:lower()) or (tonumber(args[1]) and tonumber(args[1]) == i) then -- found matching ship
+        shipProfile = copytable.deep(v)
+        ColourNote("yellow","","Matching ship '"..v.name.."' found in shipdb, loaded into ship profile.")
+        return
+      end
+    end
+    ColourNote("red","","Ship '"..args[1].."' not found in shipdb.")
+  else -- user input nothing, print usage
+    ColourNote("red","","Usage: shipProfileLoad <name/#>")
+  end
+end
+function shipProfileSave(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+  if shipProfile.name and shipProfile.type then
+    shipdb[#shipdb + 1] = copytable.deep(shipProfile)
+    ColourNote("yellow","","Current profile '"..shipdb[#shipdb].name.."' saved to ship db.")
+  else -- don't have a name or type, error out
+    ColourNote("red","","Current ship profile is missing name or type.")
+  end
+end
+-- push does the same thing as save except it also clears the current profile after pushing onto the list
+function shipProfilePush(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+  if shipProfile.name and shipProfile.type then
+    shipdb[#shipdb + 1] = copytable.deep(shipProfile)
+    ColourNote("yellow","","Current profile '"..shipdb[#shipdb].name.."' saved to ship db.")
+    shipProfile = {}
+  else -- don't have a name or type, error out
+    ColourNote("red","","Current ship profile is missing name or type.")
+  end
+end
+function shipDBList(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+  local found = false
+  local ship = nil
+  if args[1] ~= "" then -- user input an argument
+    for i, v in ipairs(shipdb) do
+      if (tonumber(args[1]) and tonumber(args[1]) == i) or v.name:lower():find(args[1]:lower()) then
+        ColourNote(gray,"","Found matching ship '",cyan,"",v.name,gray,"","' in ship db:")
+        ColourNote(gray,"","[",cyan,"",string.format("%2d", i),gray,"","] [",cyan,"",v.type.." '"..v.name.."'",gray,"","] [",cyan,"","Hangars: "..((v.hangars and #v.hangars) or 0),gray,"","] [",cyan,"","Size: "..v.size,gray,"","] [",cyan,"","Dirs: ",((checkShipDirs(v) and "lime") or "brightred"),"",((checkShipDirs(v) and "set") or "not set"),gray,"","]")
+        ColourNote(gray,"","[Dirs:]")
+        for k, j in pairs(v.dirs or {}) do
+          ColourNote(gray,"","  [",cyan,"",k..":".."'"..j.."'",gray,"","]")
+        end
+        if v.hangars and #v.hangars > 0 then
+          ColourNote(gray,"","[Hangar Dirs:]")
+          for k, j in ipairs(v.hangars) do
+            ColourNote(gray,"","  [",cyan,"","Hangar "..k,gray,"","]")
+            ColourNote(gray,"","    [",cyan,"","pilottohangar:'"..((j["pilottohangar"] and j["pilottohangar"]) or "none").."'",gray,"","]")
+            ColourNote(gray,"","    [",cyan,"","hangartohatch:'"..((j["hangartohatch"] and j["hangartohatch"]) or "none").."'",gray,"","]")
+          end
+        end
+        found = true
+        break
+      end
+    end
+  
+  else -- no argument
+    ColourNote(gray,"","Cargo ship db full ship list: ")
+    for i, v in ipairs(shipdb) do
+      ColourNote(gray,"","[",cyan,"",string.format("%2d", i),gray,"","] [",cyan,"",v.type.." '"..v.name.."'",gray,"","] [",cyan,"","Hangars: "..((v.hangars and #v.hangars) or 0),gray,"","] [",cyan,"","Size: "..v.size,gray,"","] [",cyan,"","Dirs: ",((checkShipDirs(v) and "lime") or "brightred"),"",((checkShipDirs(v) and "set") or "not set"),gray,"","]")  
+    end
+    ColourNote(gray,"","Showing ",cyan,"",((shipdb and #shipdb) or 0),gray,""," ship profiles saved total.")
+    return
+  end
+  if not found then
+    ColourNote("red","","Ship '"..args[1].."' not found in ship db.")
+  end
+  --tprint(shipdb)
+end
+function checkShipDirs(ship)
+  local pass = true
+  if ship.dirs then
+    if not ship.dirs["hatchtopilot"] or not ship.dirs["pilottonav"] or not ship.dirs["hatchtopilot"] or not ship.dirs["navtopilot"] then
+      pass = false
+    end
+  else
+    pass = false
+  end
+  if ship.hangars then
+    for i, v in ipairs(ship.hangars) do
+      if not v["pilottohangar"] or not v["hangartohatch"] then
+        pass = false
+      end
+    end
+  else
+    pass = false
+  end
+  return pass
+end
+function printDBShip(ship)
+  ColourNote(gray,"","[",cyan,"","Num: "..i,gray,"","] [",cyan,"",ship.type.." '"..ship.name.."' ",gray,"","] [",cyan,"","Size: "..ship.size,gray,"","] [",cyan,"","Dirs: ",((checkShipDirs(ship) and "lime") or "brightred"),"",((checkShipDirs(ship) and "set") or "not set"),gray,"","]")  
+end
+function shipDBRem(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+  if args[1] ~= "" then -- user input something
+    for i, v in ipairs(shipdb) do
+      if v.name:lower():find(args[1]:lower()) or v.type:lower():find(args[1]:lower()) or (tonumber(args[1]) and tonumber(args[1]) == i) then -- found matching ship
+        ColourNote("yellow","","Matching ship '"..v.name.."' found in shipdb, deleted.")
+        table.remove(shipdb, i)
+        OnPluginSaveState()
+        return
+      end
+    end
+    ColourNote("red","","Ship '"..args[1].."' not found in shipdb.")
+  else -- user input nothing, print usage
+    ColourNote("red","","Usage: shipDBRem <name/#>")
+  end
+end
+function shipDBClear(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+  shipdb = {}
+  ColourNote("yellow","","Ship profile list cleared.")
+  OnPluginSaveState()
+end
+function shipDBRename(name, line, args)
+  args = utils.split(Trim(args[1]), " ")
+end
+
+function OnPluginSaveState()
+  SetVariable("closeBays", tostring(closeBays))
+  SetVariable("shipnum", shipnum)
+  SetVariable("cVar", cVar)
+  SetVariable("cPlanets", ((cPlanets and serialize.save("cPlanets")) or ""))
+  SetVariable("shipdb", ((shipdb and serialize.save("shipdb")) or "")) -- don't set until shipdb variable exists
+  SetVariable("ships", ((ships and serialize.save("ships")) or ""))
+end
+
+function beginManifest()
+  scannednum = 0
+  scanNextManifest()
+end
+
+function scanNextManifest()
+  scannednum = scannednum + 1
+  if scannednum > getNumCargoShips() then -- finished manifest scan
+  -- from disableshipmanifest
+
+  ColourNote("yellow","","Beginning cargo session momentarily...")
+  DoAfterSpecial(2, 'cargoStart()', sendto.script)
+  
+  else
+    if not getShip(scannednum).name or getShip(scannednum).name == "" then -- name isn't set, bug out
+      ColourNote("red","","Error: ships must have a name assigned in order to scan manifest.")
+      return
+    else
+      getShip(scannednum).cargo = {}
+      Send("listcargo "..getShip(scannednum).name)
       EnableTriggerGroup("ManifestStart", true)
     end
-  else -- entered something, store ship name and use it
-    ship.name = Trim(args[1])
-    SendNoEcho("listcargo "..ship.name)
-    EnableTriggerGroup("ManifestStart", true)
   end
-  ship.cargo = {}
 end
+function doClearCargo(name, line, args)
+  if args[1] == "" then -- no argument, clear it all
+    clearCargoManifest()
+  else
+    clearCargoManifest(Trim(args[1]))
+  end
+end
+
+function clearCargoManifest(ship)
+  if ship then -- provided a ship, find it
+    local found = false
+    for i=1, getNumCargoShips(), 1 do
+      if string.find(getShip(i).name:lower(), ship, 0, true) then -- found the ship
+        getShip(i).cargo = {}
+        getShip(i).scanned = false
+        ColourNote("yellow","","Ship '"..getShip(i).name.."' cargo manifest cleared, run cargostart again to rescan.")
+        found = true
+        break
+      end
+    end
+    if not found then
+      ColourNote("red","","Ship '"..ship.."' not found in cargo ship list.")
+    end
+  else -- no ship provided, invalidate all
+    for i=1, getNumCargoShips(), 1 do
+      getShip(i).cargo = {}
+      getShip(i).scanned = false
+      ColourNote("yellow","","Ship '"..getShip(i).name.."' cargo manifest cleared, run cargostart again to rescan.")
+    end
+  end
+end
+
 function errorShipManifest()
   EnableTriggerGroup("Manifest", false)
   EnableTriggerGroup("ManifestStart", false)
   ColourNote("red","","Error starting ship manifest. Make sure you are standing outside your cargo vessel, and that you are the owner/pilot/copilot.")
 end
+
 function enableShipManifest()
   EnableTriggerGroup("Manifest", true)
   ColourNote("yellow","","Enabled ship manifest capture.")
 end
--- stores a pod into the ship manifest
+-- stores a pod into the current ship manifest
 function storeCargoPod(name, line, args)
   if not args or args[1] == "" or args[2] == "" or args[3] == "" or args[4] == "" then
     return
   end
   local pod = { name=Trim(args[2]),held=tonumber(Trim(args[3])),cap=tonumber(Trim(args[4])) }
-  ship.cargo[tonumber(Trim(args[1]))] = pod
+  getShip(scannednum).cargo[tonumber(Trim(args[1]))] = pod
 end
 function disableShipManifest()
-  EnableTriggerGroup("Manifest", false)
+ EnableTriggerGroup("Manifest", false)
   EnableTriggerGroup("ManifestStart", false)
-  ColourNote("yellow","","Disabled ship manifest capture. Found "..#ship.cargo.." pods carrying "..getCargoCarrying().."/"..getCargoCapacity().." units.")
-  scannedCargo = true
-  ColourNote("yellow","","Beginning cargo session momentarily...")
-  DoAfterSpecial(2, 'cargoStart()', sendto.script)
+  
+  ColourNote("yellow","","Disabled ship manifest capture. Found "..#getShip(scannednum).cargo.." pods carrying "..getCargoCarrying(scannednum).."/"..getCargoCapacity(scannednum).." units.")
+  getShip(scannednum).scanned = true
+  scanNextManifest()
 end
 -- gets amount of cargo we're currently carrying
-function getCargoCarrying()
+function getCargoCarrying(num)
+  num = num or shipnum
   local retval = 0
-  for i, v in ipairs(ship.cargo) do
+  for i, v in ipairs(getShip(num).cargo) do
     retval = retval + v.held
   end
   return retval
 end
 -- gets amount of cargo we're capable of carrying
-function getCargoCapacity()
+function getCargoCapacity(num)
+  num = num or shipnum
   local retval = 0
-  for i, v in ipairs(ship.cargo) do
+  for i, v in ipairs(getShip(num).cargo) do
     retval = retval + v.cap
   end
   return retval
@@ -162,73 +1013,103 @@ end
 function cargoSetup() -- old setup function, replacement planned
 	cPlanets = {}
 	local planet = {}
-	local numWorlds = tonumber(utils.inputbox("Number of worlds on cargo route?", "Number", "2", "Courier", 9))
-	for i = 1, numWorlds, 1 do
-		planet.name = utils.inputbox("Name of world " .. i .. "?", "Name of world " .. i, "Name", "Courier", 9)
-		planet.resource = utils.inputbox("Resource to be bought on world " .. i .. "?", "Resource of world " .. i, "Resource", "Courier", 9)
+	local numWorlds = tonumber(utils.inputbox("Number of worlds on cargo route?", "Number", "2", GetInfo(23), GetInfo(215)))
+	for i = 1, (numWorlds or 0), 1 do
+		planet.name = utils.inputbox("Name of world " .. i .. "?", "Name of world " .. i, "Name", GetInfo(23), GetInfo(215))
+		planet.resource = utils.inputbox("Resource to be bought on world " .. i .. "?", "Resource of world " .. i, "Resource", GetInfo(23), GetInfo(215))
+    --planet.landing = utils.inputbox("Preferring landing pad on this world?", "Landing pad", "", GetInfo(23), GetInfo(215))
+    planet.contraband = utils.inputbox("Do you want to use buy/sellcontraband?", "Use Buy/Sellcontraband", "No", GetInfo(23), GetInfo(215))
+    if not planet.name or not planet.resource or not planet.contraband then
+      ColourNote("red","","Cancel detected, aborting.")
+      return
+    end
 		cPlanets[#cPlanets + 1] = planet
 		planet = {}
 	end
-	ship.name = utils.inputbox("Name of cargo vessel?", "Cargo vessel", "", "Courier", 9)
+	--ship.name = utils.inputbox("Name of cargo vessel?", "Cargo vessel", "", GetInfo(23), GetInfo(215))
+  --if not ship.name then
+  --  ColourNote("red","","Cancel detected, aborting.")
+  --  return
+ -- end
 end
+
 function cargoSetupShipName(name, line, args)
-  if not args or args[1] == "" then
-    ColourNote("yellow","","Cargo ship set to '"..ship.name.."'")
-    return
-  end
-  ship.name = Trim(args[1])
-  ColourNote("yellow","","Cargo ship set to '"..ship.name.."'")
+  ColourNote("yellow","","This command has been superceded by the cargoShipProfile and cargoShipList systems,")
+  ColourNote("yellow","","Please see their cargohelp topics for more information.")
 end
+
+cargoPlanetsUsage = "Usage: cargoPlanets <planet1>,<resource1>,<trafficking>,<planet2>,<resource2>,<trafficking>..."
+
 function cargoSetupPlanets(name, line, args)
   if not args or args[1] == "" then
-    ColourNote("red","","Usage: cargoPlanets <planet1>,<resource1>,<planet2>,<resource2>,...")
+    ColourNote("red","",cargoPlanetsUsage)
     return
   end
+
   local addItems = {}
   if string.find(args[1], ",", 0, true) then
     addItems = utils.split(args[1], ",")
   else
-    ColourNote("red","","Usage: cargoPlanets <planet1>,<resource1>,<planet2>,<resource2>,...")
+    ColourNote("red","",cargoPlanetsUsage)
 	  return
 	end
 	cPlanets = {}
   local planet = {}
   ColourNote("yellow","","Cargo planet list cleared.")
-	local skip = true
-	for i, v in ipairs(addItems) do
-	  if skip then
-	    skip = false
-	    planet.name = Trim(v)
-	  else
-	    skip = true
-	    planet.resource = Trim(v)
-	    if planet.resource == "" then
-        ColourNote("red","","Usage: cargoPlanets <planet1> <resource1> <planet2> <resource2> ...")
-	      return
-	    end
-	    cPlanets[#cPlanets+1] = planet
-	    ColourNote("yellow","","("..planet.name..","..planet.resource..") added to cargo planets.")
-	    planet = {}
-	  end
-	end
+  
+  for i, v in pairs(addItems) do
+    if math.fmod(i-1, 3)==0 then -- planet
+      planet.name = Trim(v)
+    elseif math.fmod(i-1, 3)==1 then -- resource
+      planet.resource = Trim(v)
+    elseif math.fmod(i-1, 3)==2 then -- trafficking
+      planet.contraband = Trim(v)
+      cPlanets[#cPlanets + 1] = planet
+      ColourNote("yellow","","("..planet.name..","..planet.resource..","..planet.contraband..") added to cargo planets.")
+      planet = {}
+    end
+  end
 end
+
+function contraSellFailed(name, line, args)
+  removeCargo(lastsoldresource, lastsoldamount)
+  buyRemaining()
+end
+
+function contraBuyFailed(name, line, args)
+  -- need to add a line here to reduce amountearned or efficiency will be off!
+  buyRemaining()
+end
+
 function soldCargo(name, list, args)
-	removeCargo(args[2], tonumber(args[1]))
-	buyRemaining()
+  if args.quantity ~= nil and args.resource ~= nil then
+    removeCargo(args.resource, tonumber(args.quantity))
+    if args.credits ~= nil then
+      amountEarned = amountEarned + tonumber(args.credits)
+    end
+  end
+  if not buyRemaining() then
+    continueTrading()
+  end
 end
 
 function boughtCargo(name, list, args)
-	addCargo(args[2], tonumber(args[1]))
-	leftShip()
+  if args.quantity ~= nil and args.resource ~= nil then
+    addCargo(args.resource, tonumber(args.quantity))
+    if args.credits ~= nil then
+      amountEarned = amountEarned - tonumber(args.credits)
+    end
+  end
+	continueTrading()
 end
 
 function removeCargo(cargotype, cargoamount)
-  if not cargotype or cargotype == "" or not cargoamount or cargoamount == "" then
+  if cargotype == nil or cargoamount == nil then
     return
   end
   local found = false
   local amounttoremove = tonumber(cargoamount)
-  for i, v in ipairs(ship.cargo) do
+  for i, v in ipairs(getShip().cargo) do
     if amounttoremove > 0 and cargotype == v.name then -- cargo type matches type in pod
       found = true -- we found the cargo type we're removing in the manifest
       if amounttoremove >= v.held then -- we sold more than the pod is carrying
@@ -240,7 +1121,7 @@ function removeCargo(cargotype, cargoamount)
         amounttoremove = 0 -- the pod had more than we were trying to sell
       end
     else -- type doesn't match type in manifest
-      if #ship.cargo == i and not found then -- we tried to sell a cargo type we weren't carrying
+      if #getShip().cargo == i and not found then -- we tried to sell a cargo type we weren't carrying
         ColourNote("red","","Error occurred. Attempt to sell cargo not located in manifest.")
       end
     end
@@ -249,11 +1130,11 @@ end
       
 -- usage: addcargo(name, amount)
 function addCargo(cargotype, cargoamount)
-  if not cargotype or cargotype == "" or not cargoamount or cargoamount == "" then
+  if cargotype == nil or cargoamount == nil then
     return
   end
   local amounttoadd = tonumber(cargoamount)
-  for i, v in ipairs(ship.cargo) do
+  for i, v in ipairs(getShip().cargo) do
     if amounttoadd > 0 then
       if cargotype == v.name then -- we found a pod of our cargo type
         local roomleft = v.cap - v.held -- figure out how much room's left in the pod
@@ -276,7 +1157,7 @@ function addCargo(cargotype, cargoamount)
           amounttoadd = 0 -- we added everything we were trying to add
         end
       else -- can't use this pod
-        if #ship.cargo == i then -- reached end of list without adding our cargo
+        if #getShip().cargo == i then -- reached end of list without adding our cargo
           ColourNote("red","","Error adding cargo type "..cargotype..". No suitable pod found in ship manifest.")
         end
       end
@@ -285,17 +1166,21 @@ function addCargo(cargotype, cargoamount)
 end
 
 function cargoManifest()
-  ColourNote("gray","","Cargo Readout for ","cyan","",ship.name..":")
-  if not ship.cargo or #ship.cargo == 0 then
-    ColourNote("silver","","No cargo pods.")
-    return
+  for i=0,getNumCargoShips(),1 do
+    if getShip(i) then
+      ColourNote(gray,"","Cargo readout for ",cyan,"",getShip(i).name..":")
+      if getShip(i).cargo and #getShip(i).cargo > 0 then
+        ColourNote(gray,"","-------------------------------------------")
+        ColourNote(gray,"","[",darkblue,"","ID:",gray,"","] [",darkblue,"","Contents:           ",gray,"","] [",darkblue,"","Amount:  ",gray,"","]")
+        for i, v in ipairs(getShip(i).cargo) do
+          ColourNote(gray,"","[",cyan,"",string.format("%-3d",i),gray,"","] [",cyan,"",string.format("%-20s",v.name),gray,"","] [",cyan,"",string.format("%-9s",v.held.."/"..v.cap),gray,"","]")
+        end
+        Note("")
+      else
+        ColourNote(gray,"","No cargo pods.")
+      end
+    end
   end
-  ColourNote("gray","","-------------------------------------------")
-  ColourNote("gray","","[","dodgerblue","","ID:","gray","","] [","dodgerblue","","Contents:           ","gray","","] [","dodgerblue","","Amount:  ","gray","","]")
-  for i, v in ipairs(ship.cargo) do
-    ColourNote("gray","","[","cyan","",string.format("%-3d",i),"gray","","] [","cyan","",string.format("%-20s",v.name),"gray","","] [","cyan","",string.format("%-9s",v.held.."/"..v.cap),"gray","","]")
-  end
-  Note("")
 end
 
 function jumpComplete()
@@ -327,9 +1212,9 @@ function displayEfficiency()
 	if amountEarned == 0 or not elapsed then
 	  return
 	end
-	ColourNote("silver","","Credits made: ","cyan","",commas(amountEarned),"silver",""," Elapsed: ","cyan","",displayTime(elapsed))
-	--,"silver",""," (","cyan","",elapsed,"silver","",")"
-	ColourNote("silver","","Credits per hour: ","cyan","",commas(string.format("%d", ((amountEarned / (elapsed / 60) * 60)))))
+	ColourNote("silver","","Credits made: ",cyan,"",commas(amountEarned),"silver",""," Elapsed: ",cyan,"",displayTime(elapsed))
+	--,"silver",""," (",cyan,"",elapsed,"silver","",")"
+	ColourNote("silver","","Credits per hour: ",cyan,"",commas(string.format("%d", ((amountEarned / (elapsed / 60) * 60)))))
 end
 
 function displayTime(time)
@@ -379,20 +1264,51 @@ function displayTime(time)
 end
 
 function leftShip()
-  if not hyperCompleted then
+  if not hyperCompleted or not tradingCompleted then
     return
   end
+  planet = getName()
+  unloadShips()
   beginTradingStage()
 end
 
 function beginTradingStage()
+  tradingCompleted = false
+  shipnum = 0
+  beginNextTradingStage()
+end
+
+function beginNextTradingStage()
   -- first we try to sell what we're carrying
+  if moveToNextShip() then -- we found a ship
+    continueTrading()
+  else
+    ColourNote("yellow","","Trading completed. Loading up and flying to "..getNextName().." momentarily...")
+    DoAfterSpecial(3, 'endTradingStage()', sendto.script)
+  end
+end
+
+function continueTrading()
   if not sellOnePod() then -- if we are unable to sell anything, that means we need to move on
-    flyNext()
+    if not buyRemaining() then
+      beginNextTradingStage()
+    end
+  end
+end
+
+function moveToNextShip()
+  shipnum = shipnum + 1
+  if shipnum > getNumCargoShips() then
+    shipnum = 1
+    return nil
+  else
+    return shipnum
   end
 end
 
 function endTradingStage()
+  tradingCompleted = true
+  loadShips()
   flyNext()
 end
 
@@ -402,9 +1318,18 @@ function errorSelling()
 end
 
 function sellOnePod()
-  for i, v in ipairs(ship.cargo) do
+  for i, v in ipairs(getShip().cargo) do
     if v.held > 0 and string.lower(v.name) ~= string.lower(getResource()) then -- pod is carrying something we don't want
-      Send("sellcargo \""..ship.name.."\" \""..v.name.."\" "..v.held) -- sell the contents of the pod
+      if getContraband():lower() == "yes" or getContraband():lower() == "y" then
+      -- we're using sellcontraband
+         Send("sellcontraband \""..getShip().name.."\" \""..v.name.."\" "..v.held)
+         lastsoldamount = v.held
+         lastsoldresource = v.name
+      else
+         Send("sellcargo \""..getShip().name.."\" \""..v.name.."\" "..v.held) -- sell the contents of the pod
+         lastsoldamount = v.held
+         lastsoldresource = v.name
+      end
       return true -- abort out so we don't sell everything at once
     end
   end
@@ -414,12 +1339,16 @@ end
 -- buys a single pod's worth of cargo
 function buyOnePod()
   if getResource() ~= "" and getResource() ~= "none" then -- our resource list indicates we want to buy something
-    for i, v in ipairs(ship.cargo) do
+    for i, v in ipairs(getShip().cargo) do
       local needed = 0
       if (v.name == "(Empty)" or string.lower(v.name) == string.lower(getResource())) then -- our container is either empty or contains the resource we need
         needed = v.cap - v.held -- we need to buy remaining amount
         if needed > 0 then
-          Send("buycargo \""..ship.name.."\" \""..getResource().."\" "..needed)
+          if getContraband():lower() == "yes" or getContraband():lower() == "y" then
+            Send("buycontraband \""..getShip().name.."\" \""..getResource().."\" "..needed)
+          else
+            Send("buycargo \""..getShip().name.."\" \""..getResource().."\" "..needed)
+          end
           return true-- abort out so we don't buy everything at once
         end
       end
@@ -432,7 +1361,11 @@ function buyRemaining()
   if getResource() ~= "" and getResource() ~= "none" then -- we need to buy something
     local needed = getCargoCapacity() - getCargoCarrying()
     if needed > 0 then
-      Send("buycargo \""..ship.name.."\" \""..getResource().."\" "..needed)
+      if getContraband():lower() == "yes" or getContraband():lower() == "y" then
+        Send("buycontraband \""..getShip().name.."\" \""..getResource().."\" "..needed)
+      else
+        Send("buycargo \""..getShip().name.."\" \""..getResource().."\" "..needed)
+      end
       return true -- we bought something
     end
   end
@@ -440,23 +1373,60 @@ function buyRemaining()
 end
 
 function waitSell()
-	DoAfterSpecial (5, 'beginTradingStage()', sendto.script)
+	DoAfterSpecial (5, 'continueTrading()', sendto.script)
 end
 
-
-function cargoStart()
+function retrievePlanetFailed()
+  EnableTriggerGroup("RetrievePlanet", false)
+  ColourNote("red","","Error: you must be standing outside your ship on a planet for cargostart to work!")
+end
+function retrievePlanet()
+  shipnum = 1
 	cVar = 1
 	amountEarned = 0
+  ColourNote("yellow","","Retrieving current planet...")
+  Send("showplanet")
+  EnableTriggerGroup("RetrievePlanet", true)
+end
+
+function storePlanet(name, line, args)
+  if args[1] then
+    planet = Trim(args[1])
+    ColourNote("yellow","","Current planet found: "..planet)
+  end
+end
+function updateListPosition()
+  EnableTriggerGroup("RetrievePlanet", false)
+  local found = false
+  if planet and planet ~= "" then
+    for i, v in ipairs(cPlanets or {}) do
+      if v.name:lower() == planet:lower() then
+        cVar = i
+        found = true
+        break
+      end
+    end
+  end
+  if found then
+    ColourNote(gray,"","Adjusting cargo planet position to match current planet: ",cyan,"",cVar,gray,""," (",cyan,"",cPlanets[cVar].name,gray,"",")")
+    ColourNote("yellow","","Beginning cargo run momentarily...")
+    DoAfterSpecial(2, 'cargoStart()', sendto.script)
+  else
+    ColourNote("red","","Error: tried to run cargo from a planet not present on cargo planets list!")
+  end
+end
+
+function cargoStart()
 	startTime = os.time()
-	if not ship.name or ship.name == "" then
+	if not getShip() or not getShip().name or getShip().name == "" then
 	  ColourNote("red","","You must assign a ship name using cargoship <shipname> before starting your session.")
 	  return
 	end
 	if not cPlanets or #cPlanets == 0 then
-	  ColourNote("red","","You must assign your cargo route using cargoplanets <planet1>,<resource1>,<planet2>,<resource2>...")
+	  ColourNote("red","","You must assign your cargo route using cargosetup or cargoplanets <planet1>,<resource1>,<trafficking>,<planet2>,<resource2>,<trafficking>...")
 	  return
 	end
-	if not ship.cargo or not scannedCargo then
+	if ((not checkAllCargoExists() or not checkAllScanned()) and checkForResources()) then -- make it possible to run script without any cargo by entering 'none' into every resource
 	  ColourNote("yellow","","Retrieving ship's cargo manifest for you...")
 	  beginManifest()
 	  return
@@ -466,8 +1436,37 @@ function cargoStart()
 	beginTradingStage() -- sell off stuff we don't want and refill the ship
 end
 
+function checkAllCargoExists()
+  for i, v in ipairs(ships) do
+    if not v.cargo then
+      return false
+    end
+  end
+  return true
+end
+
+function checkAllScanned()
+  for i, v in ipairs(ships) do
+    if not v.scanned then
+      return false
+    end
+  end
+  return true
+end
+
+function checkForResources()
+  for i, v in pairs(cPlanets) do
+    if v.resource:lower() ~= "none" and v.resource ~= "" then
+      return true
+    end
+  end
+  return false
+end
+
 function flyNext()
-  buyRemaining() -- fill up the ship (without selling it off since hyperCompleted is now false)
+  if getResource() ~= "" and getResource() ~= "none" then
+    buyRemaining() -- fill up the ship (without selling it off since hyperCompleted is now false)
+  end
   cVar = cVar + 1
   if (cVar > #cPlanets) then  -- if we're at the end of the list
     if cycle then         -- wrap to the beginning
@@ -539,6 +1538,13 @@ function getPlanet()
   return cPlanets[cVar]
 end
 
+function getContraband()
+  if #cPlanets == 0 then
+    return ""
+  end
+  return cPlanets[cVar].contraband
+end
+
 function toggleACOn()
 	autoCargo = true
 	EnableTriggerGroup("AutoCargo", true)
@@ -575,14 +1581,16 @@ function listSystems(name, list, args)
 end
 
 function cargoClear(name, list, args)
-  ship = {}
+  ship = { name = "", cargo = {} }
 	cPlanets = {}
 	startTime = 0
 	amountEarned = 0
 	cVar = 0
 	cycle = true
+  tradingCompleted = false
 	hyperCompleted = false
 	scannedCargo = false
+  planet = ""
 	ColourNote("yellow","","Cargo list cleared.")
 	toggleACOff()
 end
@@ -644,7 +1652,7 @@ function cargoBestRoute(name, list, args)					-- find the most profitable route 
 														--	bestPlanet2 = body2value
 														--	bestGoResource = resourcego1value
 														--	bestRetResource = resourceret1value
-														--ColourNote("silver","","New best found! Start: ","cyan","",body1value.name,"silver",""," (","cyan","",resourcego1value.name,"silver","",") End: ","cyan","",body2value.name,"silver",""," (","cyan","",resourceret1value.name,"silver","",") Value: ","cyan","",string.format("%.0f",bestRouteValue*1000))
+														--ColourNote("silver","","New best found! Start: ",cyan,"",body1value.name,"silver",""," (",cyan,"",resourcego1value.name,"silver","",") End: ",cyan,"",body2value.name,"silver",""," (",cyan,"",resourceret1value.name,"silver","",") Value: ",cyan,"",string.format("%.0f",bestRouteValue*1000))
 														--end
 													end
 												end
@@ -667,8 +1675,8 @@ function cargoBestRoute(name, list, args)					-- find the most profitable route 
 		return
 	end
 	if (args[2] ~= "") then
-		--ColourNote("silver","","Best route from ","cyan","",bestPlanet1.name,"silver","",":")
-		ColourNote("silver","","Top 10 best routes from ","cyan","",Trim(args[1]),"silver","",":")
+		--ColourNote("silver","","Best route from ",cyan,"",bestPlanet1.name,"silver","",":")
+		ColourNote("silver","","Top 10 best routes from ",cyan,"",Trim(args[1]),"silver","",":")
 		max,step = 10,1
 	else
 		ColourNote("silver","","Top 10 best routes in the entire galaxy:")
@@ -773,20 +1781,22 @@ function scanNext(name, list, args)
 		scanned = "none"
 		EnableTriggerGroup("ResourceStart", false)
 		SendNoEcho("config +prompt")
-		ColourNote("silver","","Finished scanning galaxy resources. Found ","cyan","",#systems,"silver",""," systems with ","cyan","",numBodies,"silver",""," planets.")
+		ColourNote("silver","","Finished scanning galaxy resources. Found ",cyan,"",#systems,"silver",""," systems with ",cyan,"",numBodies,"silver",""," planets.")
 		--listSystems()
 	end
 end
 
 function cargoList()
-  ColourNote("silver","","Cargo List Contains: ")
-  for i, v in ipairs(cPlanets) do
-   		if i == cVar then
-   			ColourNote("lime","","--]>","silver","",v.name.." (","cyan","",v.resource,"silver","",")","lime","","<[--")
-   		else
-   			ColourNote("silver","",v.name.." (","cyan","",v.resource,"silver","",")")
-   		end -- if
-   	end -- for
+  if #cPlanets == 0 then
+    ColourNote("red","","Cargo route empty, add something first!")
+  else
+    ColourNote(gray,"","Cargo list contains ",cyan,"",#cPlanets,gray,""," planets: ")
+    ColourNote(gray,"","-----------------------------------------------")
+    ColourNote(gray,"","[",darkblue,"","Curr:",gray,"","] [",darkblue,"","Planet:       ",gray,"","] [",darkblue,"","Resource:           ",gray,"","]")
+    for i, v in ipairs(cPlanets) do
+      ColourNote(gray,"","[",cyan,"",string.format("%-5s", ((i == cVar and "*") or "")),gray,"","] [",cyan,"",string.format("%-14s", v.name),gray,"","] [",cyan,"",string.format("%-20s", v.resource),gray,"","]")
+    end -- for
+  end
 end
 
 function storeBody(name, list, args)
@@ -886,14 +1896,14 @@ local commands = { { name = "cargoScan", desc = "Scans every system in the galax
                { name = "listSystems", desc = "Displays every system currently saved in the cargo database for debug purposes.",
                         args = { }
                           },
-               { name = "cargoSetup", desc = "Initiates automatic prompting for information needed for a new cargo session.",
+               { name = "cargoSetup", desc = "Initiates automatic prompting for information about cargo planets.",
                         args = { }
                           },
-               { name = "cargoShip", desc = "Used to manually set the name of your cargo ship.",
+               { name = "cargoShip", desc = "Used to manually set the name of your cargo ship. This has been superceded by the cargoShipProfile and cargoShipList system, see below.",
                         args = { { name = "<shipname>", desc = "Assigns the given name as your current cargo ship."}, }
                           },
                { name = "cargoPlanets", desc = "Used to manually define your cargo running route.",
-                        args = { { name = "<planet1>,<resource1>,<planet2>,<resource2>,...", desc = "Manually define your cargo running route with comma-separated parameters. Must list planet and resource in pairs."}, }
+                        args = { { name = "<planet1>,<resource1>,<contraband>,<planet2>,<resource2>,<contraband>...", desc = "Manually define your cargo running route with comma-separated parameters. Must list planet, resource and contraband in triplets."}, }
                           },
                { name = "cargoList", desc = "Displays the current cargo running specifications.",
                         args = { }
@@ -907,32 +1917,113 @@ local commands = { { name = "cargoScan", desc = "Scans every system in the galax
                { name = "cargoManifest", desc = "Displays the saved cargo manifest detailing your cargo ship contents.",
                         args = { }
                           },
+               { name = "cargoManifestClear", desc = "Clears out the cargo manifest so it can be rescanned.",
+                        args = { { name = "<ship>", desc = "Clear only the cargo on the given ship." } }
+                          },
                { name = "cargoAuto", desc = "Toggles automatic cargo running on or off.",
                         args = { { name = "<on/off>", desc = "Sets automatic cargo running status to the given parameter."}, }
                           },
                { name = "cargoClear", desc = "Clears all cargo running settings.",
                         args = { }
                           },
-               { name = "cargoEfficiency", desc = "Displays session statistical information.",
+               { name = "cargoEfficiency", desc = "Displays some stats to show how pro your cargo running skills are.",
                         args = { }
                           },
                { name = "cargoHelp", desc = "Displays this help file.",
                         args = { { name = "<command>", desc = "Displays more detailed information on the specified command."}, }
                           },
+               { name = "cargoNext", desc = "Manually skip to the next planet in your route.",
+                        args = {  }
+                          },
+               { name = "cargoShipProfileList", desc = "Display the full parameters of the working cargo ship profile.",
+                        args = {  }
+                          },
+               { name = "cargoShipProfileName", desc = "Set the name of the working cargo ship profile.",
+                        args = { { name = "<name>", desc = "This should be the name of the cargo ship you are defining in this profile."}, }
+                          },
+               { name = "cargoShipProfileSetup", desc = "Prompt for every field necessary for a cargo ship profile.",
+                        args = {  }
+                          },
+               { name = "cargoShipProfileClear", desc = "Erase the working cargo ship profile.",
+                        args = {  }
+                          },
+               { name = "cargoShipProfileLoad", desc = "Load a cargo ship profile stored in the cargo ship database into the working profile.",
+                        args = { { name="<name>", desc="Load first matching instance of name from cargo ship database into working cargo profile." },
+                                 { name="<#>", desc="Load profile number from cargo ship database into working cargo profile." } }
+                          },
+               { name = "cargoShipProfileSave", desc = "Save the working cargo ship profile into the cargo ship database without clearing the working profile.",
+                        args = {  }
+                          },
+               { name = "cargoShipProfilePush", desc = "Save the working cargo ship profile into the cargo ship database and clear the working profile.",
+                        args = {  }
+                          },
+               { name = "cargoShipDBList", desc = "Display cargo ship profiles stored in cargo ship database.",
+                        args = {  }
+                          },
+               { name = "cargoShipDBRem", desc = "Remove a cargo ship profile from the cargo ship database.",
+                        args = { { name="<name>", desc="Remove first matching instance of name from cargo ship database. Will match ship name or ship type." } }
+                          },
+               { name = "cargoShipDBClear", desc = "Erase the cargo ship database.",
+                        args = {  }
+                          },
+               { name = "cargoShipDBRename", desc = "Rename a profile in the cargo ship database. *NOT CURRENTLY IMPLEMENTED*",
+                        args = {  }
+                          },
+               { name = "cargoShipList", desc = "Display current list of cargo ship parents and children.",
+                        args = {  }
+                          },
+               { name = "cargoShipAdd", desc = "Add a cargo ship into cargo ship list from cargo ship database.",
+                        args = { { name="<ship>", desc="Used with a single argument, ship is loaded into main cargo ship list as primary cargo running vessel.", },
+                                 { name="<child> <parent>", desc="Used with two arguments, the first ship is loaded into cargo ship list as a child of the parent ship in the first available hangar space of parent ship.", },
+                                 { name="<child> <parent> <hangar>", desc="Used with three arguments, the first ship is loaded into the cargo ship list as a child of the parent ship in the designated hangar, if there is enough space." } }
+                          },
+               { name = "cargoShipRem", desc = "Remove a cargo ship from cargo ship list. *NOT CURRENTLY IMPLEMENTED*",
+                        args = {  }
+                          },
+               { name = "cargoShipClear", desc = "Clear cargo ship list.",
+                        args = {  }
+                          },
+               { name = "cargoLoadShips", desc = "Load all child ships into parent hangars.",
+                        args = {  }
+                          },
+               { name = "cargoUnloadShips", desc = "Unload all child ships from parent hangars.",
+                        args = {  }
+                          },
 
                         }
+                        
+  --[[ 
+    <alias script="flyNext" match="cargonext" enabled="y" group="LotJCargo" ignore_case="y" sequence="100" />
+  <alias match="^cargoShipProfileList(.*?)?$" script="shipProfileList" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfileName(.*?)?$" script="shipProfileName" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfileSetup(.*?)?$" script="shipProfileSetup" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfileClear(.*?)?$" script="shipProfileClear" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfileLoad(.*?)?$" script="shipProfileLoad" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfileSave(.*?)?$" script="shipProfileSave" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipProfilePush(.*?)?$" script="shipProfilePush" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipDBList(.*?)?$" script="shipDBList" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipDBRem(.*?)?$" script="shipDBRem" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipDBClear(.*?)?$" script="shipDBClear" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipDBRename(.*?)?$" script="shipDBRename" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipList$" script="shipCargoList" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipAdd(.*?)?$" script="shipCargoAdd" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipRem(.*?)?$" script="shipCargoRem" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoShipClear?$" script="shipCargoClear" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoLoadShips$" script="loadShips" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
+  <alias match="^cargoUnloadShips$"
+  ]]--
 
 function cargoHelp(name, line, args)
   local found = false
   if args[1] == "" then -- show general help
-    ColourNote("white","black","LotJCargo v 1.45 by Johnson. Enter 'cargohelp <command>' for more detailed information.")
+    ColourNote("white","black","LotJCargo v"..VERSION.." by "..AUTHOR..". Enter 'cargohelp <command>' for more detailed information.")
     for a, b in ipairs(commands) do -- commands
       local command = b
       ColourNote("silver","black",string.format("%-20s", command.name).." : "..command.desc)
     end
     Note("")
   else -- entered something
-    ColourNote("white","black","LotJCargo v 1.45 by Johnson. Enter 'cargohelp' for more general information.")
+    ColourNote("white","black","LotJCargo v"..VERSION.." by "..AUTHOR..". Enter 'cargohelp' for more general information.")
     for a, b in ipairs(commands) do -- scroll through commands
       if (string.lower(b.name) == string.lower(Trim(args[1]))) then -- found our argument
         found = true

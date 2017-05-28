@@ -54,6 +54,8 @@ mapper area <name>    --> set the name of the area
 mapper toggle         --> turns room creation on/off (Best to have off once mapped.)
                       --> moving too quickly can cause room exits to build wrong
 mapper output <level> --> output levels of debug (0 = off 3 = everything) default: 1
+mapper goto <vnum>    --> start walking towards a specific room vnum
+mapper walkto <vnum>  --> alias command for, and same function as, goto  
 
 RIGHT-CLICK ROOM OPTIONS
 
@@ -1141,10 +1143,10 @@ function room_delete(room, uid)
 
     -- update in-memory table, resetting exits to zero.
     for i, v in pairs(rooms[uid].exits) do
-            ColourNote("orange","black","deleting exit "..i.." leading "..v)
+        ColourNote("orange","black","deleting exit "..i.." leading "..v)
         local exit_room = rooms[uid].exits[i]
         local invers_dir = inverse_direction[i]
-        rooms[exit_room].exits[invers_dir] = "0"
+        --rooms[exit_room].exits[invers_dir] = "0"
         rooms[uid].exits[i] = "0" -- sanity
     end
     rooms[uid] = nil

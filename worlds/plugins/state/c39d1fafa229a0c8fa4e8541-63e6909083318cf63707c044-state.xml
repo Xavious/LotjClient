@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE muclient>
+<!-- Saved on Saturday, May 27, 2017, 8:09 PM -->
+<!-- MuClient version 4.94 -->
+<!-- Written by Nick Gammon -->
+<!-- Home Page: http://www.mushclient.com/ -->
+
+<!-- Plugin state saved. Plugin: "Lotj_Mapper". World: "Legends of the Jedi". -->
+
+<muclient>
+
+<!-- variables -->
+
+<variables
+   muclient_version="4.94"
+   world_file_version="15"
+   date_saved="2017-05-27 20:09:13"
+  >
+  <variable name="automap">true</variable>
+  <variable name="config">config = {}
+  config.PAD_FILL_COLOUR = {}
+    config.PAD_FILL_COLOUR.name = "Landing Pad"
+    config.PAD_FILL_COLOUR.colour = 42495
+  config.EXIT_COLOUR = {}
+    config.EXIT_COLOUR.name = "Exit"
+    config.EXIT_COLOUR.colour = 10526303
+  config.ROOM_NAME_TEXT = {}
+    config.ROOM_NAME_TEXT.name = "Room name text"
+    config.ROOM_NAME_TEXT.colour = 15856574
+  config.OUR_ROOM_COLOUR = {}
+    config.OUR_ROOM_COLOUR.name = "Our room"
+    config.OUR_ROOM_COLOUR.colour = 0
+  config.DELAY = {}
+    config.DELAY.time = 0
+  config.SCAN = {}
+    config.SCAN.depth = 30
+  config.TRAINER_FILL_COLOUR = {}
+    config.TRAINER_FILL_COLOUR.name = "Trainer"
+    config.TRAINER_FILL_COLOUR.colour = 9498256
+  config.ALPHA_FILL_COLOUR = {}
+    config.ALPHA_FILL_COLOUR.name = "Alpha"
+    config.ALPHA_FILL_COLOUR.colour = 16777215
+  config.WORKSHOP_FILL_COLOUR = {}
+    config.WORKSHOP_FILL_COLOUR.name = "Workshop"
+    config.WORKSHOP_FILL_COLOUR.colour = 32768
+  config.WINDOW = {}
+    config.WINDOW.height = 400
+    config.WINDOW.width = 400
+  config.AREA_NAME_BORDER = {}
+    config.AREA_NAME_BORDER.name = "Area name box"
+    config.AREA_NAME_BORDER.colour = 0
+  config.UNKNOWN_ROOM_COLOUR = {}
+    config.UNKNOWN_ROOM_COLOUR.name = "Unknown room"
+    config.UNKNOWN_ROOM_COLOUR.colour = 13289984
+  config.HOTEL_FILL_COLOUR = {}
+    config.HOTEL_FILL_COLOUR.name = "Hotel"
+    config.HOTEL_FILL_COLOUR.colour = 255
+  config.ROOM_NAME_BORDER = {}
+    config.ROOM_NAME_BORDER.name = "Room name box"
+    config.ROOM_NAME_BORDER.colour = 0
+  config.LAST_VISIT_TIME = {}
+    config.LAST_VISIT_TIME.time = 180
+  config.AREA_NAME_FILL = {}
+    config.AREA_NAME_FILL.name = "Area name fill"
+    config.AREA_NAME_FILL.colour = 5461520
+  config.BACKGROUND_COLOUR = {}
+    config.BACKGROUND_COLOUR.name = "Background"
+    config.BACKGROUND_COLOUR.colour = 6908265
+  config.COMMAND_FILL_COLOUR = {}
+    config.COMMAND_FILL_COLOUR.name = "Command"
+    config.COMMAND_FILL_COLOUR.colour = 11829830
+  config.FONT = {}
+    config.FONT.name = "Dina"
+    config.FONT.size = 8
+  config.CHARLIE_FILL_COLOUR = {}
+    config.CHARLIE_FILL_COLOUR.name = "Charlie"
+    config.CHARLIE_FILL_COLOUR.colour = 0
+  config.BANK_FILL_COLOUR = {}
+    config.BANK_FILL_COLOUR.name = "Bank"
+    config.BANK_FILL_COLOUR.colour = 65535
+  config.SHOP_FILL_COLOUR = {}
+    config.SHOP_FILL_COLOUR.name = "Shop"
+    config.SHOP_FILL_COLOUR.colour = 3107669
+  config.AREA_NAME_TEXT = {}
+    config.AREA_NAME_TEXT.name = "Area name text"
+    config.AREA_NAME_TEXT.colour = 15856574
+  config.MAPPER_NOTE_COLOUR = {}
+    config.MAPPER_NOTE_COLOUR.name = "Messages"
+    config.MAPPER_NOTE_COLOUR.colour = 9498256
+  config.ROOM_COLOUR = {}
+    config.ROOM_COLOUR.name = "Room"
+    config.ROOM_COLOUR.colour = 16777215
+  config.ROOM_NAME_FILL = {}
+    config.ROOM_NAME_FILL.name = "Room name fill"
+    config.ROOM_NAME_FILL.colour = 5461520
+  config.BRAVO_FILL_COLOUR = {}
+    config.BRAVO_FILL_COLOUR.name = "Bravo"
+    config.BRAVO_FILL_COLOUR.colour = 8421504
+  config.LIBRARY_FILL_COLOUR = {}
+    config.LIBRARY_FILL_COLOUR.name = "Library"
+    config.LIBRARY_FILL_COLOUR.colour = 8388736
+  config.EXIT_COLOUR_UP_DOWN = {}
+    config.EXIT_COLOUR_UP_DOWN.name = "Exit up/down"
+    config.EXIT_COLOUR_UP_DOWN.colour = 9109643</variable>
+  <variable name="mw_63e6909083318cf63707c044_mapper_windowflags">2</variable>
+  <variable name="mw_63e6909083318cf63707c044_mapper_windowmode">0</variable>
+  <variable name="mw_63e6909083318cf63707c044_mapper_windowx">840</variable>
+  <variable name="mw_63e6909083318cf63707c044_mapper_windowy">0</variable>
+  <variable name="outputlevel">0</variable>
+</variables>
+</muclient>
