@@ -1577,42 +1577,26 @@ end
 -------------------------------------------------------------------
 function OnPluginBroadcast (msg, id, name, text)
     if id == "b3aae34498d5bf19b5b2e2af" then
-
         -- By the time we get the VNUM, all the other data has been populated in MSDP
         if (text == "ROOMVNUM") then
-            --uid = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMVNUM"))
             uid = getmsdp("ROOMVNUM")
             if GetVariable("automap") == "false" then
-                DebugNote(2,"Got room vnum", uid, " Not autompaping.")
+                DebugNote(2,"Got room vnum", uid, " Not automapping.")
                 current_room = uid
-
                 DebugNote(3,"Redrawing map")
                 mapper.draw(current_room)
             else
-        
                 DebugNote(2,"Got room vnum", uid)
-        
+
                 got_room_number(uid)
-                --got_room_name(strip_colours(utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMNAME"))))
-                --room_exits = utils.base64decode(GetPluginVariable("b3aae34498d5bf19b5b2e2af", "ROOMEXITS"))
                 got_room_name(strip_colours(getmsdp("ROOMNAME")))
-                room_exits = getmsdp("ROOMEXITS")
-                if room_exits ~= nil and room_exits ~= '' then
-        
+                exits = getmsdp("ROOMEXITS")
+                if exits ~= nil and exits ~= '' then
                     --Initial population of Exits from MSDP
-                    room_exits = utils.tohex(room_exits)
-                    --DebugNote(3,"Room exits:'"..room_exits.."'")
-                    room_exits = string.gsub(room_exits, "024F01", "2C")
-                    room_exits = string.gsub(room_exits, "024301", "2C")
-                    room_exits = string.gsub(room_exits, "024F", "")
-                    room_exits = string.gsub(room_exits, "0243", "")
-                    room_exits = utils.fromhex(room_exits)
-                    exits = utils.split(room_exits, ",")
-        
-                    DebugNote(3,"Room", uid, "found exits:",room_exits)
-        
+
+                    DebugNote(3,"Room", uid, "found exits:", exits)
+                    exits = utils.split(exits, ",")
                     room_exits = ""
-        
                     -- Go through and build the list of valid exits
                     -- ignoring all the custom exits ("enter hospital")
                     for key, value in pairs(exits) do
@@ -1621,17 +1605,15 @@ function OnPluginBroadcast (msg, id, name, text)
                             room_exits = room_exits..valid_direction[value]
                         end
                     end
-        
                     got_room_exit(room_exits)
                 else
                     DebugNote(2,"Room", uid, "found no exits.")
                 end 
-        
                 -- We've handled it, so clear it out so we don't mess with it again
                 DebugNote(3,"Room processed. Clearing last_direction_moved.")
                 last_direction_moved = nil
                 from_room = nil
-            
+
             end
         end
     end
