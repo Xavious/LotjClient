@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Saturday, May 27, 2017, 8:09 PM -->
+<!-- Saved on Saturday, June 03, 2017, 2:16 PM -->
 <!-- MuClient version 4.94 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="4.94"
    world_file_version="15"
-   date_saved="2017-05-27 20:09:13"
+   date_saved="2017-06-03 14:16:01"
   >
   <variable name="automap">true</variable>
   <variable name="config">config = {}
@@ -75,15 +75,15 @@
   config.CHARLIE_FILL_COLOUR = {}
     config.CHARLIE_FILL_COLOUR.name = "Charlie"
     config.CHARLIE_FILL_COLOUR.colour = 0
-  config.BANK_FILL_COLOUR = {}
-    config.BANK_FILL_COLOUR.name = "Bank"
-    config.BANK_FILL_COLOUR.colour = 65535
-  config.SHOP_FILL_COLOUR = {}
-    config.SHOP_FILL_COLOUR.name = "Shop"
-    config.SHOP_FILL_COLOUR.colour = 3107669
   config.AREA_NAME_TEXT = {}
     config.AREA_NAME_TEXT.name = "Area name text"
     config.AREA_NAME_TEXT.colour = 15856574
+  config.SHOP_FILL_COLOUR = {}
+    config.SHOP_FILL_COLOUR.name = "Shop"
+    config.SHOP_FILL_COLOUR.colour = 3107669
+  config.BANK_FILL_COLOUR = {}
+    config.BANK_FILL_COLOUR.name = "Bank"
+    config.BANK_FILL_COLOUR.colour = 65535
   config.MAPPER_NOTE_COLOUR = {}
     config.MAPPER_NOTE_COLOUR.name = "Messages"
     config.MAPPER_NOTE_COLOUR.colour = 9498256
