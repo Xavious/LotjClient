@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Thursday, January 14, 2016, 6:05 PM -->
-<!-- MuClient version 4.94 -->
+<!-- Saved on Tuesday, December 10, 2019, 8:07 PM -->
+<!-- MuClient version 5.06 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
 
-<!-- Plugin state saved. Plugin: "LotJStudying". World: "Legends of the Jedi". -->
+<!-- Plugin state saved. Plugin: "LotJStudy". World: "Legends of the Jedi". -->
 
 <muclient>
 
 <!-- variables -->
 
 <variables
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
-   date_saved="2016-01-14 18:05:41"
+   date_saved="2019-12-10 20:07:35"
   >
+  <variable name="currentPos">0</variable>
+  <variable name="studyContainer"></variable>
+  <variable name="studyItem"></variable>
+  <variable name="studyList">studyList = {}</variable>
+  <variable name="studyMode">false</variable>
+  <variable name="studyNum">0</variable>
+  <variable name="studyStatus">false</variable>
 </variables>
 </muclient>

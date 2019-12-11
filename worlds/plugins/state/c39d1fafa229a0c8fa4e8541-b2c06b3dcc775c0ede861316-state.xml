@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- MuClient version 4.94 -->
+<!-- Saved on Tuesday, December 10, 2019, 8:07 PM -->
+<!-- MuClient version 5.06 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
 
@@ -11,8 +12,9 @@
 <!-- variables -->
 
 <variables
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
+   date_saved="2019-12-10 20:07:35"
   >
   <variable name="planetname"></variable>
 </variables>
