@@ -32,7 +32,7 @@
 <include name="constants.lua"/>
 <script>
 <![CDATA[
-ColourNote ("black", "yellow",  "           You are using LotjClient                ")
+ColourNote ("black", "yellow", "            You are using LotjClient                ")
 ColourNote ("black", "yellow", "    Type 'client help' for help getting started     ")
 
 function OnHelp ()
