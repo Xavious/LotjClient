@@ -3,7 +3,7 @@
 <!--  Saved on Thursday, July 05, 2012, 1:04 AM   --> 
 <!-- MuClient version 4.73 --> 
 <muclient>
-<plugin name="LotJStarMap" author="@Johnson" id="dd5080a41939faabc233da8f" language="Lua" purpose="Dynamically display a system map with player location overlay" save_state="y" requires="4.73" version="2.29">
+<plugin name="LotJStarMap" author="@Johnson" id="dd5080a41939faabc233da8f" language="Lua" purpose="Dynamically display a system map with player location overlay" save_state="y" requires="4.73" version="2.30">
 <description trim="y">
 <![CDATA[
 This plugin will gather information about the current galaxy's star systems 
@@ -803,15 +803,15 @@ function SetUpHotspotsAndDraw(firstTime)
 		WindowCreate (win, 0, 0, width, height, miniwin.pos_center_all, 0, ColourNameToRGB("black")) -- create windows
 		windowinfo = movewindow.install (win, 6) -- default to 6 (on top right)
 		check(WindowFont (win, font, font_name, font_size, false, false, false, false))
-		effectiveWidth = math.min(width, GetInfo(281)-windowinfo.window_left)
-		WindowAddHotspot (win, "resize", effectiveWidth-RESIZE_TAG_SIZE, height-RESIZE_TAG_SIZE, effectiveWidth, height, "MouseOver", "CancelMouseOver", "MouseDown", "CancelMouseDown", "MouseUp", "", 6, 0)
+		--effectiveWidth = math.min(width, GetInfo(281)-windowinfo.window_left)
+		WindowAddHotspot (win, "resize", width-RESIZE_TAG_SIZE, height-RESIZE_TAG_SIZE, width, height, "MouseOver", "CancelMouseOver", "MouseDown", "CancelMouseDown", "MouseUp", "", 6, 0)
 		WindowDragHandler(win, "resize", "ResizeMoveCallback", "ResizeReleaseCallback", 0)
 	else -- not our first time drawing
 		-- everything has already been made
 		-- just move them back into place
-		effectiveWidth = math.min(width, GetInfo(281)-windowinfo.window_left)
-		WindowResize(win, effectiveWidth, height, 0x000000)
-		WindowMoveHotspot(win, "resize", effectiveWidth-RESIZE_TAG_SIZE, height-RESIZE_TAG_SIZE, effectiveWidth, height)
+		--effectiveWidth = math.min(width, GetInfo(281)-windowinfo.window_left)
+		WindowResize(win, width, height, 0x000000)
+		WindowMoveHotspot(win, "resize", width-RESIZE_TAG_SIZE, height-RESIZE_TAG_SIZE, width, height)
 		setupConflicts()
     redraw_scheduled = true
 		drawWindows()

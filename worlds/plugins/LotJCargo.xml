@@ -2,26 +2,20 @@
 <!DOCTYPE muclient> 
 <!--  Saved on Wednesday, July 25, 2012, 7:12 PM   -->  
 <muclient>
-<plugin name="LotJCargo" author="@Johnson" id="b4f195e776cff20d17a1abd2" language="Lua" purpose="Cargo Running Made Easy" save_state="y" requires="4.40" version="1.50">
+<plugin name="LotJCargo" author="@Johnson" id="b4f195e776cff20d17a1abd2" language="Lua" purpose="Cargo Running Made Easy" save_state="y" requires="4.40" version="1.52">
 <description trim="y">
 <![CDATA[ 
-
 Usage:
-
 *NOTICE* This plugin has been expanded to allow usage of multiple ships stacked 
 inside each other, referred to as 'parents' and 'children'. Ships must be 
 defined with a 'cargo ship profile' and stored into the cargo ship database before 
 they can be used for running cargo. Once your ship is stored into the database it 
 will remain there so you can easily load up different configurations of ships for 
 cargo running. Example situations follow below.
-
-
 Example 1:
 We want to use a single cargo ship: YG-4210 Transport 'GGCargo'
-
 We must create a 'cargo ship profile' to suit this ship and define necessary info 
 about it.
-
 Step 1:
 'cargoShipProfileSetup'  - This command will prompt you for all the info the plugin
                            needs to create a 'cargo ship profile'.
@@ -36,7 +30,6 @@ Step 1:
                                   
 This is a lot of info so if you need to cancel out don't worry, you can always enter
 the command to input new fields while retaining what you already entered.
-
 Step 2:
 'cargoShipProfilePush'  - This command will save the working 'cargo ship profile' into
                           the cargo ship database for repeated usage and clear the working
@@ -71,8 +64,6 @@ Step 6:
 That's it! If everything was set up correctly the plugin should fly between worlds buying and selling cargo.
 You can pause the script at any time by entering 'cargoauto'. You can clear the script and restart by
 entering 'cargoclear'. Note: to clear your saved cargo ship list, enter 'cargoshipclear'.
-
-
 Example 2:
 We want to use four cargo ships: YG-4210 Transport 'GGCargo1'
                                  YG-4210 Transport 'GGCargo2'
@@ -81,7 +72,6 @@ We want to use four cargo ships: YG-4210 Transport 'GGCargo1'
                                  
 We must create a 'cargo ship profile' for each ship and define necessary info 
 about them.
-
 Step 1:
 'cargoShipProfileSetup'          - Prompt for information about first cargo ship.
                            In this example it will be: ship name - 'GGCargo1'
@@ -92,27 +82,21 @@ Step 1:
                              dirs from pilot's chair to nav room - ''
                              dirs from nav room to pilot's chair - ''
                                   number of hangars on this ship - '0'
-
 Step 2:
 'cargoShipProfileSave'            - Save working cargo ship profile 'GGCargo1' into cargo ship database.
                                     Note that unlike the previous example where we used 'push'
                                     this time we used 'save' to retain the working cargo ship
                                     profile to make creating multiple profiles easier.
-
 Step 3:
 'cargoShipProfileName GGCargo2'   - Change the working cargo ship profile name to match the next
                                     ship while retaining all the other info between shared ship
                                     types.
-
 Step 4:
 'cargoShipProfileSave'            - Save cargo ship profile 'GGCargo2' while retaining info.
-
 Step 5:
 'cargoShipProfileName GGCargo3'   - Change working cargo ship profile name again, retain other info.
-
 Step 6:
 'cargoShipProfilePush'            - Save cargo ship profile 'GGCargo3' and push it out of the working profile.
-
 Step 7:
 'cargoShipProfileSetup'           - Prompt for information about last cargo ship.
                            In this example it will be: ship name - 'GGFrigate'
@@ -132,19 +116,16 @@ Step 7:
                                      
 Step 8:
 'cargoShipProfilePush'            - Save cargo ship profile 'GGFrigate' and push it out of working profile.
-
 Step 9:
 'cargoShipAdd GGFrigate'    - This command will load the saved 'cargo ship profile' matching
                               'GGFrigate' into the 'cargo ship list'. The 'cargo ship list' is
                               where we define our desired cargo ship structure. With this usage
                               ship 'GGFrigate' gets added to the list as a single parent with no
                               children.
-
 Step 10:
 'cargoShipAdd GGCargo1 GGFrigate 1'  - This command will load the saved 'cargo ship profile' matching
                                        'GGCargo1' into the 'cargo ship list' as a child of 'GGFrigate'
                                        into the first hangar bay.
-
 Step 11:
 'cargoShipAdd GGCargo2 GGFrigate'    - This command will load the saved 'cargo ship profile' matching
                                        'GGCargo2' into the 'cargo ship list' as a child of 'GGFrigate'
@@ -178,12 +159,8 @@ Step 15:
 That's it! If everything was set up correctly the plugin should fly between worlds buying and selling cargo.
 You can pause the script at any time by entering 'cargoauto'. You can clear the script and restart by
 entering 'cargoclear'. Note: to clear your saved cargo ship list, enter 'cargoshipclear'.
-
 More info on all plugin commands can be found using 'cargohelp'.
-
-
 Initial contraband features added by @Domovoi.
-
   ]]> 
   </description>
   </plugin>
@@ -213,7 +190,7 @@ Initial contraband features added by @Domovoi.
 
   <!-- planet retrieval triggers -->
   <trigger match="^(.*)$" group="RetrievePlanet" regexp="y" keep_evaluating="y" omit_from_log="y" omit_from_output="y" sequence="100" />
-  <trigger match="^Usage\: showplanet \<planet\>$" script="retrievePlanetFailed" regexp="y" enabled="y" group="RetrievePlanet" sequence="100" />
+  <trigger match="^Usage\: showplanet \<planet\>$" script="retrievePlanetFailed" regexp="y" enabled="n" group="RetrievePlanet" sequence="100" />
   <trigger match="--Planet Data: -------------------------------\nPlanet: (.*)\Z" script="storePlanet" regexp="y" enabled="n" multi_line="y" lines_to_match="2" omit_from_log="y" omit_from_output="y" group="RetrievePlanet" sequence="100" />
   <trigger match="^Use \'SHOWPLANET \<planet\> RESOURCES\' for current resources\.$" script="updateListPosition" regexp="y" enabled="n" group="RetrievePlanet" sequence="100" />
   
@@ -288,7 +265,6 @@ require "tprint"
 require "commas"
 require "serialize"
 require "copytable"
-
 local AUTHOR = GetPluginInfo(GetPluginID(), 2) -- author info
 local VERSION = string.format("%1.2f", GetPluginInfo(GetPluginID(), 19)) -- version info
 local systems = {}
@@ -297,7 +273,6 @@ local tempSystem = ""
 local scanned = "none"
 local percent = 0
 local numBodies = 0
-
 local autoCargo = false
 cPlanets = {}
 loadstring(GetVariable("cPlanets") or "")()
@@ -307,7 +282,6 @@ local closeBays = GetVariable("closeBays") == "true"
 local shipProfile = {}
 ships = {}
 loadstring(GetVariable("ships") or "")()
-
 local startTime = 0
 local amountEarned = 0
 local cycle = true
@@ -317,22 +291,17 @@ local scannedCargo = false
 local lastsoldamount = 0
 local lastsoldresource = ""
 local lastboughtamount = 0
-
 shipdb = {}
 loadstring(GetVariable("shipdb") or "")()
-
 local planet = ""
-
 local darkblue = RGBColourToName(GetNormalColour(5))
 local gray = RGBColourToName(GetBoldColour(1))
 local cyan = RGBColourToName(GetBoldColour(7))
-
 -- Activate some settings to ensure proper functioning
 SetOption("enable_aliases", true)
 SetOption("enable_timers", true)
 SetOption("enable_triggers", true)
 SetOption("enable_scripts", true)
-
 function runDirs(dirs)
   dirs = splitBy(dirs, ",")
   dirs = splitBy(dirs, " ")
@@ -344,7 +313,6 @@ function runDirs(dirs)
     end
   end
 end
-
 function splitBy(str, delim)
   local ret = {}
   if type(str) == "string" then
@@ -358,14 +326,14 @@ function splitBy(str, delim)
     return ret
   end
 end
-
 function toggleCloseBays(name, line, args)
   closeBays = not closeBays
   ColourNote("yellow","","Automatic closing and opening of hangar bays is "..((closeBays and "ON") or "OFF")..".")
+  if not closeBays then
+    ColourNote("red","","Disclaimer: It is potentially unsafe to leave hangars open, ensure you are willing to accept the risk!")
+  end
 end
-
 toUnload = {}
-
 function unloadShips(name, line, args)
   for i, v in ipairs(ships) do
     toUnload[#toUnload + 1] = v
@@ -374,7 +342,6 @@ function unloadShips(name, line, args)
     unloadNext(toUnload[1])
   end
 end
-
 function unloadNext(ship)
   if shipContainsChildren(ship) then
     Send("openhatch "..ship.name)
@@ -413,7 +380,6 @@ function shipContainsChildren(ship)
   end
   return false
 end
-
 function hangarContainsChildren(hangar)
   if hangar.ships and #hangar.ships > 0 then
     return true
@@ -421,9 +387,7 @@ function hangarContainsChildren(hangar)
     return false
   end
 end
-
 toLoad = {}
-
 function loadShips(name, line, args)
   for i=getNumCargoShips(), 1, -1 do
     toLoad[#toLoad + 1] = getShip(i)
@@ -432,7 +396,6 @@ function loadShips(name, line, args)
     loadNext(toLoad[1])
   end
 end
-
 function loadNext(ship)
   if shipContainsChildren(ship) then
     Send("openhatch "..ship.name)
@@ -467,7 +430,6 @@ function loadNext(ship)
   end
   table.remove(toLoad, 1)
 end
-
 function shipCargoClear(name, line, args)
   ships = {}
   ColourNote("yellow","","Cargo ship list cleared.")
@@ -482,7 +444,6 @@ function shipCargoRem(name, line, args)
   end
 end
 function shipCargoAdd(name, line, args)
-
   args = utils.split(Trim(args[1]), " ")
   if #args > 0 then -- user input 1 word
     if #args > 1 then -- user input 2 words
@@ -517,7 +478,6 @@ function shipCargoAdd(name, line, args)
     return
   end
 end
-
 function internalAddCargoShip(child, parent, hangar)
   childShip = ""
   parentShip = ""
@@ -593,7 +553,6 @@ function internalAddCargoShip(child, parent, hangar)
     return
   end
 end
-
 function checkShip(ship, search)
   local found = nil
   if ship.name:lower():find(search:lower()) or ship.type:lower():find(search:lower()) then -- found matching ship
@@ -608,7 +567,6 @@ function checkShip(ship, search)
   end
   return found
 end
-
 function shipCargoList(name, line, args)
   ColourNote(gray,"","Current cargo ship list (",cyan,"",getNumCargoShips().." ship"..((getNumCargoShips()~=1 and "s") or ""),gray,"","):")
   for i, v in ipairs(ships) do
@@ -616,7 +574,6 @@ function shipCargoList(name, line, args)
   end
   --tprint(ships)
 end
-
 function printShip(indent, ship)
   ColourNote(gray,"",string.rep(" ", indent)..((indent>0 and "|->") or "").."[",cyan,"",((ship.type and ship.type) or "not set").." '"..((ship.name and ship.name) or "not set").."'",gray,"","] [",cyan,"","Size:"..((ship.size and ship.size) or 0),gray,"","] [",cyan,"","Hangars:"..((ship.hangars and #ship.hangars) or 0),gray,"","] (",cyan,"",getTotalHangarUsed(ship),gray,"","/",cyan,"",getTotalHangarCapacity(ship),gray,"",")")
   for i, v in ipairs(ship.hangars or {}) do
@@ -626,7 +583,6 @@ function printShip(indent, ship)
     end
   end
 end
-
 function getHangarLeft(hangar)
   local cap = tonumber(hangar.capacity)
   for i, v in ipairs(hangar.ships or {}) do
@@ -641,7 +597,6 @@ function getHangarUsed(hangar)
   end
   return used
 end
-
 function getTotalHangarCapacity(ship)
   local cap = 0
   for i, v in ipairs(ship.hangars or {}) do
@@ -667,7 +622,6 @@ function getTotalHangarUsed(ship)
   end
   return used
 end
-
 function getNumCargoShips()
   local count = 0
   for i, v in ipairs(ships) do
@@ -675,7 +629,6 @@ function getNumCargoShips()
   end
   return count
 end
-
 function countShip(ship)
   local count = 1
   for i, v in ipairs(ship.hangars or {}) do
@@ -685,7 +638,6 @@ function countShip(ship)
   end
   return count
 end
-
 function getShip(num)
   local num = num or shipnum
   local count = 0
@@ -696,7 +648,6 @@ function getShip(num)
     end
   end
 end
-
 function checkInsideShip(ship, iCount, iNum)
   local found = nil
   iCount = iCount + 1
@@ -714,7 +665,6 @@ function checkInsideShip(ship, iCount, iNum)
   end
   return found, iCount
 end
-
 function shipProfileList(name, line, args)
   args = utils.split(Trim(args[1]), " ")
   local v = shipProfile
@@ -899,7 +849,6 @@ end
 function shipDBRename(name, line, args)
   args = utils.split(Trim(args[1]), " ")
 end
-
 function OnPluginSaveState()
   SetVariable("closeBays", tostring(closeBays))
   SetVariable("shipnum", shipnum)
@@ -908,17 +857,14 @@ function OnPluginSaveState()
   SetVariable("shipdb", ((shipdb and serialize.save("shipdb")) or "")) -- don't set until shipdb variable exists
   SetVariable("ships", ((ships and serialize.save("ships")) or ""))
 end
-
 function beginManifest()
   scannednum = 0
   scanNextManifest()
 end
-
 function scanNextManifest()
   scannednum = scannednum + 1
   if scannednum > getNumCargoShips() then -- finished manifest scan
   -- from disableshipmanifest
-
   ColourNote("yellow","","Beginning cargo session momentarily...")
   DoAfterSpecial(2, 'cargoStart()', sendto.script)
   
@@ -940,7 +886,6 @@ function doClearCargo(name, line, args)
     clearCargoManifest(Trim(args[1]))
   end
 end
-
 function clearCargoManifest(ship)
   if ship then -- provided a ship, find it
     local found = false
@@ -964,13 +909,11 @@ function clearCargoManifest(ship)
     end
   end
 end
-
 function errorShipManifest()
   EnableTriggerGroup("Manifest", false)
   EnableTriggerGroup("ManifestStart", false)
   ColourNote("red","","Error starting ship manifest. Make sure you are standing outside your cargo vessel, and that you are the owner/pilot/copilot.")
 end
-
 function enableShipManifest()
   EnableTriggerGroup("Manifest", true)
   ColourNote("yellow","","Enabled ship manifest capture.")
@@ -1009,7 +952,6 @@ function getCargoCapacity(num)
   end
   return retval
 end
-
 function cargoSetup() -- old setup function, replacement planned
 	cPlanets = {}
 	local planet = {}
@@ -1032,20 +974,16 @@ function cargoSetup() -- old setup function, replacement planned
   --  return
  -- end
 end
-
 function cargoSetupShipName(name, line, args)
   ColourNote("yellow","","This command has been superceded by the cargoShipProfile and cargoShipList systems,")
   ColourNote("yellow","","Please see their cargohelp topics for more information.")
 end
-
 cargoPlanetsUsage = "Usage: cargoPlanets <planet1>,<resource1>,<trafficking>,<planet2>,<resource2>,<trafficking>..."
-
 function cargoSetupPlanets(name, line, args)
   if not args or args[1] == "" then
     ColourNote("red","",cargoPlanetsUsage)
     return
   end
-
   local addItems = {}
   if string.find(args[1], ",", 0, true) then
     addItems = utils.split(args[1], ",")
@@ -1070,17 +1008,14 @@ function cargoSetupPlanets(name, line, args)
     end
   end
 end
-
 function contraSellFailed(name, line, args)
   removeCargo(lastsoldresource, lastsoldamount)
   buyRemaining()
 end
-
 function contraBuyFailed(name, line, args)
   -- need to add a line here to reduce amountearned or efficiency will be off!
   buyRemaining()
 end
-
 function soldCargo(name, list, args)
   if args.quantity ~= nil and args.resource ~= nil then
     removeCargo(args.resource, tonumber(args.quantity))
@@ -1092,7 +1027,6 @@ function soldCargo(name, list, args)
     continueTrading()
   end
 end
-
 function boughtCargo(name, list, args)
   if args.quantity ~= nil and args.resource ~= nil then
     addCargo(args.resource, tonumber(args.quantity))
@@ -1102,7 +1036,6 @@ function boughtCargo(name, list, args)
   end
 	continueTrading()
 end
-
 function removeCargo(cargotype, cargoamount)
   if cargotype == nil or cargoamount == nil then
     return
@@ -1164,7 +1097,6 @@ function addCargo(cargotype, cargoamount)
     end
   end
 end
-
 function cargoManifest()
   for i=0,getNumCargoShips(),1 do
     if getShip(i) then
@@ -1182,11 +1114,9 @@ function cargoManifest()
     end
   end
 end
-
 function jumpComplete()
 	hyperCompleted = true
 end
-
 function toggleCycle()
 	if cycle then
 		cycle = false
@@ -1196,16 +1126,13 @@ function toggleCycle()
 		ColourNote("yellow","","AutoCargo cycling is ON.")
 	end
 end
-
 function gainMoney(name, list, args)
 	local earned = tonumber(args[1]) - tonumber(args[2])
 	amountEarned = amountEarned + earned
 end
-
 function loseMoney(name, list, args)
 	amountEarned = amountEarned - tonumber(args[1])
 end
-
 function displayEfficiency()
 	local newTime = os.time()
 	local elapsed = newTime - startTime
@@ -1216,11 +1143,9 @@ function displayEfficiency()
 	--,"silver",""," (",cyan,"",elapsed,"silver","",")"
 	ColourNote("silver","","Credits per hour: ",cyan,"",commas(string.format("%d", ((amountEarned / (elapsed / 60) * 60)))))
 end
-
 function displayTime(time)
 	local retval = {}
 	local secs = tonumber(time)
-
 	if (secs >= 315705600) then
 		local decades = secs / 315705600
 		secs = secs - (decades * 315705600)
@@ -1262,7 +1187,6 @@ function displayTime(time)
 	--1,60,3600,86400,604800,2630880,31570560,315705600
 	return table.concat(retval, ", ")
 end
-
 function leftShip()
   if not hyperCompleted or not tradingCompleted then
     return
@@ -1271,13 +1195,11 @@ function leftShip()
   unloadShips()
   beginTradingStage()
 end
-
 function beginTradingStage()
   tradingCompleted = false
   shipnum = 0
   beginNextTradingStage()
 end
-
 function beginNextTradingStage()
   -- first we try to sell what we're carrying
   if moveToNextShip() then -- we found a ship
@@ -1287,7 +1209,6 @@ function beginNextTradingStage()
     DoAfterSpecial(3, 'endTradingStage()', sendto.script)
   end
 end
-
 function continueTrading()
   if not sellOnePod() then -- if we are unable to sell anything, that means we need to move on
     if not buyRemaining() then
@@ -1295,7 +1216,6 @@ function continueTrading()
     end
   end
 end
-
 function moveToNextShip()
   shipnum = shipnum + 1
   if shipnum > getNumCargoShips() then
@@ -1305,20 +1225,17 @@ function moveToNextShip()
     return shipnum
   end
 end
-
 function endTradingStage()
   tradingCompleted = true
   loadShips()
   flyNext()
 end
-
 function errorSelling()
   ColourNote("red","","Attempted to sell bad resource, aborting cargo script to prevent credit loss. Please check your settings and rerun the script.")
   toggleACOff()
 end
-
 function sellOnePod()
-  for i, v in ipairs(getShip().cargo) do
+  for i, v in ipairs(getShip().cargo or {}) do
     if v.held > 0 and string.lower(v.name) ~= string.lower(getResource()) then -- pod is carrying something we don't want
       if getContraband():lower() == "yes" or getContraband():lower() == "y" then
       -- we're using sellcontraband
@@ -1335,11 +1252,10 @@ function sellOnePod()
   end
   return false -- we didn't sell anything
 end
-
 -- buys a single pod's worth of cargo
 function buyOnePod()
   if getResource() ~= "" and getResource() ~= "none" then -- our resource list indicates we want to buy something
-    for i, v in ipairs(getShip().cargo) do
+    for i, v in ipairs(getShip().cargo or {}) do
       local needed = 0
       if (v.name == "(Empty)" or string.lower(v.name) == string.lower(getResource())) then -- our container is either empty or contains the resource we need
         needed = v.cap - v.held -- we need to buy remaining amount
@@ -1371,11 +1287,9 @@ function buyRemaining()
   end
   return false -- we didn't buy anything
 end
-
 function waitSell()
 	DoAfterSpecial (5, 'continueTrading()', sendto.script)
 end
-
 function retrievePlanetFailed()
   EnableTriggerGroup("RetrievePlanet", false)
   ColourNote("red","","Error: you must be standing outside your ship on a planet for cargostart to work!")
@@ -1388,7 +1302,6 @@ function retrievePlanet()
   Send("showplanet")
   EnableTriggerGroup("RetrievePlanet", true)
 end
-
 function storePlanet(name, line, args)
   if args[1] then
     planet = Trim(args[1])
@@ -1415,7 +1328,6 @@ function updateListPosition()
     ColourNote("red","","Error: tried to run cargo from a planet not present on cargo planets list!")
   end
 end
-
 function cargoStart()
 	startTime = os.time()
 	if not getShip() or not getShip().name or getShip().name == "" then
@@ -1427,6 +1339,7 @@ function cargoStart()
 	  return
 	end
 	if ((not checkAllCargoExists() or not checkAllScanned()) and checkForResources()) then -- make it possible to run script without any cargo by entering 'none' into every resource
+    clearCargoManifest()
 	  ColourNote("yellow","","Retrieving ship's cargo manifest for you...")
 	  beginManifest()
 	  return
@@ -1435,7 +1348,6 @@ function cargoStart()
 	hyperCompleted = true
 	beginTradingStage() -- sell off stuff we don't want and refill the ship
 end
-
 function checkAllCargoExists()
   for i, v in ipairs(ships) do
     if not v.cargo then
@@ -1444,7 +1356,6 @@ function checkAllCargoExists()
   end
   return true
 end
-
 function checkAllScanned()
   for i, v in ipairs(ships) do
     if not v.scanned then
@@ -1453,7 +1364,6 @@ function checkAllScanned()
   end
   return true
 end
-
 function checkForResources()
   for i, v in pairs(cPlanets) do
     if v.resource:lower() ~= "none" and v.resource ~= "" then
@@ -1462,7 +1372,6 @@ function checkForResources()
   end
   return false
 end
-
 function flyNext()
   if getResource() ~= "" and getResource() ~= "none" then
     buyRemaining() -- fill up the ship (without selling it off since hyperCompleted is now false)
@@ -1480,7 +1389,6 @@ function flyNext()
   hyperCompleted = false
   Execute("flyto " .. getName())
 end
-
 function getNextName()
   if #cPlanets == 0 then -- list is empty
     return ""
@@ -1492,7 +1400,6 @@ function getNextName()
   end
   return "" -- should never get here
 end
-
 function getNextResource()
   if #cPlanets == 0 then
     return ""
@@ -1504,7 +1411,6 @@ function getNextResource()
   end
   return ""
 end
-
 function getNextPlanet()
   if #cPlanets == 0 then
     return ""
@@ -1516,35 +1422,30 @@ function getNextPlanet()
   end
   return ""
 end
-
 function getName()
   if #cPlanets == 0 then
     return ""
   end
   return cPlanets[cVar].name
 end
-
 function getResource()
   if #cPlanets == 0 then
     return ""
   end
   return cPlanets[cVar].resource
 end
-
 function getPlanet()
   if #cPlanets == 0 then
     return ""
   end
   return cPlanets[cVar]
 end
-
 function getContraband()
   if #cPlanets == 0 then
     return ""
   end
   return cPlanets[cVar].contraband
 end
-
 function toggleACOn()
 	autoCargo = true
 	EnableTriggerGroup("AutoCargo", true)
@@ -1579,7 +1480,6 @@ function listSystems(name, list, args)
   end
 	--tprint(systems)
 end
-
 function cargoClear(name, list, args)
   ship = { name = "", cargo = {} }
 	cPlanets = {}
@@ -1594,7 +1494,6 @@ function cargoClear(name, list, args)
 	ColourNote("yellow","","Cargo list cleared.")
 	toggleACOff()
 end
-
 function cargoAuto(name, list, args)
    if (args[1] == "on") then
       toggleACOn()
@@ -1610,7 +1509,6 @@ function cargoAuto(name, list, args)
       end
    end
 end
-
 function cargoBestRoute(name, list, args)					-- find the most profitable route in the entire galaxy
 	foundPlanet = false
 	--bestRouteValue = 0
@@ -1667,7 +1565,6 @@ function cargoBestRoute(name, list, args)					-- find the most profitable route 
 			end
 		end
 	end
-
 	table.sort(bestPlanets, function (k1, k2) return k1.value > k2.value end )
 	
 	if (foundPlanet == false) then
@@ -1690,7 +1587,6 @@ function cargoBestRoute(name, list, args)					-- find the most profitable route 
 	end
 	
 end
-
 function calculateRouteValue(sys1, sys2, resourcecost1, resourcecost2, tax1, tax2)
 	local distance = distance(sys1, sys2)
 	local time = (((((distance * 10) / 95) * 1000) / 50) * 2)
@@ -1701,25 +1597,19 @@ function calculateRouteValue(sys1, sys2, resourcecost1, resourcecost2, tax1, tax
 	--Note("sys1: "..sys1.name.." sys2: "..sys2.name.." res1: "..resourcecost1.." res2: "..resourcecost2.." distance: "..distance.." profit: "..profit.." value: "..profit/distance)
 	return profit/time
 end
-
 function distance(a, b)
 	return math.sqrt(((a.x-b.x)*(a.x-b.x))+((a.y-b.y)*(a.y-b.y)))
 end
-
-
-
 function showplanetSuccess(name, list, args)
 	EnableTriggerGroup("ResourceCap", true)
 	EnableTriggerGroup("GagAll", true)
 end
-
 function showplanetFailure(name, list, args)
 	EnableTriggerGroup("ResourceCap", false)
 	EnableTriggerGroup("GagAll", false)
 	EnableTriggerGroup("ResourceStart", false)
 	ColourNote("red","","Invalid planet, unable to continue.")
 end
-
 function resourceEnd(name, list, args)
 	EnableTriggerGroup("ResourceCap", false)
 	DeleteLines(1)
@@ -1731,19 +1621,15 @@ function resourceEnd(name, list, args)
 		scanNext()
 	end
 end
-
 function storeTempPlanet(name, list, args)
 	tempPlanet = Trim(args[1])
 end
-
 function storeTempSystem(name, list, args)
 	tempSystem = Trim(args[1])
 end
-
 function cleanUp()
 	DeleteLines(1)
 end
-
 function scanNext(name, list, args)
 	toggleSystemCapOff()
 	toggleBodyCapOff()
@@ -1785,7 +1671,6 @@ function scanNext(name, list, args)
 		--listSystems()
 	end
 end
-
 function cargoList()
   if #cPlanets == 0 then
     ColourNote("red","","Cargo route empty, add something first!")
@@ -1798,7 +1683,6 @@ function cargoList()
     end -- for
   end
 end
-
 function storeBody(name, list, args)
 	local storage = { name = "", type = "", tax = 0, x = 0, y = 0, z = 0, resources = {} }
 	for k, v in pairs(systems) do
@@ -1811,7 +1695,6 @@ function storeBody(name, list, args)
 		end
 	end
 end
-
 function storeCoords(name, list, args)
 	for k, v in pairs(systems) do
 		for ka, va in pairs(v.bodies) do
@@ -1823,7 +1706,6 @@ function storeCoords(name, list, args)
 		end
 	end
 end
-
 function storeTax(name, list, args)
 	for k, v in pairs(systems) do
 		for ka, va in pairs(v.bodies) do
@@ -1833,7 +1715,6 @@ function storeTax(name, list, args)
 		end
 	end
 end
-
 function storeResource(name, list, args)
 	local storage = { name = "", price = 0 }
 	for k, v in pairs(systems) do
@@ -1848,15 +1729,12 @@ function storeResource(name, list, args)
 	end
 end
 		
-
 function toggleBodyCapOn(name, list, args)
 	EnableTriggerGroup("BodyCap", true)
 end
-
 function toggleSystemCapOn(name, list, args)
 	EnableTriggerGroup("SystemCap", true)
 end
-
 function storeSystem(name, list, args)
 	local storage = {
 		name = "",
@@ -1871,20 +1749,16 @@ function storeSystem(name, list, args)
 		systems[#systems+1] = storage
 	end
 end
-
 function clearTables()
 	systems = {}
 	ColourNote("yellow","","Cargo Tables cleared.")
 end
-
 function toggleSystemCapOff(name, list, args)
 	EnableTriggerGroup("SystemCap", false)
 end
-
 function toggleBodyCapOff(name, list, args)
 	EnableTriggerGroup("BodyCap", false)
 end
-
 -- define our help command structure
 local commands = { { name = "cargoScan", desc = "Scans every system in the galaxy into the cargo database.",
                          args = {  }
@@ -1989,7 +1863,6 @@ local commands = { { name = "cargoScan", desc = "Scans every system in the galax
                { name = "cargoUnloadShips", desc = "Unload all child ships from parent hangars.",
                         args = {  }
                           },
-
                         }
                         
   --[[ 
@@ -2012,7 +1885,6 @@ local commands = { { name = "cargoScan", desc = "Scans every system in the galax
   <alias match="^cargoLoadShips$" script="loadShips" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
   <alias match="^cargoUnloadShips$"
   ]]--
-
 function cargoHelp(name, line, args)
   local found = false
   if args[1] == "" then -- show general help
@@ -2044,14 +1916,11 @@ function cargoHelp(name, line, args)
     end
   end -- end no input
 end
-
 require "checkplugin"
 function OnPluginListChanged()
 	do_plugin_check_now ("680bf1a4e5e600854747c379", "LotJFlight") -- check we have LotJFlight Plugin
 	do_plugin_check_now ("b2c06b3dcc775c0ede861316", "LotJCalc") -- check we have LotJCalc Plugin
 end
-
-
   ]]> 
   </script>
  <!--   Plugin help    -->
@@ -2062,7 +1931,6 @@ end
  <![CDATA[ function OnHelp ()
   world.Note (world.GetPluginInfo (world.GetPluginID (), 3))
 end
-
   ]]> 
   </script>
   </muclient>

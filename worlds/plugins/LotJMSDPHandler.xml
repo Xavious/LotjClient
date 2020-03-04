@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1" ?> 
 <!DOCTYPE muclient>  
 <muclient>
-<plugin name="LotJMSDPHandler" author="@Johnson" id="b3aae34498d5bf19b5b2e2af" language="Lua" purpose="Handle MSDP Communications" save_state="y" requires="4.73" version="0.55">
+<plugin name="LotJMSDPHandler" author="@Johnson" id="b3aae34498d5bf19b5b2e2af" language="Lua" purpose="Handle MSDP Communications" save_state="y" requires="4.73" version="0.56">
 <description trim="y">
 <![CDATA[
 --Legends of the Jedi MSDP Handler--
@@ -161,7 +161,7 @@ function OnPluginTelnetSubnegotiation (type, data)
         end
         value = list
       end
-    elseif b==79 then -- 'O' CHARACTER ??? No idea why this is here.
+    elseif b==67 or b==79 then -- 'C' or 'O' CHARACTERS ??? No idea why these are here.
       if tList then -- middle of a separated list
         -- do nothing, probably where a direction,vnum pair should be, but isn't!
       else

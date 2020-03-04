@@ -2,11 +2,34 @@
 <!DOCTYPE muclient> 
 <!--  Saved on Sunday, July 04, 2012, 5:39 AM   -->  
 <muclient>
-<plugin name="LotJResearch" author="@Johnson" id="0b90ce53347f37f34ff36fcf" language="Lua" purpose="Automatic Researching" save_state="y" requires="4.40" version="1.77">
+<plugin name="LotJResearch" author="@Johnson" id="0b90ce53347f37f34ff36fcf" language="Lua" purpose="Automatic Researching" save_state="y" requires="4.40" version="1.80">
 <description trim="y">
 <![CDATA[ 'ResearchHelp' - To see the commands available in the game.
 
-Automatically populate and research items that need to be researched.
+Automatically populate and research items that need to be researched using 'researchgrab'.
+
+Now with custom practice list coloring!
+Colors are assigned to percentage ranges of lower <-> upper.
+Add new highlighting rules with researchColorAdd.
+With no arguments this command will prompt you for all the new tier rules.
+
+Add new color highlighting rules with a single command using the syntax:
+
+researchColorAdd <tier 1 Lower> <tier 1 upper> <tier 1 color> <tier 2 Lower> <tier 2 Upper> <tier 2 color> ...
+
+example 1: researchColorAdd 0 25 red 26 50 yellow 51 75 lime 76 100 white
+  This example gives you 4 color rules. 0-25 will be red
+                                        26-50 will be yellow
+                                        51-75 will be lime
+                                        76-100 will be white
+
+example 2: researchColorAdd 0 50 red 51 100 lime
+              This example gives you 2 color rules. 0-50 will be red
+                                                    51-100 will be lime.
+
+There is no limit on the number of color rules you can use and you can leave gaps if you like, but rules
+cannot overlap. Colors must be valid mushclient colors, see them by entering 'PickColour(1)' into your
+immediate window and clicking run. (open immediate window by pressing ctrl+i)
 
   ]]> 
   </description>
@@ -37,7 +60,7 @@ Automatically populate and research items that need to be researched.
   <alias name="ResearchAdd" script="addItem" match="^researchadd (.*)$" enabled="y" group="AutoResearchCmd" regexp="y" ignore_case="y" sequence="100" /> 
   <alias name="ResearchAddShort" script="addItem" match="^radd (.*)$" enabled="y" group="AutoResearchCmd" regexp="y" ignore_case="y" sequence="100" /> 
   <alias name="ResearchRem" script="removeItem" match="^researchrem (.*)$" enabled="y" group="AutoResearchCmd" regexp="y" ignore_case="y" sequence="100" />
-  <alias name="DisplayResearchCommands" script="displayResearchCommands" match="researchhelp" enabled="y" group="AutoResearchCmd" ignore_case="y" sequence="100" />
+  <alias script="researchHelp" match="^researchhelp(\s*(.*))?$" enabled="y" group="AutoResearchCmd" regexp="y" ignore_case="y" sequence="100" />
   <alias name="ResearchClear" script="clearList" match="researchclear" enabled="y" group="AutoResearchCmd" ignore_case="y" sequence="100" />
   <alias name="ResearchAuto" script="researchAuto" match="^researchAuto(.*)?$" enabled="y" group="AutoResearchCmd" regexp="y" ignore_case="y" sequence="100" />
   <alias name="ResearchDisplay" script="displayList" match="researchList" enabled="y" group="AutoResearchCmd" ignore_case="y" sequence="100" />
@@ -47,12 +70,19 @@ Automatically populate and research items that need to be researched.
   <alias name="ResearchGrab" script="toggleGrabOn" match="^researchgrab(.*)?" enabled="y" group="AutoResearchCmd" regexp="y" ignore_case="y" sequence="100" />
   <alias name="printskills" script="printSkills" match="^printskills$" enabled="y" group="AutoResearchCmd" regexp="y" ignore_case="y" sequence="100" />
   <alias name="Researchcolormodecmd" script="swapColorMode" match="researchColorMode" enabled="y" group="AutoResearchCmd" ignore_case="y" sequence="100" />
+  <alias script="colorAdd" match="^researchcoloradd( +(.*))?$" enabled="y" group="AutoResearchCmd" regexp="y" ignore_case="y" sequence="100" />
+  <alias script="colorList" match="researchcolorlist" enabled="y" group="AutoResearchCmd" ignore_case="y" sequence="100" />
+  <alias script="colorRem" match="researchcolorrem *" enabled="y" group="AutoResearchCmd" ignore_case="y" sequence="100" />
+  <alias script="colorClear" match="researchcolorclear" enabled="y" group="AutoResearchCmd" ignore_case="y" sequence="100" />
 </aliases>
 <!--   Script    --> 
 <script>
 <![CDATA[ 
 
 require "pairsbykeys"
+require "serialize"
+local AUTHOR = GetPluginInfo(GetPluginID(), 2) -- author info
+local VERSION = string.format("%1.2f", GetPluginInfo(GetPluginID(), 19)) -- version info
 local autoResearch = false
 local researchList = {}
 local currentPos = 1
@@ -68,39 +98,215 @@ local darkblue = RGBColourToName(GetNormalColour(5))
 local gray = RGBColourToName(GetBoldColour(1))
 local cyan = RGBColourToName(GetBoldColour(7))
 
-function displayResearchCommands(name, line, args)
-   ColourNote("silver","","Research <skill>                       - Resume research or start on skill independent of the list")
-   ColourNote("silver","","ResearchStart                          - Begin new research session from front of list")
-   ColourNote("silver","","ResearchGrab <skill tree> <percentage> - Grab skills from optional skill tree that")
-   ColourNote("silver","","                                         are below optional percentage barrier")
-   ColourNote("silver","","                                         (If no arguments are given it will add every")
-   ColourNote("silver","","                                          item in your skill list that is below 90%)")
-   ColourNote("silver","","ResearchAdd <skill>                    - Manually add a skill to the list")
-   ColourNote("silver","","ResearchRem <skill/#>                  - Remove skill in list by name or index number")
-   ColourNote("silver","","ResearchList                           - Display list contents")
-   ColourNote("silver","","ResearchNext                           - Skip current item in list")
-   ColourNote("silver","","ResearchClear                          - Clear all research variables")
-   ColourNote("silver","","ResearchColorMode                      - Switch skill highlighting modes")
-   ColourNote("silver","","ResearchAuto (on/off)                  - Turns automatic researching on or off")
-end -- function
+ -- enable these to ensure everything works smooth
+SetOption("enable_triggers", true)
+SetOption("enable_scripts", true)
 
-function swapColorMode(name, line, args)
-  if colorMode == 1 then
-    colorMode = 2
-	  ColourNote("yellow","","Practice list color mode: ","lime", "", string.format("%20s", "alternate"),"silver","",string.format(" %3d", 90),gray,"","%")
-  elseif colorMode == 2 then
-    colorMode = 3
-    ColourTell("yellow","","Practice list color mode: ")
-	  Hyperlink("#Note('Clicking this link would normally add a skill to your research list!')", string.format("%20s %3d%%","hyperlinks", 90), "Sample hyperlink.", "lime", "", false, true)
-    Tell("\n")
-  elseif colorMode == 3 then
-    colorMode = 1
-	  ColourNote("yellow","","Practice list color mode: ","lime", "", string.format("%20s %3d%%", "basic", 90))
+colorPrefs = {}
+-- load in stored custom color prefs
+loadstring(GetVariable("colorPrefs") or "") ()
+
+
+function colorAdd(name, line, args)
+  local mode = {}
+  local tier = {}
+  local lowerFound = false
+  local upperFound = false
+  local colorFound = false
+  if args[1]~="" then -- entered an arg, split it up
+    args[1] = Trim(args[1]:gsub("%s+", " ")) -- clean up spaces
+    if args[1]:match(",") then -- found a comma
+      args = utils.split(args[1], ",")
+    elseif args[1]:match(" ") then -- found a space
+      args = utils.split(args[1], " ")
+    end
+    for i, v in pairs(args) do
+      if math.fmod(i-1, 3)==0 then -- first arg (tier lower)
+        if tonumber(v) then -- entered number
+          lowerFound = true
+          tier.lower = tonumber(v)
+          --Note("arg 1 add tier lower "..tier.lower)
+        elseif ColourNameToRGB(v) then -- entered valid color name
+          colorFound = true
+          tier.color = tonumber(ColourNameToRGB(v))
+          --Note("arg 1 add tier color " ..tier.color)
+        else -- didn't enter number or valid color name, abort
+          ColourNote("red","","Usage: researchColorAdd <lower> <upper> <color> <lower> <upper> <color> ...")
+          return
+        end
+      elseif math.fmod(i-1, 3)==1 then -- second arg (tier upper)
+        if tonumber(v) then -- entered number
+          if lowerFound then -- already have first number, sanity check this one
+            if tonumber(v) > tier.lower then -- number is larger than tier.lower, as it should be
+              upperFound = true
+              tier.upper = tonumber(v)
+              --Note("arg 2 add tier upper "..tier.upper)
+            else -- number smaller than tier.lower, swap them
+              upperFound = true
+              tier.upper = tier.lower
+              tier.lower = tonumber(v)
+              --Note("arg 2 swap tier lower to tier upper and add tier lower "..tier.lower)
+            end
+          else -- don't have a first number, meaning first arg was color so this arg is lower
+            lowerFound = true
+            tier.lower = tonumber(v)
+            --Note("arg 2 add tier lower "..tier.lower)
+          end
+        else -- didn't enter number, abort
+          ColourNote("red","","Usage: researchColorAdd <lower> <upper> <color> <lower> <upper> <color> ...")
+          return
+        end
+      elseif math.fmod(i-1, 3)==2 then -- third arg (tier color)
+        if tonumber(v) then -- entered number
+          if lowerFound then -- already have first number, sanity check this one
+            if tonumber(v) > tier.lower then -- number is larger than tier.lower
+              upperFound = true
+              tier.upper = tonumber(v)
+              --Note("arg 3 add tier upper "..tier.upper)
+            else -- number is smaller than tier.lower, swap them
+              upperFound = true
+              tier.upper = tier.lower
+              tier.lower = tonumber(v)
+              --Note("arg 3 swap tier lower to tier upper and add tier lower "..tier.lower)
+            end
+          end -- should never get here
+        else -- gave a string, convert it to RGB
+          v = ColourNameToRGB(v)
+          tier.color = tonumber(v)
+          --Note("arg 3 add tier color " ..tier.color)
+        end
+        
+        mode[#mode + 1] = tier
+        ColourNote(RGBColourToName(tier.color),"","New tier "..tier.lower.." - "..tier.upper.." ("..RGBColourToName(tier.color)..") added.")
+        lowerFound = false
+        upperFound = false
+        colorFound = false
+        tier = {}
+      end
+    end
+  else -- no arg, start prompts
+    local tiers = utils.inputbox("Number of color tiers?", "Color Tiers", tiers or "4", GetInfo(23), GetInfo(215))
+    if not tiers then
+      ColourNote("red","","User pressed cancel, aborting.")
+      return
+    end
+    for i=1, tiers, 1 do
+      tier.lower = tonumber(utils.inputbox("Lower percentage bound for tier "..i.."?", "Lower Bound", tier.lower or "0", GetInfo(23), GetInfo(215)))
+      tier.upper = tonumber(utils.inputbox("Upper percentage bound for tier "..i.."?", "Upper Bound", tier.upper or "100", GetInfo(23), GetInfo(215)))
+      tier.color = tonumber(PickColour(-1)) -- get a valid color for this tier
+      if tier.lower and tier.upper and (tier.color and (tier.color > 0)) then
+        mode[#mode + 1] = tier
+        ColourNote(RGBColourToName(tier.color),"","New tier "..tier.lower.." - "..tier.upper.." ("..RGBColourToName(tier.color)..") added.")
+        tier = {}
+      else
+        ColourNote("red","","User pressed cancel, aborting.")
+        return
+      end
+    end
+  end
+  local check, msg = checkMode(mode)
+  if check then
+    ColourNote("red","","Error code "..check..": "..msg)
+    return
+  end
+  colorPrefs[#colorPrefs + 1] = mode
+  PrintMode(mode, 50)
+  ColourNote("yellow","","Added new mode with "..#mode.." tiers to color prefs.")
+  OnPluginSaveState()
+end
+function checkMode(mode)
+  local lowcheck = 0
+  local upcheck = 0
+  for i, v in ipairs(mode) do
+    if upcheck > 0 and v.lower <= upcheck then -- failed lowcheck
+      return 1, "tier "..i.." failed lower check (overlapping value)"
+    elseif lowcheck > 0 and v.upper <= lowcheck then -- failed upcheck
+      return 2, "tier "..i.." failed upper check (overlapping value)"
+    elseif not RGBColourToName(v.color) then -- failed colorcheck
+      return 3, "tier "..i.." failed color check (invalid color)"
+    else -- no problems, continue checking
+      lowcheck = v.lower
+      upcheck = v.upper
+    end
+  end
+  
+  
+  --[[
+  Error codes:
+    1: tier failed upper check (overlapping values)
+    2: tier failed lower check (overlapping values)
+    3: invalid color
+  ]]--
+  return nil
+end
+function colorList(name, line, args)
+  ColourNote(gray,"","[",darkblue,"","Research Color Modes",gray,"","]")
+  ColourTell(gray,"","[",cyan,"","Basic Mode 1",gray,"","]")
+  if colorMode == 1 then ColourTell(cyan,""," Selected") end Note()
+  ColourNote("lime", "", string.format("%20s %3d%%", "basic", 90))
+  ColourTell(gray,"","[",cyan,"","Basic Mode 2",gray,"","]")
+  if colorMode == 2 then ColourTell(cyan,""," Selected") end Note()
+  ColourNote("lime", "", string.format("%20s", "alternate"),"silver","",string.format(" %3d", 90),gray,"","%")
+	ColourTell(gray,"","[",cyan,"","Basic Mode 3",gray,"","]")
+  if colorMode == 3 then ColourTell(cyan,""," Selected") end Note()
+	Hyperlink("#Note('Clicking this link would normally add a skill to your research list!')", string.format("%20s %3d%%","hyperlinks", 90), "Sample hyperlink.", "lime", "", false, true)
+  Tell("\n")
+  for i, v in ipairs(colorPrefs) do
+    ColourTell(gray,"","[",cyan,"","Custom Mode "..i,gray,"","]")
+    if colorMode == i + 3 then
+      ColourTell(cyan,"", " Selected")
+    end
+    Note()
+    PrintMode(v, 50)
   end
 end
+function colorRem(name, line, args)
+  for i, v in ipairs(colorPrefs) do
+    if tonumber(args[1]) and (i == tonumber(args[1])) then
+      ColourNote("yellow","","Removing skill color preference "..i..": ")
+      PrintMode(v, 50)
+      table.remove(colorPrefs, i)
+      if (colorMode + 3) >= i then
+        colorMode = colorMode - 1
+      end
+      OnPluginSaveState()
+      return
+    end
+  end
+  ColourNote("red","","Skill color preference '"..args[1].."' not found.")
+end
+function colorClear(name, line, args)
+  colorPrefs = {}
+  ColourNote("yellow","","All color highlighting modes have been cleared.")
+  OnPluginSaveState()
+end
+function PrintMode(mode, length)
+  local percent = 0
+  local outStr = ""
+  for i, v in ipairs(mode) do
+    percent = ((v.upper-v.lower) / 100) * length
+    ColourTell(RGBColourToName(v.color),"","|"..v.lower..string.rep("-", percent)..v.upper.."|")
+  end
+  Note()
+end
 
-function OnPluginSaveState()
-  SetVariable("colorMode", colorMode)
+function swapColorMode(name, line, args)
+  colorMode = colorMode + 1
+  if colorMode > #colorPrefs + 3 then -- wrap around
+    colorMode = 1
+  end
+  if colorMode == 1 then
+    ColourNote("yellow","","Practice list basic color mode: ","lime", "", string.format("%20s %3d%%", "basic", 90))
+  elseif colorMode == 2 then
+    ColourNote("yellow","","Practice list basic color mode: ","lime", "", string.format("%20s", "alternate"),"silver","",string.format(" %3d", 90),gray,"","%")
+  elseif colorMode == 3 then
+	  ColourTell("yellow","","Practice list basic color mode: ")
+	  Hyperlink("#Note('Clicking this link would normally add a skill to your research list!')", string.format("%20s %3d%%","hyperlinks", 90), "Sample hyperlink.", "lime", "", false, true)
+    Tell("\n")
+  elseif colorMode > 3 and colorMode <= #colorPrefs + 3 then -- custom color pref selected
+    ColourNote("yellow","","Practice list custom color mode "..(colorMode - 3)..": ")
+    PrintMode(colorPrefs[colorMode - 3], 50)
+  end
 end
 
 function researchSuccess(name, line, args)
@@ -193,24 +399,40 @@ function grabAdd(name, line, args)
 end
 
 function printSkill(name, percent)
-	local colour = "blue"
-	if (percent == 100) then
-		colour = "white"
-	elseif (percent > 89) then
-		colour = "lime"
-	elseif (percent > 0) then
-		colour = "orange"
-	else
-		colour = "red"
-	end
-	if colorMode == 1 then
-	  ColourTell(colour, "", string.format("%20s %3d%%", name,percent))
-  elseif colorMode == 2 then
-	  ColourTell(colour, "", string.format("%20s", name),"silver","",string.format(" %3d", percent),gray,"","%")
-	elseif colorMode == 3 then -- room for expansion for more coloring options here (hyperlinks, plaintext, etc)
-	  Hyperlink("radd "..name, string.format("%20s",name), "Add "..name.." to research list.", colour, "", false, true)
-	  ColourTell(colour,"",string.format(" %3d%%",percent))
-	end
+  if colorMode < 4 then
+    local colour = "blue"
+    if (percent == 100) then
+      colour = "white"
+    elseif (percent > 89) then
+      colour = "lime"
+    elseif (percent > 0) then
+      colour = "orange"
+    else
+      colour = "red"
+    end
+    if colorMode == 1 then
+      ColourTell(colour, "", string.format("%20s %3d%%", name,percent))
+    elseif colorMode == 2 then
+      ColourTell(colour, "", string.format("%20s", name),"silver","",string.format(" %3d", percent),gray,"","%")
+    elseif colorMode == 3 then -- room for expansion for more coloring options here (hyperlinks, plaintext, etc)
+      Hyperlink("radd "..name, string.format("%20s",name), "Add "..name.." to research list.", colour, "", false, true)
+      ColourTell(colour,"",string.format(" %3d%%",percent))
+    end
+  else -- custom colors
+    local colour = GetNormalColour(5) -- default to user's preset darkblue
+    local pref = colorPrefs[colorMode - 3]
+    if not pref then -- unable to load color mode!!!!!
+      ColourNote("red","","Unable to load color pref, check color mode settings!")
+      return
+    end
+    for i, v in ipairs(pref) do
+      if percent >= v.lower and percent <= v.upper then
+        colour = v.color
+      end
+    end
+    ColourTell(RGBColourToName(colour),"",string.format("%20s %3d%%", name, percent))
+  end
+    
 end
 	
 
@@ -241,14 +463,18 @@ end
 function toggleGrabOn(name, line, args)
 	clearList()
 	grab = true
+  grabSkill = ""
+  grabPercent = 90
 	if (args[1] ~= "") then
-		if (string.find(args[1], "%d", 1)) then -- number found
-			grabSkill = Trim(string.sub(args[1], 1, string.find(args[1], "%d", 1)-1))
-			grabPercent = tonumber(string.sub(args[1], string.find(args[1], "%d", 1), string.len(args[1])))
-		else -- no number found
-			grabSkill = Trim(args[1])
-		end
-	end
+    args = utils.split(Trim(args[1]), " ")
+    for i, v in ipairs(args) do
+      if tonumber(v) then -- percent found
+        grabPercent = tonumber(v)
+      else -- skill given, concat it
+        grabSkill = Trim(grabSkill.. " "..v)
+      end
+    end
+  end
 	EnableTriggerGroup("ResearchGrabber", true)
 	ColourNote("silver","","Grab started. Skill: '",cyan,"",grabSkill,"silver","","' Percent: ",cyan,"",grabPercent)
 	Send("practice " .. grabSkill)
@@ -360,6 +586,105 @@ function researchAuto(name, line, args)
 			toggleOff()
 		end
 	end
+end
+
+function OnPluginSaveState()
+  SetVariable("colorMode", colorMode)
+  SetVariable("colorPrefs", ((colorPrefs and serialize.save("colorPrefs")) or "")) -- don't set until colorPrefs variable exists
+end
+
+-- define our help command structure
+local commands = { { name = "researchHelp", desc = "Display this help file.",
+                         args = { { name = "<none>", desc = "Displays brief help about every available command." },
+                                  { name = "<command>", desc = "Displayed more detailed help including possible arguments for given command." },
+                                }
+                          },
+               { name = "researchAdd", desc = "Add skills to the research list.",
+                        args = { { name = "<skill>", desc = "Adds a single skill to the research list."}, 
+                               }
+                          },
+               { name = "researchClear", desc = "Clears research list.",
+                        args = { }
+                          },
+               { name = "researchAuto", desc = "Toggles automatic research.",
+                        args = { { name = "<none>", desc = "Toggles automatic research." },
+                                 { name = "<on/off>", desc = "Sets automatic research to given state." }
+                               }
+                          },
+               { name = "researchList", desc = "Print current research list.",
+                        args = { }
+                          },
+               { name = "researchStart", desc = "Initiates automatic research from beginning of list.",
+                        args = { }
+                          },
+               { name = "research", desc = "Performs research.. duh",
+                        args = { { name = "<none>", desc = "Researches previously assigned item."},
+                                 { name = "<skill>", desc = "Assigns new skill and starts researching it."} 
+                               }
+                          },
+               { name = "researchNext", desc = "Skips to next skill in research list.",
+                        args = { }
+                          },
+               { name = "researchGrab", desc = "Scans practice list for skills, loads them into research list and begins all at once.",
+                        args = { { name = "<class>", desc = "Scans only the given class for skills below 90%."},
+                                 { name = "<percent>", desc = "Adds only skills below given percentage." },
+                                 { name = "<class> <percent>", desc = "Class and percent can be given in any order." }, 
+                               }
+                          },
+               { name = "researchColorMode", desc = "Cycles through available options for color highlighting of practice list.",
+                        args = { }
+                          },
+               { name = "researchColorAdd", desc = "Adds custom color highlighting options for practice list.",
+                        args = { { name = "<none>", desc = "Adds custom color rules using prompts." },
+                                 { name = "<lower> <upper> <color> ...", desc = "Adds custom color rules by giving 'number number color' in pairs of 3, with no limit on number of groups." },
+                               }
+                          },
+               { name = "researchColorList", desc = "Prints available practice list color options.",
+                        args = { }
+                          },
+               { name = "researchColorRem", desc = "Deletes a custom practice list color option.",
+                        args = { { name = "<number>", desc = "Deletes the given custom color option." }, }
+                          },
+               { name = "researchColorClear", desc = "Clears all custom practice list color options.",
+                        args = { }
+                          },
+              }
+                        
+  --[[ 
+
+
+  ]]--
+
+function researchHelp(name, line, args)
+  local found = false
+  if args[1] == "" then -- show general help
+    ColourNote("white","black","LotJResearch v"..VERSION.." by "..AUTHOR..". Enter 'researchhelp <command>' for more detailed information.")
+    for a, b in ipairs(commands) do -- commands
+      local command = b
+      ColourNote("silver","black",string.format("%-20s", command.name).." : "..command.desc)
+    end
+    Note("")
+  else -- entered something
+    ColourNote("white","black","LotJResearch v"..VERSION.." by "..AUTHOR..". Enter 'researchhelp' for more general information.")
+    for a, b in ipairs(commands) do -- scroll through commands
+      if (string.lower(b.name) == string.lower(Trim(args[1]))) then -- found our argument
+        found = true
+        ColourNote("silver","black",b.name .. " : " .. b.desc)
+        ColourNote("silver","black","Available arguments:")
+        if #b.args == 0 then -- no arguments
+          ColourNote("silver","black","   None.")
+        else -- arguments to print
+          for i, k in ipairs(b.args) do
+            ColourNote("silver","black",string.format("%20s", k.name).." : " .. k.desc)
+          end -- end print arguments
+        end -- end no arguments
+        Note("")
+      end -- end found command
+    end -- end scroll commands
+    if not found then
+      ColourNote("silver","black","Command '"..args[1].."' not found.")
+    end
+  end -- end no input
 end
 
   ]]> 

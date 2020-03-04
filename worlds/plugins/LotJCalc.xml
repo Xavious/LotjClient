@@ -2,7 +2,7 @@
 <!DOCTYPE muclient> 
 <!--  Saved on Sunday, July 04, 2012, 6:29 PM   -->  
 <muclient>
-<plugin name="LotJCalc" author="@Johnson" id="b2c06b3dcc775c0ede861316" language="Lua" purpose="Calculate Sectors Easily" save_state="y" requires="4.40" version="1.07">
+<plugin name="LotJCalc" author="@Johnson" id="b2c06b3dcc775c0ede861316" language="Lua" purpose="Calculate Sectors Easily" save_state="y" requires="4.40" version="1.08">
 <description trim="y">
 <![CDATA[ 
 Automatically calculate hyperjumps to the specified sector.
@@ -14,15 +14,16 @@ Automatically calculate hyperjumps to the specified sector.
 <!--   Triggers    --> 
 <triggers>
 
-  <trigger enabled="n" group="CalcStart" match="^You use the datapad to lookup the information\.$" name="ShowplanetSuccess" script="showplanetSuccess" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
-  <trigger enabled="n" group="CalcStart" match="^No such planet\.$" name="ShowplanetFailure" script="showplanetFailure" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger> 
-  <trigger enabled="n" group="CalcCap" match="^Planet\: (.*)$" name="PlanetCap" script="planetCheck" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
-  <trigger enabled="n" group="CalcCap" match="^Starsystem\: (.*)$" name="SystemCap" script="setSystem" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
-  <trigger enabled="n" group="CalcCap" match="^Coordinates\: (.*) (.*) (.*)$" name="CoordCap" script="setCoords" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
-  <trigger enabled="n" group="GagAll" match="^(.*)$" name="GagAll" regexp="y" keep_evaluating="y" omit_from_log="y" omit_from_output="y" sequence="100"></trigger>
-  <trigger enabled="n" group="CalcCap" match="^Use \'SHOWPLANET \<planet\> RESOURCES\' for current resources\.$" name="CalcEnd" regexp="y" omit_from_log="y" omit_from_output="y" script="calculate" sequence="100"></trigger>
+  <trigger enabled="n" group="CalcStart" match="^You use the datapad to lookup the information\.$" name="ShowplanetSuccess" script="showplanetSuccess" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger enabled="n" group="CalcStart" match="^No such planet\.$" name="ShowplanetFailure" script="showplanetFailure" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger enabled="n" group="CalcCap" match="^Planet\: (.*)$" name="PlanetCap" script="planetCheck" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger enabled="n" group="CalcCap" match="^Starsystem\: (.*)$" name="SystemCap" script="setSystem" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger enabled="n" group="CalcCap" match="^Coordinates\: (.*) (.*) (.*)$" name="CoordCap" script="setCoords" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger enabled="n" group="GagAll" match="^(.*)$" name="GagAll" regexp="y" keep_evaluating="y" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger enabled="n" group="CalcCap" match="^Use \'SHOWPLANET \<planet\> RESOURCES\' for current resources\.$" name="CalcEnd" regexp="y" omit_from_log="y" omit_from_output="y" script="calculate" sequence="100" />
   <trigger enabled="n" group="CalcStart" match="^You have failed.$" script="repeatCalc" regexp="y" sequence="100" />
-	
+  <trigger enabled="n" group="avoidStellar" match="^\[Alert\]\: Jump coordinates too close to stellar object\. Jump not set\.$" script="avoidStellarObject" regexp="y" sequence="100" />
+  <trigger enabled="n" group="avoidStellar" match="Hyperspace course locked. Running final jump checks..." script="avoidStellarSuccess" sequence="100" />
 	<!-- triggers relating to space capturing -->
 	<trigger name="StoreSpaceCoordinate" match="^(.*) (\-?\d+) (\-?\d+) (\-?\d+)(.*)?$" script="spaceCapStore" omit_from_output="y" keep_evaluating="y" group="SpaceCap" enabled="n" regexp="y" sequence="100" />
 	<trigger name="CapStop" match="^Your Coordinates\: (.*)$" script="spaceCapStop" group="SpaceCap" enabled="n" regexp="y" sequence="100" />
@@ -49,6 +50,7 @@ local coordY = 0
 local coordZ = 0
 SetVariable("planetname", "")
 local calcArgs = ""
+local avoidTries = 0
 
 
 
@@ -100,6 +102,7 @@ function repeatCalc(name, line, args) -- we failed a showplanet, do it again
 end
 
 function showPlanet(name, line, args)
+  avoidTries = 0
   calcArgs = args
   if not args or args[1] == "" then -- we entered "calc" with no args, so pass it through
     Send("calculate")
@@ -171,8 +174,37 @@ end
 function calculate(name, list, args)
 	local newX = coordX + 500
 	Send("calculate \"" .. systemname .. "\" " .. newX .. " " .. coordY .. " " .. coordZ)
+  EnableTriggerGroup("avoidStellar", true)
 	toggleOff()
 	gagOff()
+end
+
+function avoidStellarObject(name, line, args)
+  avoidTries = avoidTries + 1
+  local newX = coordX
+  local newY = coordY
+  local newZ = coordZ
+  if avoidTries == 1 then -- first try to avoid is -500 0 0
+    newX = newX - 500
+  elseif avoidTries == 2 then -- second try 0 500 0
+    newY = newY + 500
+  elseif avoidTries == 3 then -- 0 0 500
+    newZ = newZ + 500
+  elseif avoidTries == 4 then
+    newX = newX + 1000
+  elseif avoidTries == 5 then
+    newY = newY - 500
+  elseif avoidTries == 6 then
+    newZ = newZ - 500
+  elseif avoidTries > 6 then
+    ColourNote("red","","Too many failed attempts to avoid stellar object, aborting for your safety.")
+    return
+  end
+  Send("calculate \"" .. systemname .. "\" " .. newX .. " " .. newY .. " " .. newZ)
+end
+
+function avoidStellarSuccess(name, line, args)
+  EnableTriggerGroup("avoidStellar", false)
 end
 
 function toggleOn(name, list, args)

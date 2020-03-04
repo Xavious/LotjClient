@@ -15,7 +15,7 @@
    save_state="y"
    date_written="2012-07-04 02:02:58"
    requires="4.43"
-   version="1.40"
+   version="1.42"
    >
 <description trim="y">
 <![CDATA[
@@ -165,8 +165,8 @@ This string adds as many ships as you specify with a single command.
 <script>
 <![CDATA[
 
-AUTHOR = GetPluginInfo(GetPluginID(), 2) -- author info
-VERSION = GetPluginInfo(GetPluginID(), 19) -- version info
+local AUTHOR = GetPluginInfo(GetPluginID(), 2) -- author info
+local VERSION = string.format("%1.2f", GetPluginInfo(GetPluginID(), 19)) -- version info
 
 shipParts = {"hull", "circuits", "weapons", "engines"}
 partNames = {
@@ -193,6 +193,35 @@ local upgradeppos = 0
 local upgradespos = 0
 profiles = {}
 loadstring(GetVariable("profiles") or "") ()
+
+local componentTable = { ["hull"] = { size = .02, cost = 4 },
+                         ["shields"] = { size = .03, cost = 20 },
+                         ["comm"] = { size = .5, cost = 100 },
+                         ["sensor"] = { size = .5, cost = 100 },
+                         ["astroarray"] = { size = .5, cost = 150 },
+                         ["tractorbeam"] = { size = 25, cost = 75000 },
+                         ["autoblaster"] = { size = 2, cost = 2500 },
+                         ["lasers"] = { size = 5, cost = 8000 },
+                         ["turbolasers"] = { size = 25, cost = 40000 },
+                         ["ion"] = { size = 6, cost = 7500 },
+                         ["docking"] = { size = 10, cost = 15000 },
+                         ["cloaking"] = { size = 75, cost = 750000 },
+                         ["missile"] = { size = 5, cost = 2000 },
+                         ["missiles"] = { size = 1, cost = 2000 },
+                         ["torpedoes"] = { size = 1, cost = 2500 },
+                         ["rockets"] = { size = 1, cost = 3000 },
+                         ["pulse"] = { size = 1, cost = 5000 },
+                         ["chaff"] = { size = .2, cost = 100 },
+                         ["speed"] = { size = .1, cost = 100 },
+                         ["maneuver"] = { size = .2, cost = 1000 },
+                         ["energy"] = { size = .02, cost = 10 },
+                         ["gravity"] = { size = 100, cost = 1000000 },
+                         ["hyperspeed"] = { size = .5, cost = 200 },
+                         ["smallcargo"] = { size = 5, cost = 4000 },
+                         ["mediumcargo"] = { size = 10, cost = 12000 },
+                         ["largecargo"] = { size = 15, cost = 20000 },
+                         ["tune"] = { size = 0, cost = 0 },
+                        }
 
 function enableEndLine()
   EnableTrigger("endline", true)
@@ -224,7 +253,19 @@ function upgradeProfilePartAdd(name, line, args)
 	for i, v in ipairs(addItems) do
 	  if skip then
 	    skip = false
-	    part.name = Trim(v)
+      local found = false
+      for k, _ in pairs(componentTable) do -- check component table for valid part name
+        if k:lower():find(Trim(v)) then
+          found = true
+          break
+        end
+      end
+      if found then
+        part.name = Trim(v)
+      else
+        ColourNote("red","","Error: Invalid part type given to upgradeProfilePartAdd. '"..Trim(v).."'")
+        return
+      end
 	  else
 	    skip = true
 	    part.amount = tonumber(Trim(v))
@@ -266,10 +307,22 @@ function upgradeProfilePartList(name, line, args)
   ColourNote("silver","","Current profile part list: ")
   local modlist = profile.mods
   ColourTell("silver","","| ","red","",profile.name,"silver",""," | ")
+  local cost = 0
   for k, j in ipairs(modlist) do
+    for a, _ in pairs(componentTable) do
+      if i:lower():find(j.name) then
+        if j.amount < 0 then -- we only get half value when selling parts
+          cost = cost + (j.amount * (.5*componentTable[a].cost))
+        else
+          cost = cost + (j.amount * componentTable[a].cost)
+        end
+        break
+      end
+    end
     ColourTell("cyan","",j.name,"silver",""," ","cyan","",((j.amount<0 and "") or "+")..j.amount,"silver",""," | ")
   end
-  Tell("\n")
+  ColourTell("silver","","Total Cost: ","red","",cost)
+  Note()
 end
 function upgradeProfileSave(name, line, args)
   if profile.name == "" or #profile.mods == 0 then
@@ -323,12 +376,25 @@ function upgradeProfileList(name, line, args)
   for i, v in ipairs(profiles) do
     local modlist = v.mods
     ColourTell("silver","",i.." | ","red","",v.name,"silver",""," | ")
+    local cost = 0
     for k, j in ipairs(modlist) do
+      for a, _ in pairs(componentTable) do
+        if a:lower():find(j.name) then
+          if j.amount < 0 then -- we only get half value when selling parts
+            cost = cost + (j.amount * (.5*componentTable[a].cost))
+          else
+            cost = cost + (j.amount * componentTable[a].cost)
+          end
+          break
+        end
+      end
       ColourTell("cyan","",j.name,"silver",""," ","cyan","",((j.amount<0 and "") or "+")..j.amount,"silver",""," | ")
     end
-    Tell("\n")
+    ColourTell("silver","","Total Cost: ","red","",cost)
+    Note()
   end
 end
+
 function upgradePush(name, line, args)
   if profile.name == "" then
     ColourNote("red","","Current profile is missing a name, unable to push it onto the work list.")
@@ -383,6 +449,7 @@ function upgradeLoad(name, line, args)
     end -- of
   end -- for
 end
+
 function upgradeAdd(name, line, args)
   if not args or args[1] == "" or args[2] == "" then
     ColourNote("red","","Usage: upgradeAdd <ship> <parameters>")
@@ -403,7 +470,19 @@ function upgradeAdd(name, line, args)
 	for i, v in ipairs(addItems) do
 	  if skip then
 	    skip = false
-	    mod.name = Trim(v)
+      local found = false
+      for k, _ in pairs(componentTable) do -- check component table for valid part name
+        if k:lower():find(Trim(v)) then
+          found = true
+          break
+        end
+      end
+      if found then
+        mod.name = Trim(v)
+      else
+        ColourNote("red","","Error: Invalid part type given to upgradeAdd. '"..Trim(v).."'")
+        return
+      end
 	  else
 	    skip = true
 	    mod.amount = tonumber(Trim(v))

@@ -192,7 +192,7 @@ function ColoursToStyles (Text)
       Text = Text:gsub ("&x[3-9]%d%d","") -- strip invalid xterm codes (300+)
       Text = Text:gsub ("&x2[6-9]%d","") -- strip invalid xterm codes (260+)
       Text = Text:gsub ("&x25[6-9]","") -- strip invalid xterm codes (256+)
-      Text = Text:gsub ("&[^xcmyrgbwCMYRGBWD]", "")  -- rip out hidden garbage
+      Text = Text:gsub ("&[^xrgObpcwzRGYBPCW]", "")  -- rip out hidden garbage
       
       -- make sure we start with & or gsub doesn't work properly
       if Text:sub (1, 1) ~= "&" then
