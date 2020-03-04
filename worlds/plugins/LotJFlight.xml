@@ -2,7 +2,7 @@
 <!DOCTYPE muclient> 
 <!--  Saved on Wednesday, July 25, 2012, 7:14 PM   -->  
 <muclient>
-<plugin name="LotJFlight" author="@Johnson" id="680bf1a4e5e600854747c379" language="Lua" purpose="Flight Made Easy" save_state="y" requires="4.40" version="1.48">
+<plugin name="LotJFlight" author="@Johnson" id="680bf1a4e5e600854747c379" language="Lua" purpose="Flight Made Easy" save_state="y" requires="4.40" version="1.49">
 <description trim="y">
 <![CDATA[ 
 'FlyHelp'      - To see the list of commands associated with this plugin.
@@ -87,6 +87,7 @@ require "tprint"
 require "pairsByKeys"
 require "serialize"
 
+math.randomseed(os.time())
 
 function flyLand(name, line, args)
   args = utils.split(Trim(args[1]), ",")
@@ -198,18 +199,10 @@ end
 function toggleReenter(name, line, args)
   if not args or args[1] == "" then -- entered nothing
     reentership = not reentership
-
-
-
-
-
-
   elseif string.lower(args[1]) == "on" then
     reentership = true
-
   elseif string.lower(args[1]) == "off" then
     reentership = false
-
   end
   ColourNote("yellow","","LotJFlight: Will "..((reentership and "") or "not ").."re-enter ship upon arrival.")
 end
@@ -227,7 +220,6 @@ function flyClear()
 	landingSites = {}
 	landingSiteNum = 0
 	landgrabbing = false
-
 	reentership = false
   checkSale = false
   dirsEntered = false
@@ -239,21 +231,7 @@ function flyClear()
 end
 
 function endFlight()
-
-
-
-
-
-
-
-
   if shipLeaveDirs and shipLeaveDirs ~= "" then
-
-
-
-
-
-
     runDirs(shipLeaveDirs)
   end
   Send("openhatch")
@@ -291,13 +269,9 @@ function endLandGrab()
 	if (landgrabbing == false) then
 		landgrabbing = true
 		Note("Grabbing landing sites...")
-
 	else
 		landgrabbing = false
 		EnableTriggerGroup("landGrab", false)
-
-
-
     local landing = landPref[planetName:lower()]
     if landing and tonumber(landing) then -- pref is a number
       if tonumber(landing) > 0 then -- landing number given
@@ -314,11 +288,11 @@ function endLandGrab()
           if landingSites[i] and string.find(landingSites[i]:lower(), landing:lower(), 0, true) then -- pref found
             found = true
             landArg(i)
-            break
+            return
           end
         end
         if not found then
-          ColourNote("red","","Landing preference '"..landing.."' not found in stored preference list.")
+          ColourNote("red","","Landing preference '"..landing.."' not found in planet's landing pad list.")
         end
       end
     else -- no landing pref, use automatic
@@ -389,16 +363,6 @@ end
 
 function flightStatus(name, list, args)
   ColourNote(gray,"","LotJFlight status: ",cyan,"",((autoFly and "Enabled") or "Disabled"))
-
-
-
-
-
-
-
-
-
-
   ColourNote(gray,"","[",cyan,"","Ship name: "..shipName,gray,"","] [",cyan,"","Hatch: "..hatchCode,gray,"","]")
   ColourNote(gray,"","[",cyan,"","Flying from: "..((lastPlanet~="" and lastPlanet) or "Unknown"),gray,"","]")
   ColourNote(gray,"","[",cyan,"","Flying to: "..((planetName~="" and planetName) or "Unknown"),gray,"","]")
@@ -431,8 +395,6 @@ function finishFlight(name, list, args)
 	if not dirsEntered and (shipEnterDirs and shipEnterDirs == "") then
 		shipEnterDirs = utils.inputbox("Dirs to cockpit?\nFormat options:\nSpaces: E U N\nCommas: E,U,N\nSemi-colons: E;U;N\n1-Room Ship: none", "Cockpit", "", "Courier", 9)
 	end
-
-
 	if not dirsEntered and (shipLeaveDirs and shipLeaveDirs == "") then
 		shipLeaveDirs = utils.inputbox("Dirs to leave ship?\nFormat options:\nSpaces: S D W\nCommas: S,D,W\nSemi-colons: S;D;W\n1-Room Ship: none", "Exit", "", "Courier", 9)
     dirsEntered = true
@@ -463,8 +425,6 @@ function beginFlight(name, list, args)
 	Send("shields on")
 	Note("Flying to: '" .. planetName .. "'")
 	toggleFlyOn()
-
-
 	if landPref[planetName:lower()] then
     ColourNote("yellow","","Using saved landing preference '"..landPref[planetName:lower()].."'.")
   else
@@ -503,31 +463,11 @@ function toCockpit(name, list, args)
 	end
 	if not dirsEntered and (shipLeaveDirs and shipLeaveDirs == "") then
 		shipLeaveDirs = utils.inputbox("Dirs to leave ship?\nFormat options:\nSpaces: S D W\nCommas: S,D,W\nSemi-colons: S;D;W\n1-Room Ship: none", "Exit", "", "Courier", 9)
-
-
-
-
-
-
     dirsEntered = true
 	end
-
-
-
-
-
-
-
-
-
-
-
-
   if not navEntered and (pilotToNav and pilotToNav == "") then
     pilotToNav = utils.inputbox("Dirs from pilot to nav station?", "Pilot To Nav", "", "Courier", 9)
   end
-
-
   if not navEntered and (navToPilot and navToPilot == "") then
     navToPilot = utils.inputbox("Dirs from nav to pilot station?", "Nav To Pilot", "", "Courier", 9)
     navEntered = true
