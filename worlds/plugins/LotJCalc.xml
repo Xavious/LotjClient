@@ -20,7 +20,7 @@ Automatically calculate hyperjumps to the specified sector.
   <trigger enabled="n" group="CalcCap" match="^Starsystem\: (.*)$" name="SystemCap" script="setSystem" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
   <trigger enabled="n" group="CalcCap" match="^Coordinates\: (.*) (.*) (.*)$" name="CoordCap" script="setCoords" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
   <trigger enabled="n" group="GagAll" match="^(.*)$" name="GagAll" regexp="y" keep_evaluating="y" omit_from_log="y" omit_from_output="y" sequence="100" />
-  <trigger enabled="n" group="CalcCap" match="^Use \'SHOWPLANET \<planet\> RESOURCES\' for current resources\.$" name="CalcEnd" regexp="y" omit_from_log="y" omit_from_output="y" script="calculate" sequence="100" />
+  <trigger enabled="n" group="CalcCap" match="^Use \'SHOWPLANET \<planet\> RESOURCES\' for current resources(.*?)$" name="CalcEnd" regexp="y" omit_from_log="y" omit_from_output="y" script="calculate" sequence="100" />
   <trigger enabled="n" group="CalcStart" match="^You have failed.$" script="repeatCalc" regexp="y" sequence="100" />
   <trigger enabled="n" group="avoidStellar" match="^\[Alert\]\: Jump coordinates too close to stellar object\. Jump not set\.$" script="avoidStellarObject" regexp="y" sequence="100" />
   <trigger enabled="n" group="avoidStellar" match="Hyperspace course locked. Running final jump checks..." script="avoidStellarSuccess" sequence="100" />
