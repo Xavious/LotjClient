@@ -331,7 +331,6 @@ end
 
 function coursePlanet()
   hyperCompleted = true
-	Send("speed 100")
 	Send("course '" .. planetName .. "'")
 end
 
