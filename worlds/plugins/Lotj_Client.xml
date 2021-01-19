@@ -77,6 +77,10 @@ function OnHelp ()
 	Note("-------------------------------------------------------------")
 	Note("ctrl+left+click highted text - Copy text with colors codes   ")
 	Note("-------------------------------------------------------------")
+	Note("                       Datanet Links                         ")
+	Note("-------------------------------------------------------------")
+	Note("left+click underlined links - Navivate to datanet page       ")
+	Note("-------------------------------------------------------------")
 end
 ]]>
 </script>

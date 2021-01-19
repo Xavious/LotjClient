@@ -5,7 +5,7 @@
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
 
-<!-- Plugin state saved. Plugin: "LotJResearch". World: "Legends of the Jedi". -->
+<!-- Plugin state saved. Plugin: "LotJDatanet". World: "Legends of the Jedi". -->
 
 <muclient>
 
@@ -16,7 +16,5 @@
    world_file_version="15"
    date_saved="2021-01-19 12:30:26"
   >
-  <variable name="colorMode">1</variable>
-  <variable name="colorPrefs">colorPrefs = {}</variable>
 </variables>
 </muclient>

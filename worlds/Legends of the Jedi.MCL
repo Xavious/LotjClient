@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Tuesday, December 10, 2019, 7:29 PM -->
-<!-- MuClient version 4.94 -->
+<!-- Saved on Tuesday, January 19, 2021, 12:30 PM -->
+<!-- MuClient version 5.06 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
 <muclient>
 <world
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
-   date_saved="2019-12-10 19:29:10"
+   date_saved="2021-01-19 12:30:26"
 
    auto_say_override_prefix="-"
    auto_say_string="say "
@@ -51,6 +51,8 @@
    enable_timers="y"
    enable_triggers="y"
    enable_trigger_sounds="y"
+   fade_output_opacity_percent="20"
+   fade_output_seconds="8"
    history_lines="1000"
    hyperlink_adds_to_command_history="y"
    hyperlink_colour="#0080FF"
@@ -107,36 +109,36 @@
 <!-- triggers -->
 
 <triggers
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
-   date_saved="2019-12-10 19:29:10"
+   date_saved="2021-01-19 12:30:26"
   >
 </triggers>
 
 <!-- aliases -->
 
 <aliases
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
-   date_saved="2019-12-10 19:29:10"
+   date_saved="2021-01-19 12:30:26"
   >
 </aliases>
 
 <!-- timers -->
 
 <timers
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
-   date_saved="2019-12-10 19:29:10"
+   date_saved="2021-01-19 12:30:26"
   >
 </timers>
 
 <!-- macros -->
 
 <macros
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
-   date_saved="2019-12-10 19:29:10"
+   date_saved="2021-01-19 12:30:26"
   >
 
   <macro name="up" type="send_now" >
@@ -228,18 +230,18 @@
 <!-- variables -->
 
 <variables
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
-   date_saved="2019-12-10 19:29:10"
+   date_saved="2021-01-19 12:30:26"
   >
 </variables>
 
 <!-- colours -->
 
 <colours
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
-   date_saved="2019-12-10 19:29:10"
+   date_saved="2021-01-19 12:30:26"
   >
 
 <ansi>
@@ -294,9 +296,9 @@
 <!-- keypad -->
 
 <keypad
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
-   date_saved="2019-12-10 19:29:10"
+   date_saved="2021-01-19 12:30:26"
   >
 
   <key name="0" >
@@ -408,9 +410,9 @@
 <!-- printing -->
 
 <printing
-   muclient_version="4.94"
+   muclient_version="5.06"
    world_file_version="15"
-   date_saved="2019-12-10 19:29:10"
+   date_saved="2021-01-19 12:30:26"
   >
 
 <ansi>
@@ -447,7 +449,8 @@
 <include name="LotJArmor.xml" plugin="y" />
 <include name="LotJBuildship.xml" plugin="y" />
 <include name="LotJStudy.xml" plugin="y" />
-<include name="Lotj_Client.xml" plugin="y" />
 <include name="LotJCargo.xml" plugin="y" />
 <include name="lotj_channels_ic.xml" plugin="y" />
+<include name="LotJDatanet.xml" plugin="y" />
+<include name="Lotj_Client.xml" plugin="y" />
 </muclient>
