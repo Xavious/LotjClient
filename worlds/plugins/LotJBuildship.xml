@@ -96,7 +96,6 @@ This string adds as many ships as you specify with a single command.
   <trigger name="SpamRemoval1" script="enableEndLine" match="^(.*) steps away from (.*) looking very pleased with (.*)\.$" enabled="n" regexp="y" group="ShipbuildingSpam" omit_from_log="y" omit_from_output="y" sequence="100" />
   <trigger name="SpamRemoval2" script="enableEndLine" match="^(.*) takes (.*) tools and starts to work on (.*)$" enabled="n" regexp="y" group="ShipbuildingSpam" omit_from_log="y" omit_from_output="y" sequence="100" />
   <trigger name="SpamRemoval3" script="enableEndLine" match="^(.*)droid assists(.*)$" enabled="n" regexp="y" group="ShipbuildingSpam" omit_from_log="y" omit_from_output="y" sequence="100" />
-  <trigger name="SpamRemoval4" script="enableEndLine" match="^(.*) (gets|drops) (.*)$" enabled="n" regexp="y" group="ShipbuildingSpam" omit_from_log="y" omit_from_output="y" sequence="100" />
   <trigger name="SpamRemoval5" script="enableEndLine" match="^You (.*) engineering experience\.$" enabled="n" regexp="y" group="ShipbuildingSpam" omit_from_log="y" omit_from_output="y" sequence="100" />
   <trigger name="SpamRemoval6" script="enableEndLine" match="^Your droid gains (.*) experience points\.$" enabled="n" regexp="y" group="ShipbuildingSpam" omit_from_log="y" omit_from_output="y" sequence="100" />
   <trigger name="endline" match="^$" enabled="n" regexp="y" group="end_line" omit_from_output="y" sequence="100" send_to="12" >
