@@ -16,7 +16,7 @@ MUSHclient is a Windows application, but can also run on Linux or Mac using WINE
 - You can type "**client help**" to get an introductory help screen that will explain various plugins and also reference help commands for a specific plugin. (*These plugins were written by different people and are not necessarily uniform*)
 
 ## Change Log
-- 2020/01/19
+- 2021/01/19
   - Added Fishy's datanet hyperlink plugin
 - 2019/12/10
   - Updated the client to the latest MUSHclient version
