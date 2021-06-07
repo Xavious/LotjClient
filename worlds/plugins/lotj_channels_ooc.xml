@@ -42,6 +42,7 @@ USAGE:
   <trigger enabled="n" name="ask2" match="'*'*ask*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="exclaim1" match="*exclaim*'*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="exclaim2" match="'*'*exclaim*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="mindtalk" match="*speak* your mind '*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="clan" match="*{*}<*>[*]*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="clan2" match="$\[(Outgoing|Incoming) Transmission (to|from) (.*)\](.*)" regexp="y" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="comms" match="CommNet*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
@@ -51,6 +52,7 @@ USAGE:
   
   <trigger enabled="n" name="immchat" match="( IMM | CHAT )*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="rpcchat" match="(R|P|C)*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="y" name="ufg" match="(OOC) Planet *" regexp="n" omit_from_output="n" sequence="99" />
   <trigger enabled="n" name="ooc" match="(OOC) *" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="newbie" match="(NEWBIE) *" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="immooc" match="(IMM) *" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
@@ -162,7 +164,9 @@ SetTriggerOption("ask1", "enabled", show_say)
 SetTriggerOption("ask2", "enabled", show_say)
 SetTriggerOption("exclaim1", "enabled", show_say)
 SetTriggerOption("exclaim2", "enabled", show_say)
+SetTriggerOption("mindtalk", "enabled", show_say)
 SetTriggerOption("clan", "enabled", show_clan)
+SetTriggerOption("clan2", "enabled", show_clan)
 SetTriggerOption("comms", "enabled", show_comms)
 SetTriggerOption("broadcast", "enabled", show_broadcast)
 SetTriggerOption("buzz", "enabled", show_buzz)
@@ -181,7 +185,9 @@ SetTriggerOption("ask1", "omit_from_output", say_echo)
 SetTriggerOption("ask2", "omit_from_output", say_echo)
 SetTriggerOption("exclaim1", "omit_from_output", say_echo)
 SetTriggerOption("exclaim2", "omit_from_output", say_echo)
+SetTriggerOption("mindtalk", "omit_from_output", say_echo)
 SetTriggerOption("clan", "omit_from_output", clan_echo)
+SetTriggerOption("clan2", "omit_from_output", clan_echo)
 SetTriggerOption("comms", "omit_from_output", comms_echo)
 SetTriggerOption("ooc", "omit_from_output", ooc_echo)
 SetTriggerOption("immooc", "omit_from_output", ooc_echo)
@@ -820,7 +826,7 @@ end
 
 function untagged_info (name, line, wildcards, styles)
   stampAndStore(styles)
-  if say_echo == 1 and (name == "say1" or name == "say2" or name=="ask1" or name=="ask2" or name=="exclaim1" or name=="exclaim2") then
+  if say_echo == 1 and (name == "say1" or name == "say2" or name=="ask1" or name=="ask2" or name=="exclaim1" or name=="exclaim2" or name=="mindtalk") then
   EnableTrigger("end_gag", true)
   end
   if clan_echo == 1 and name=="clan" then
@@ -1293,6 +1299,7 @@ function right_click_menu (hotspot_id)
 	        EnableTrigger("ask2", 0 == show_say)
 	        EnableTrigger("exclaim1", 0 == show_say)
 	        EnableTrigger("exclaim2", 0 == show_say)
+	        EnableTrigger("mindtalk", 0 == show_say)
 	        show_say = GetTriggerOption("say1", "enabled")       
       elseif numResult == 12+hyperlink_skip then
       	if show_clan == 0 then
@@ -1391,6 +1398,7 @@ function right_click_menu (hotspot_id)
         SetTriggerOption("ask3", "omit_from_output", 0 == say_echo)
         SetTriggerOption("exclaim1", "omit_from_output", 0 == say_echo)
         SetTriggerOption("exclaim2", "omit_from_output", 0 == say_echo)
+        SetTriggerOption("mindtalk", "omit_from_output", 0 == say_echo)
         say_echo = GetTriggerOption("say1", "omit_from_output")
       elseif numResult == 23+hyperlink_skip then
         if clan_echo == 0 then
