@@ -88,18 +88,18 @@ init_ansi()
 
 for i = 16,255 do
    local xterm_colour = extended_colours[i]
-   conversion_colours[xterm_colour] = (conversion_colours[xterm_colour] or string.format("&x%03d",i))
-   colour_conversion[string.format("x%03d",i)] = xterm_colour
-   colour_conversion[string.format("x%d",i)] = xterm_colour
+   conversion_colours[xterm_colour] = (conversion_colours[xterm_colour] or string.format("&%03d",i))
+   colour_conversion[string.format("%03d",i)] = xterm_colour
+   colour_conversion[string.format("%d",i)] = xterm_colour
 end
 
 -- Aardwolf bumps a few very dark xterm colors to brighter values to improve visibility
 for i = 232,237 do
-   colour_conversion[string.format("x%d",i)] = extended_colours[238]
+   colour_conversion[string.format("%d",i)] = extended_colours[238]
 end
 for i = 17,19 do
-   colour_conversion[string.format("x%03d",i)] = extended_colours[19]
-   colour_conversion[string.format("x%d",i)] = extended_colours[19]
+   colour_conversion[string.format("%03d",i)] = extended_colours[19]
+   colour_conversion[string.format("%d",i)] = extended_colours[19]
 end
 
 -- also provide the reverse of the extended_colours global table
@@ -188,10 +188,10 @@ function ColoursToStyles (Text)
 
       Text = Text:gsub ("&%-", "~") -- fix tildes
       Text = Text:gsub ("&&", "\0") -- change && to 0x00
-      Text = Text:gsub ("&x([^%d])","%1") -- strip invalid xterm codes (non-number)
-      Text = Text:gsub ("&x[3-9]%d%d","") -- strip invalid xterm codes (300+)
-      Text = Text:gsub ("&x2[6-9]%d","") -- strip invalid xterm codes (260+)
-      Text = Text:gsub ("&x25[6-9]","") -- strip invalid xterm codes (256+)
+      Text = Text:gsub ("&([^%d])","%1") -- strip invalid xterm codes (non-number)
+      Text = Text:gsub ("&[3-9]%d%d","") -- strip invalid xterm codes (300+)
+      Text = Text:gsub ("&2[6-9]%d","") -- strip invalid xterm codes (260+)
+      Text = Text:gsub ("&25[6-9]","") -- strip invalid xterm codes (256+)
       Text = Text:gsub ("&[^xrgObpcwzRGYBPCW]", "")  -- rip out hidden garbage
       
       -- make sure we start with & or gsub doesn't work properly
@@ -230,7 +230,7 @@ function strip_colours (s)
    s = s:gsub ("&%-", "~")    -- fix tildes
    s = s:gsub ("&&", "\0")  -- change && to 0x00
    s = s:gsub ("&[^xcmyrgbwCMYRGBWD]", "")  -- rip out hidden garbage
-   s = s:gsub ("&x%d?%d?%d?", "") -- strip xterm color codes
+   s = s:gsub ("&%d?%d?%d?", "") -- strip xterm color codes
    s = s:gsub ("&%a([^&]*)", "%1") -- strip normal color codes
    return (s:gsub ("%z", "&")) -- put & back
 end -- strip_colours
