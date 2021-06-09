@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Tuesday, January 19, 2021, 2:08 PM -->
+<!-- Saved on Tuesday, June 08, 2021, 9:33 PM -->
 <!-- MuClient version 5.06 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,12 +14,14 @@
 <variables
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-01-19 14:08:48"
+   date_saved="2021-06-08 21:33:23"
   >
   <variable name="WINDOW_HEIGHT">131</variable>
   <variable name="WINDOW_NAME">OOC Log</variable>
   <variable name="WINDOW_WIDTH">657</variable>
   <variable name="channels_table">channels_table = {}
+  channels_table.Mindtalk = {}
+    channels_table.Mindtalk.capture = true
   channels_table.Newbie = {}
     channels_table.Newbie.capture = true
   channels_table.OOC = {}
@@ -34,38 +36,44 @@
     channels_table.ImmNet.capture = true
   channels_table.Clan = {}
     channels_table.Clan.capture = true
+  channels_table.Say = {}
+    channels_table.Say.capture = true
   channels_table.CouncilNet = {}
     channels_table.CouncilNet.capture = true
-  channels_table.Say = {}
-    channels_table.Say.capture = true</variable>
+  channels_table.Farspeak = {}
+    channels_table.Farspeak.capture = true</variable>
   <variable name="clan_echo">1</variable>
   <variable name="comms_echo">1</variable>
   <variable name="councilnet_echo">1</variable>
   <variable name="date_format">[%d %b %H:%M:%S] </variable>
   <variable name="enabled">true</variable>
+  <variable name="farspeak_echo">1</variable>
   <variable name="font_name">Dina</variable>
   <variable name="font_size">8</variable>
-  <variable name="immchat_echo">0</variable>
+  <variable name="immchat_echo">1</variable>
   <variable name="immnet_echo">1</variable>
   <variable name="log_colour_codes">1</variable>
   <variable name="log_filename">C:\Users\Brandon\Documents\GitHub\LotjClient\logs\Legends of the JediChatLog.txt</variable>
   <variable name="log_timestamps">1</variable>
   <variable name="log_to_file">0</variable>
+  <variable name="mindtalk_echo">1</variable>
   <variable name="mw_96ce07ef668c1258781d6c49_windowflags">2</variable>
   <variable name="mw_96ce07ef668c1258781d6c49_windowmode">0</variable>
   <variable name="mw_96ce07ef668c1258781d6c49_windowx">1240</variable>
   <variable name="mw_96ce07ef668c1258781d6c49_windowy">0</variable>
   <variable name="newbie_echo">1</variable>
   <variable name="ooc_echo">1</variable>
-  <variable name="rpcchat_echo">0</variable>
-  <variable name="say_echo">1</variable>
+  <variable name="rpcchat_echo">1</variable>
+  <variable name="say_echo">0</variable>
   <variable name="show_broadcast">0</variable>
   <variable name="show_buzz">0</variable>
   <variable name="show_clan">0</variable>
   <variable name="show_comms">0</variable>
   <variable name="show_councilnet">1</variable>
+  <variable name="show_farspeak">0</variable>
   <variable name="show_immchat">1</variable>
   <variable name="show_immnet">1</variable>
+  <variable name="show_mindtalk">0</variable>
   <variable name="show_newbie">1</variable>
   <variable name="show_ooc">1</variable>
   <variable name="show_rpcchat">1</variable>

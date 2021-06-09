@@ -43,8 +43,9 @@ USAGE:
   <trigger enabled="n" name="exclaim1" match="*exclaim*'*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="exclaim2" match="'*'*exclaim*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="mindtalk" match="*speak* your mind '*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="farspeak" match="A voice inside your mind says '*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="clan" match="*{*}<*>[*]*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
-  <trigger enabled="n" name="clan2" match="$\[(Outgoing|Incoming) Transmission (to|from) (.*)\](.*)" regexp="y" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="clan2" match="\[(Outgoing|Incoming) Transmission (to|from) (.*)\](.*)" regexp="y" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="comms" match="CommNet*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="broadcast" match="Broadcasting Network*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   
@@ -137,6 +138,8 @@ starty = ""
 show_say = tonumber(GetVariable("show_say")) or 1
 show_clan = tonumber(GetVariable("show_clan")) or 1
 show_comms = tonumber(GetVariable("show_comms")) or 1
+show_mindtalk = tonumber(GetVariable("show_mindtalk")) or 1
+show_farspeak = tonumber(GetVariable("show_farspeak")) or 1
 show_broadcast = tonumber(GetVariable("show_broadcast")) or 1
 show_buzz = tonumber(GetVariable("show_buzz")) or 1
 show_ooc = tonumber(GetVariable("show_ooc")) or 1
@@ -149,6 +152,8 @@ show_councilnet = tonumber(GetVariable("show_councilnet")) or 1
 say_echo = tonumber(GetVariable("say_echo")) or 1
 clan_echo = tonumber(GetVariable("clan_echo")) or 1
 comms_echo = tonumber(GetVariable("comms_echo")) or 1
+mindtalk_echo = tonumber(GetVariable("mindtalk_echo")) or 1
+farspeak_echo = tonumber(GetVariable("farspeak_echo")) or 1
 ooc_echo = tonumber(GetVariable("ooc_echo")) or 1
 newbie_echo = tonumber(GetVariable("newbie_echo")) or 1
 immchat_echo = tonumber(GetVariable("immchat_echo")) or 1
@@ -164,10 +169,11 @@ SetTriggerOption("ask1", "enabled", show_say)
 SetTriggerOption("ask2", "enabled", show_say)
 SetTriggerOption("exclaim1", "enabled", show_say)
 SetTriggerOption("exclaim2", "enabled", show_say)
-SetTriggerOption("mindtalk", "enabled", show_say)
 SetTriggerOption("clan", "enabled", show_clan)
 SetTriggerOption("clan2", "enabled", show_clan)
 SetTriggerOption("comms", "enabled", show_comms)
+SetTriggerOption("mindtalk", "enabled", show_mindtalk)
+SetTriggerOption("farspeak", "enabled", show_farspeak)
 SetTriggerOption("broadcast", "enabled", show_broadcast)
 SetTriggerOption("buzz", "enabled", show_buzz)
 SetTriggerOption("immchat", "enabled", show_immchat)
@@ -185,10 +191,11 @@ SetTriggerOption("ask1", "omit_from_output", say_echo)
 SetTriggerOption("ask2", "omit_from_output", say_echo)
 SetTriggerOption("exclaim1", "omit_from_output", say_echo)
 SetTriggerOption("exclaim2", "omit_from_output", say_echo)
-SetTriggerOption("mindtalk", "omit_from_output", say_echo)
 SetTriggerOption("clan", "omit_from_output", clan_echo)
 SetTriggerOption("clan2", "omit_from_output", clan_echo)
 SetTriggerOption("comms", "omit_from_output", comms_echo)
+SetTriggerOption("mindtalk", "omit_from_output", mindtalk_echo)
+SetTriggerOption("farspeak", "omit_from_output", farspeak_echo)
 SetTriggerOption("ooc", "omit_from_output", ooc_echo)
 SetTriggerOption("immooc", "omit_from_output", ooc_echo)
 SetTriggerOption("rpcooc", "omit_from_output", ooc_echo)
@@ -412,6 +419,8 @@ function OnPluginSaveState()
 	SetVariable("show_broadcast", show_broadcast)
 	SetVariable("show_buzz", show_buzz)
 	SetVariable("show_comms", show_comms)
+   SetVariable("show_mindtalk", show_mindtalk)
+   SetVariable("show_farspeak", show_farspeak)
 	SetVariable("show_ooc", show_ooc)
 	SetVariable("show_newbie", show_newbie)
 	SetVariable("show_immchat", show_immchat)
@@ -421,6 +430,8 @@ function OnPluginSaveState()
 	SetVariable("say_echo", say_echo)
 	SetVariable("clan_echo", clan_echo)
 	SetVariable("comms_echo", comms_echo)
+   SetVariable("mindtalk_echo", mindtalk_echo)
+   SetVariable("farspeak_echo", farspeak_echo)
 	SetVariable("ooc_echo", ooc_echo)
 	SetVariable("newbie_echo", newbie_echo)
 	SetVariable("immchat_echo", immchat_echo)
@@ -826,7 +837,7 @@ end
 
 function untagged_info (name, line, wildcards, styles)
   stampAndStore(styles)
-  if say_echo == 1 and (name == "say1" or name == "say2" or name=="ask1" or name=="ask2" or name=="exclaim1" or name=="exclaim2" or name=="mindtalk") then
+  if say_echo == 1 and (name == "say1" or name == "say2" or name=="ask1" or name=="ask2" or name=="exclaim1" or name=="exclaim2") then
   EnableTrigger("end_gag", true)
   end
   if clan_echo == 1 and name=="clan" then
@@ -834,6 +845,12 @@ function untagged_info (name, line, wildcards, styles)
   end
   if comms_echo == 1 and name=="comms" then
   EnableTrigger("end_gag", true)
+  end
+  if mindtalk_echo == 1 and name == "mindtalk" then
+   EnableTrigger("end_gag", true)
+  end
+  if farspeak_echo == 1 and name == "farspeak" then
+   EnableTrigger("end_gag", true)
   end
   if immchat_echo == 1 and name=="immchat" then
   EnableTrigger("end_gag", true)
@@ -1108,7 +1125,7 @@ end -- function chat_hide
 require "pairsbykeys"
 
 --local init_channel_names = {"advice","answer","auction","barter","claninfo","clantalk","curse","debate","dtell","ftalk","gametalk","gclan","gossip","gratz","gsocial","gtell","helper","immtalk","lasertag","ltalk","market","mobsay","music","mxit","newbie","nobletalk","pchat","pokerinfo","ptell","question","quote","racetalk","rauction","rp","say","sports","spouse","tech","tell","tiertalk","trivia","wangrp","wardrums"}
-local init_channel_names = {"Say","Clan","Comms","OOC","Newbie","Immchat","RPCchat","ImmNet","CouncilNet"}
+local init_channel_names = {"Say","Clan","Comms","Mindtalk","Farspeak","OOC","Newbie","Immchat","RPCchat","ImmNet","CouncilNet"}
 channels_table = {}
 loadstring(GetVariable("channels_table") or "")()
 
@@ -1149,6 +1166,10 @@ function right_click_menu (hotspot_id)
       "Clan|"..
       ((show_comms==1 and "+") or "")..
       "Comms|"..
+      ((show_mindtalk==1 and "+") or "")..
+      "Mindtalk|"..
+      ((show_farspeak==1 and "+") or "")..
+      "Farspeak|"..
       ((show_immchat==1 and "+") or "")..
       "ImmChat|"..
       ((show_rpcchat==1 and "+") or "")..
@@ -1175,6 +1196,8 @@ function right_click_menu (hotspot_id)
                               ((say_echo==0 and "+") or "").. "Say|"..
                               ((clan_echo==0 and "+") or "").. "Clan|"..
                               ((comms_echo==0 and "+") or "").. "Comms|"..
+                              ((mindtalk_echo==0 and "+") or "").. "Mindtalk|"..
+                              ((farspeak_echo==0 and "+") or "").. "Farspeak|"..
                               ((immchat_echo==0 and "+") or "").. "ImmChat|"..
                               ((rpcchat_echo==0 and "+") or "").. "RpcChat|"..
                               ((ooc_echo==0 and "+") or "").. "OOC|"..
@@ -1299,7 +1322,6 @@ function right_click_menu (hotspot_id)
 	        EnableTrigger("ask2", 0 == show_say)
 	        EnableTrigger("exclaim1", 0 == show_say)
 	        EnableTrigger("exclaim2", 0 == show_say)
-	        EnableTrigger("mindtalk", 0 == show_say)
 	        show_say = GetTriggerOption("say1", "enabled")       
       elseif numResult == 12+hyperlink_skip then
       	if show_clan == 0 then
@@ -1319,6 +1341,22 @@ function right_click_menu (hotspot_id)
       	EnableTrigger("comms", 0 == show_comms)
       	show_comms = GetTriggerOption("comms","enabled")
       elseif numResult == 14+hyperlink_skip then
+      	if show_mindtalk == 0 then
+      		ColourNote ("yellow", "", "Mindtalk capturing is now ENABLED.")
+      	else
+      		ColourNote ("yellow", "", "Mindtalk capturing is now DISABLED.")
+      	end
+      	EnableTrigger("mindtalk", 0 == show_mindtalk)
+      	show_mindtalk = GetTriggerOption("mindtalk","enabled")
+      elseif numResult == 15+hyperlink_skip then
+      	if show_farspeak == 0 then
+      		ColourNote ("yellow", "", "Farspeak capturing is now ENABLED.")
+      	else
+      		ColourNote ("yellow", "", "Farspeak capturing is now DISABLED.")
+      	end
+      	EnableTrigger("farspeak", 0 == show_farspeak)
+      	show_farspeak = GetTriggerOption("farspeak","enabled")
+      elseif numResult == 16+hyperlink_skip then
       	if show_immchat == 0 then
       		ColourNote ("yellow", "", "ImmChat capturing is now ENABLED.")
       	else
@@ -1326,7 +1364,7 @@ function right_click_menu (hotspot_id)
       	end
       	EnableTrigger("immchat", 0 == show_immchat)
       	show_immchat = GetTriggerOption("immchat","enabled")
-      elseif numResult == 15+hyperlink_skip then
+      elseif numResult == 17+hyperlink_skip then
       	if show_rpcchat == 0 then
       		ColourNote ("yellow", "", "RPC Chat capturing is now ENABLED.")
       	else
@@ -1334,7 +1372,7 @@ function right_click_menu (hotspot_id)
       	end
       	EnableTrigger("rpcchat", 0 == show_rpcchat)
       	show_rpcchat = GetTriggerOption("rpcchat","enabled")
-      elseif numResult == 16+hyperlink_skip then
+      elseif numResult == 18+hyperlink_skip then
       	if show_ooc == 0 then
       		ColourNote ("yellow", "", "OOC capturing is now ENABLED.")
       	else
@@ -1344,7 +1382,7 @@ function right_click_menu (hotspot_id)
       	EnableTrigger("rpcooc", 0 == show_ooc)
       	EnableTrigger("ooc", 0 == show_ooc)
       	show_ooc = GetTriggerOption("ooc","enabled")
-      elseif numResult == 17+hyperlink_skip then
+      elseif numResult == 19+hyperlink_skip then
       	if show_newbie == 0 then
       		ColourNote ("yellow", "", "Newbie capturing is now ENABLED.")
       	else
@@ -1352,7 +1390,7 @@ function right_click_menu (hotspot_id)
       	end
       	EnableTrigger("newbie", 0 == show_newbie)
       	show_newbie = GetTriggerOption("newbie","enabled")
-      elseif numResult == 18+hyperlink_skip then
+      elseif numResult == 20+hyperlink_skip then
       	if show_immnet == 0 then
       		ColourNote ("yellow", "", "ImmNet capturing is now ENABLED.")
       	else
@@ -1360,7 +1398,7 @@ function right_click_menu (hotspot_id)
       	end
       	EnableTrigger("immnet", 0 == show_immnet)
       	show_immnet = GetTriggerOption("immnet","enabled")
-      elseif numResult == 19+hyperlink_skip then
+      elseif numResult == 21+hyperlink_skip then
       	if show_councilnet == 0 then
       		ColourNote ("yellow", "", "CouncilNet capturing is now ENABLED.")
       	else
@@ -1368,7 +1406,7 @@ function right_click_menu (hotspot_id)
       	end
       	EnableTrigger("councilnet", 0 == show_councilnet)
       	show_councilnet = GetTriggerOption("councilnet","enabled")
-      elseif numResult == 20+hyperlink_skip then
+      elseif numResult == 22+hyperlink_skip then
       	if show_broadcast == 0 then
          	ColourNote ("yellow", "", "Broadcast capturing is now ENABLED.")
         else
@@ -1376,7 +1414,7 @@ function right_click_menu (hotspot_id)
         end
         EnableTrigger("broadcast", 0 == show_broadcast)
         show_broadcast = GetTriggerOption("broadcast","enabled")
-      elseif numResult == 21+hyperlink_skip then
+      elseif numResult == 23+hyperlink_skip then
       	if show_buzz == 0 then
       		ColourNote ("yellow", "", "Microphone Buzz capturing is now ENABLED.")
       	else
@@ -1386,7 +1424,7 @@ function right_click_menu (hotspot_id)
       	show_buzz = GetTriggerOption("buzz","enabled") 
       end
       
-      if numResult == 22+hyperlink_skip then
+      if numResult == 24+hyperlink_skip then
         if say_echo == 0 then
           ColourNote("yellow", "", "Say will NOT be shown in the main window.")
         else
@@ -1398,9 +1436,9 @@ function right_click_menu (hotspot_id)
         SetTriggerOption("ask3", "omit_from_output", 0 == say_echo)
         SetTriggerOption("exclaim1", "omit_from_output", 0 == say_echo)
         SetTriggerOption("exclaim2", "omit_from_output", 0 == say_echo)
-        SetTriggerOption("mindtalk", "omit_from_output", 0 == say_echo)
+        SetTriggerOption("mindtalk", "omit_from_output", 0 == mindtalk_echo)
         say_echo = GetTriggerOption("say1", "omit_from_output")
-      elseif numResult == 23+hyperlink_skip then
+      elseif numResult == 25+hyperlink_skip then
         if clan_echo == 0 then
           ColourNote("yellow", "", "Clan will NOT be shown in the main window.")
         else
@@ -1409,7 +1447,7 @@ function right_click_menu (hotspot_id)
         SetTriggerOption("clan", "omit_from_output", 0 == clan_echo)
         SetTriggerOption("clan2", "omit_from_output", 0 == clan_echo)
         clan_echo = GetTriggerOption("clan", "omit_from_output")
-       elseif numResult == 24+hyperlink_skip then
+       elseif numResult == 26+hyperlink_skip then
         if comms_echo == 0 then
           ColourNote("yellow", "", "Comms will NOT be shown in the main window.")
         else
@@ -1417,7 +1455,23 @@ function right_click_menu (hotspot_id)
         end
         SetTriggerOption("comms", "omit_from_output", 0 == comms_echo)
         comms_echo = GetTriggerOption("comms", "omit_from_output")
-      elseif numResult == 25+hyperlink_skip then
+      elseif numResult == 27+hyperlink_skip then
+         if mindtalk_echo == 0 then
+           ColourNote("yellow", "", "Mindtalk will NOT be shown in the main window.")
+         else
+           ColourNote("yellow", "", "Mindtalk will be shown in the main window.")
+         end
+         SetTriggerOption("mindtalk", "omit_from_output", 0 == mindtalk_echo)
+         mindtalk_echo = GetTriggerOption("mindtalk", "omit_from_output")
+      elseif numResult == 28+hyperlink_skip then
+         if farspeak_echo == 0 then
+           ColourNote("yellow", "", "Farspeak will NOT be shown in the main window.")
+         else
+           ColourNote("yellow", "", "Farspeak will be shown in the main window.")
+         end
+         SetTriggerOption("farspeak", "omit_from_output", 0 == farspeak_echo)
+         farspeak_echo = GetTriggerOption("farspeak", "omit_from_output")
+      elseif numResult == 29+hyperlink_skip then
         if immchat_echo == 0 then
           ColourNote("yellow", "", "ImmChat will NOT be shown in the main window.")
         else
@@ -1425,7 +1479,7 @@ function right_click_menu (hotspot_id)
         end
         SetTriggerOption("immchat", "omit_from_output", 0 == immchat_echo)
         immchat_echo = GetTriggerOption("immchat", "omit_from_output")
-      elseif numResult == 26+hyperlink_skip then
+      elseif numResult == 30+hyperlink_skip then
         if rpcchat_echo == 0 then
           ColourNote("yellow", "", "RpcChat will NOT be shown in the main window.")
         else
@@ -1433,7 +1487,7 @@ function right_click_menu (hotspot_id)
         end
         SetTriggerOption("rpcchat", "omit_from_output", 0 == rpcchat_echo)
         rpcchat_echo = GetTriggerOption("rpcchat", "omit_from_output")
-      elseif numResult == 27+hyperlink_skip then
+      elseif numResult == 31+hyperlink_skip then
         if ooc_echo == 0 then
           ColourNote("yellow", "", "OOC will NOT be shown in the main window.")
         else
@@ -1443,7 +1497,7 @@ function right_click_menu (hotspot_id)
         SetTriggerOption("immooc", "omit_from_output", 0 == ooc_echo)
         SetTriggerOption("rpcooc", "omit_from_output", 0 == ooc_echo)
         ooc_echo = GetTriggerOption("ooc", "omit_from_output")
-      elseif numResult == 28+hyperlink_skip then
+      elseif numResult == 32+hyperlink_skip then
         if newbie_echo == 0 then
           ColourNote("yellow", "", "Newbie will NOT be shown in the main window.")
         else
@@ -1451,7 +1505,7 @@ function right_click_menu (hotspot_id)
         end
         SetTriggerOption("newbie", "omit_from_output", 0 == newbie_echo)
         newbie_echo = GetTriggerOption("newbie", "omit_from_output")
-      elseif numResult == 29+hyperlink_skip then
+      elseif numResult == 33+hyperlink_skip then
         if immnet_echo == 0 then
           ColourNote("yellow", "", "ImmNet will NOT be shown in the main window.")
         else
@@ -1459,7 +1513,7 @@ function right_click_menu (hotspot_id)
         end
         SetTriggerOption("immnet", "omit_from_output", 0 == immnet_echo)
         immnet_echo = GetTriggerOption("immnet", "omit_from_output")
-      elseif numResult == 30+hyperlink_skip then
+      elseif numResult == 34+hyperlink_skip then
         if councilnet_echo == 0 then
           ColourNote("yellow", "", "CouncilNet will NOT be shown in the main window.")
         else
