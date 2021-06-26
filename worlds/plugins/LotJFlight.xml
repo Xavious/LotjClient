@@ -22,7 +22,7 @@ v1.42 -
 <!--   Triggers    --> 
 <triggers>
 	<trigger name="LaunchComp" match="^Launch complete\.$" script="calcPlanet" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="CalcDone" match="^\[Status\]\: Hyperspace Calculations have been completed\.$" script="calcDone" group="Flight" enabled="n" regexp="y" sequence="100" />
+	<trigger name="CalcDone" match="^\[Status\]\: Hyperspace calculations have been completed\.$" script="calcDone" group="Flight" enabled="n" regexp="y" sequence="100" />
 	<trigger name="HyperComp" match="^Hyperjump complete\.$" script="coursePlanet" group="Flight" enabled="n" regexp="y" sequence="100" />
 	<trigger name="OrbitObtained" match="^You begin orbiting (.*)\.$" script="doLand" group="Flight" enabled="n" regexp="y" sequence="100" />
 	<trigger name="LandGrabStart" match="^Possible choices for (.*)\:$" script="startLandGrab" group="Flight" enabled="n" regexp="y" sequence="100" />
