@@ -97,7 +97,7 @@ else
     end
   end
 
-  while ( ArraySize( 'BankWithdraws' ) &gt; 0 and ArraySize( 'BankDeposits' ) &gt; 0 ) do
+  while ( ArraySize( 'BankWithdraws' ) &gt; 0 or ArraySize( 'BankDeposits' ) &gt; 0 ) do
     -- Withdraw the max we can from withdraw accounts.
     while ( credsCarried &lt; 2000000 and ArraySize( 'BankWithdraws' ) &gt; 0 ) do
       acct = ArrayGetFirstKey( 'BankWithdraws' )
