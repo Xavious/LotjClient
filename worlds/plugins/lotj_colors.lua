@@ -230,7 +230,7 @@ function strip_colours (s)
    s = s:gsub ("&%-", "~")    -- fix tildes
    s = s:gsub ("&&", "\0")  -- change && to 0x00
    s = s:gsub ("&[^xcmyrgbwCMYRGBWD]", "")  -- rip out hidden garbage
-   s = s:gsub ("&%d?%d?%d?", "") -- strip xterm color codes
+   s = s:gsub ("&%d{3}", "") -- strip xterm color codes
    s = s:gsub ("&%a([^&]*)", "%1") -- strip normal color codes
    return (s:gsub ("%z", "&")) -- put & back
 end -- strip_colours
