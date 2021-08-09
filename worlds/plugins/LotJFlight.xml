@@ -26,7 +26,7 @@ v1.42 -
 	<trigger name="HyperComp" match="^Hyperjump complete\.$" script="coursePlanet" group="Flight" enabled="n" regexp="y" sequence="100" />
 	<trigger name="OrbitObtained" match="^You begin orbiting (.*)\.$" script="doLand" group="Flight" enabled="n" regexp="y" sequence="100" />
 	<trigger name="LandGrabStart" match="^Possible choices for (.*)\:$" script="startLandGrab" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="MatchLine" match="^(.*)$" script="landGrab" group="landGrab" enabled="n" regexp="y" keep_evaluating="y" omit_from_log="n" omit_from_output="n" sequence="100" />
+	<trigger name="MatchLine" match="^(.*?) \(Max\: (.*?)\)$" script="landGrab" group="landGrab" enabled="n" regexp="y" keep_evaluating="y" omit_from_log="n" omit_from_output="n" sequence="100" />
 	<trigger name="LandGrabEnd" match="^$" script="endLandGrab" group="landGrab" enabled="n" regexp="y" sequence="100" />
 	<trigger name="LandStarted" match="^You begin to land on (.*)\.$" script="landing" group="Flight" enabled="n" regexp="y" sequence="100" />
 	<trigger name="LandComp" match="^Landing sequence complete\.$" script="endFlight" group="Flight" enabled="n" regexp="y" sequence="100" />
