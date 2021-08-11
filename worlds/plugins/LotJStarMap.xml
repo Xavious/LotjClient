@@ -3,7 +3,7 @@
 <!--  Saved on Thursday, July 05, 2012, 1:04 AM   --> 
 <!-- MuClient version 4.73 --> 
 <muclient>
-<plugin name="LotJStarMap" author="@Johnson" id="dd5080a41939faabc233da8f" language="Lua" purpose="Dynamically display a system map with player location overlay" save_state="y" requires="4.73" version="2.30">
+<plugin name="LotJStarMap" author="@Johnson+@Domovoi" id="dd5080a41939faabc233da8f" language="Lua" purpose="Dynamically display a system map with player location overlay" save_state="y" requires="4.73" version="2.3">
 <description trim="y">
 <![CDATA[
 This plugin will gather information about the current galaxy's star systems 
@@ -23,6 +23,9 @@ Click on a planet name to calculate a jump using LotJCalc.
 Right click anywhere on the background to open an options menu where you can 
 add/remove systems, customize system colors to your liking, rename the window, 
 change the display font and restore the window to defaults.
+
+Distance calculation corrected by @Domovoi
+
   ]]> 
   </description>
   </plugin>
@@ -30,11 +33,16 @@ change the display font and restore the window to defaults.
   <include name="constants.lua" /> 
 <!--   Triggers    --> 
 <triggers>
-	<trigger name="systemCapture" script="storeSystem" match="^(.*)\( (.*)\, (.*) \)$" regexp="y" group="StarCap" omit_from_log="y" omit_from_output="y" sequence="100" />
-	<trigger name="starsFailed" script="toggleOff" match="^You must hold a datapad to do this\.$" regexp="y" group="StarCap" sequence="100" />
-	<trigger name="systemCapDone" script="findPlanets" match="^$" regexp="y" group="StarCap" omit_from_log="y" omit_from_output="y" sequence="100" />
-	<trigger name="planetCapTitle" match="Planet*Starsystem*Governed By*Popular Support" enabled="n" group="PlanetCap" omit_from_log="y" omit_from_output="y" sequence="100" />
-	<trigger name="planetCapture" script="storePlanet" match="^(.*)\.\d$" regexp="y" enabled="n" group="PlanetCap" omit_from_log="y" omit_from_output="y" sequence="100" />
+	<trigger name="systemCapture" script="storeSystem" match="^(.*)\( (.*)\, (.*) \)$" regexp="y" group="StarCap" enabled="n" omit_from_log="y" omit_from_output="y" sequence="100" />
+    <trigger name="systemCapTitle1" match="Listing publicly known starsystems:" group="StarCap" enabled="n" omit_from_log="y" omit_from_output="y" sequence="100" />
+	<trigger name="starsFailed" script="toggleOff" match="^You must hold a datapad to do this\.$" regexp="y" enabled="n" group="StarCap" sequence="100" />
+	<trigger name="systemCapDone" script="findClans" match="^$" regexp="y" group="StarCap" omit_from_log="y" enabled="n" omit_from_output="y" sequence="100" />
+    <trigger name="planetCapTitle1" match="Major Organizations*Planets*Active Members" group="ClanCap" enabled="n" omit_from_log="y" omit_from_output="y" sequence="100" />
+    <trigger name="planetCapTitle2" match="Minor Organizations*Members"  group="ClanCap" omit_from_log="y" enabled="n" omit_from_output="y" sequence="100" />
+    <trigger name="clanCapture" script="storeClan" match="^(.*[a-zA-Z])(\s+((\d(.*)\+)|\d+\s+\(None\))(.*))$" group="ClanCap" enabled="n" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
+    <trigger name="clanCapDone" script="findPlanets" match="^Use SHOWCLAN for more information\.$" regexp="y" enabled="n" group="ClanCap" omit_from_log="y" omit_from_output="y" sequence="100" />
+    <trigger name="planetCapTitle" match="Planet*Starsystem*Governed By*Opinion*Military" group="PlanetCap" enabled="n" omit_from_log="y" omit_from_output="y" sequence="100" />
+	<trigger name="planetCapture" script="storePlanet" match="^((\S(\s)?)+)\s+((\S(\s)?)+)\s+((\S(\s)?)+)(.*[^\.])$" regexp="y" enabled="n" group="PlanetCap" omit_from_log="y" omit_from_output="y" sequence="100" />
 	<trigger name="planetCapDone" script="setupWindow" match="^Use SHOWPLANET for more information\.$" regexp="y" enabled="n" group="PlanetCap" omit_from_log="y" omit_from_output="y" sequence="100" />
 	<!-- Lightspeed triggers -->
 	<trigger name="partialJump" match="^Remaining jump distance\: (.*)$" script="storePartialJump" group="LotJStarMap" enabled="y" regexp="y" sequence="100" />
@@ -62,6 +70,8 @@ require "serialize"
 dofile(GetPluginInfo(GetPluginID(), 20) .. "LotJMSDPHelper.lua")
 local win = "galaxy_map_" .. GetPluginID()  -- unique window name
 systems = {}
+clans = {}
+local clan = {}
 local system = {}
 loadstring(GetVariable("systems") or "") ()
 local font = "f"
@@ -110,24 +120,46 @@ local MIN_HEIGHT  = 50
 local redraw_scheduled = false
 local width       = tonumber(GetVariable("width")) or 800
 local height      = tonumber(GetVariable("height")) or 600
+clancolors = {"darkslategray", "lightcoral", "yellow", "dodgerblue", "darkviolet", "darkorange"}
 function storePlanet(name, list, args)
-	--Note("1: '" .. args[1] .. "'")
+    --Note("Debug: storePlanet called")
+	--Note("0: '" .. args[0] .. "' 1: '"..args[1].."' 2: '"..args[2].."' 3:' "..args[3].."' 4: '"..args[4].."' 5: '"..args[5].."' 6: '"..args[6].."' 7: '"..args[7].."'")
+    --Args 0: Whole match. Args 1: Planet, Args 4: System, Args 7: Clan
 	for i, v in ipairs(systems) do
 		local sysName = v.name
-		if (string.find(args[1], sysName)) then -- if the system name was found in the grab text
-			systems[i].planet = Trim(string.sub(args[1], 1, string.find(args[1], sysName)-1)) -- set the planetname
-			--Note("System: '" .. systems[i].name .. "' Planet: '" .. systems[i].planet .. "'")
+		if (string.find(args[0], sysName)) then -- if the system name was found in the grab text
+			systems[i].planet = Trim(args[1]) -- set the planetname
+            systems[i].clan = Trim(args[7])
+			--Note("System: '" .. systems[i].name .. "' Planet: '" .. systems[i].planet .. "' Clan: '"..systems[i].clan.."'")
 		end
 	end
 end
+
+function storeClan(name, line, args)
+    clan.name = tostring(args[1])
+	clans[#clans + 1] = clan
+    clan = {}
+    --Note("Debug: storeClan called")
+end
+
 function findStars(name, list, args)
-  systems = {}
+    systems = {}
 	SendNoEcho("stars")
 	toggleOn()
+    --Note("Debug: findStars executed")
 end
 function findPlanets(name, list, args)
+    toggleClansOff()
 	SendNoEcho("planets")
 	togglePlanetsOn()
+    --Note("Debug: findPlanets executed")
+end
+function findClans(name, list, args)
+    toggleOff()
+    clans = {}
+	SendNoEcho("clans")
+	toggleClansOn()
+    --Note("Debug: findClans executed")
 end
 function togglePlanetsOn(name, list, args)
 	EnableTriggerGroup("PlanetCap", true)
@@ -137,7 +169,11 @@ function toggleOn(name, list, args)
 	--WindowCreate (win, 0, 0, 800, 600, miniwin.pos_center_all, 0, ColourNameToRGB("black"))  -- create window
 	--WindowFont (win, font, "Arial", 10, true, false, false, false) -- define font
 end
+function toggleClansOn(name, list, args)
+    EnableTriggerGroup("ClanCap", true)
+end
 function storeSystem(name, list, args)
+    --Note("Debug: storeSystem called")
 	if (args[1] and args[2] and args[3]) then
 		system.name = Trim(args[1])
 		system.x = tonumber(args[2])
@@ -152,6 +188,9 @@ end
 function togglePlanetsOff(name, list, args)
 	EnableTriggerGroup("PlanetCap", false)
 end
+function toggleClansOff(name, list, args)
+    EnableTriggerGroup("ClanCap", false)
+end
 function resetBounds()
 	visible = false
 	maxX = nil
@@ -160,13 +199,21 @@ function resetBounds()
 	minY = nil
 	setupWindow()
 end
+
+function setClanColors()
+    for i in ipairs(clans) do
+        clans[i].color = ColourNameToRGB(clancolors[i])
+    end
+end
+
 function setupWindow(name, line, args)
+    --Note("Debug: Reached setupWindow")
   if #systems == 0 then -- failsafe in case we try to display window without any planet information
     findStars()
     return
   end
-	toggleOff()
 	togglePlanetsOff()
+    setClanColors()
 	
 	-- initialize our mins and maxes
 	maxX = systems[1].x
@@ -338,7 +385,11 @@ end
 function sysdistance(sys)
   local bx = (sys.left + ((sys.right-sys.left)/2))
   local by = (sys.top + ((sys.bottom-sys.top)/2))
-  return math.sqrt(((sys.x-bx)*(sys.x-bx))+((sys.y-by)*(sys.y-by)))
+  --return math.sqrt(((sys.x-bx)*(sys.x-bx))+((sys.y-by)*(sys.y-by)))
+  local dx = math.abs(sys.x-bx)
+  local dy = math.abs(sys.y-by)
+  local dist = dx + dy
+  return dist
 end
   
 function drawWindow(name, line, args)
@@ -355,6 +406,11 @@ function drawWindow(name, line, args)
 	
 	for i=1,#systems,1 do
 		local sys = systems[i]
+        for i,v in ipairs(clans) do
+            if sys.clan == clans[i].name then
+                sys.colour = clans[i].color
+            end
+        end
 		local x = scaleXCoord(sys.x)  -- scale X coordinate
 		local y = scaleYCoord(sys.y) -- scale Y coordinate
 		
@@ -650,8 +706,13 @@ function destroyWindow(name, list, args)
 	--WindowDelete(win)
 end
 function distance(a, b)
-	return string.format("%.0f", math.sqrt(((a.x-b.x)*(a.x-b.x))+((a.y-b.y)*(a.y-b.y))))
+	--return string.format("%.0f", math.sqrt(((b.x-a.x)*(a.x-b.x))+((a.y-b.y)*(a.y-b.y))))
+    local dx=math.abs(b.x-a.x)
+    local dy=math.abs(b.y-a.y)
+    local dist = dx+dy
+    return string.format("%.0f", dist)
 end
+
 function hyperJumpTick()
 	if (totalJump > 0 and partialJump > 0) then
 		partialJump = partialJump - 50
@@ -803,15 +864,15 @@ function SetUpHotspotsAndDraw(firstTime)
 		WindowCreate (win, 0, 0, width, height, miniwin.pos_center_all, 0, ColourNameToRGB("black")) -- create windows
 		windowinfo = movewindow.install (win, 6) -- default to 6 (on top right)
 		check(WindowFont (win, font, font_name, font_size, false, false, false, false))
-		--effectiveWidth = math.min(width, GetInfo(281)-windowinfo.window_left)
-		WindowAddHotspot (win, "resize", width-RESIZE_TAG_SIZE, height-RESIZE_TAG_SIZE, width, height, "MouseOver", "CancelMouseOver", "MouseDown", "CancelMouseDown", "MouseUp", "", 6, 0)
+		effectiveWidth = math.min(width, GetInfo(281)-windowinfo.window_left)
+		WindowAddHotspot (win, "resize", effectiveWidth-RESIZE_TAG_SIZE, height-RESIZE_TAG_SIZE, effectiveWidth, height, "MouseOver", "CancelMouseOver", "MouseDown", "CancelMouseDown", "MouseUp", "", 6, 0)
 		WindowDragHandler(win, "resize", "ResizeMoveCallback", "ResizeReleaseCallback", 0)
 	else -- not our first time drawing
 		-- everything has already been made
 		-- just move them back into place
-		--effectiveWidth = math.min(width, GetInfo(281)-windowinfo.window_left)
-		WindowResize(win, width, height, 0x000000)
-		WindowMoveHotspot(win, "resize", width-RESIZE_TAG_SIZE, height-RESIZE_TAG_SIZE, width, height)
+		effectiveWidth = math.min(width, GetInfo(281)-windowinfo.window_left)
+		WindowResize(win, effectiveWidth, height, 0x000000)
+		WindowMoveHotspot(win, "resize", effectiveWidth-RESIZE_TAG_SIZE, height-RESIZE_TAG_SIZE, effectiveWidth, height)
 		setupConflicts()
     redraw_scheduled = true
 		drawWindows()
