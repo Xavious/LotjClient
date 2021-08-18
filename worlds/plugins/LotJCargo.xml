@@ -196,20 +196,20 @@ Initial contraband features added by @Domovoi.
   
 	<!-- Automatic cargo triggers -->
 	<trigger name="tradeCargo" script="leftShip" match="^You exit the ship\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
-	<trigger name="soldcargo" script="soldCargo" match="^You sell (?P<quantity>.*) units of (?P<resource>.*)\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
+	<trigger name="soldcargo" script="soldCargo" match="^You sell (?P<quantity>.*) units of (?P<resource>.*) for (?P<credits>.*) credits\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
 	<trigger name="earnedmoney" script="gainMoney" match="^You earned (.*) credits from the sale and pay (.*) in taxes\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
 	<trigger name="waitSell" script="waitSell" match="^The planet\'s funds can\'t support such a sale\!$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
-	<trigger name="boughtcargo" script="boughtCargo" match="^You purchased (?P<quantity>.*) units of (?P<resource>.*)\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
-	<trigger name="lostmoney" script="loseMoney" match="^It cost you (.*) credits total\, (.*) credits in tax\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
+	<trigger name="boughtcargo" script="boughtCargo" match="^You purchased (?P<quantity>.*) units of (?P<resource>.*) for (?P<credits>.*) credits\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
+	<trigger name="lostmoney" script="loseMoney" match="^Total profit\, accounting for purchase price\: (.*?)\. Tax paid\: (.*?)\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
 	<trigger name="jumpCompleteTrigger" match="^Hyperjump complete\.$" script="jumpComplete" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
 	<trigger name="badsale" script="errorSelling" match="^You\'re not carrying any of the resource onboard\!$" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
+	<trigger name="payfuel" script="payFuel" match="^You pay (.*?) credits to refuel the ship\.$" enabled="n" regexp="y" group="AutoCargo" sequence="100" />
   <trigger name="contrasellsuccess" script="soldCargo" match="^You find a contact willing to pay (?P<credits>.*) credits to unload (?P<quantity>.*) units of smuggled (?P<resource>.*)\.$" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
   <trigger name="contrabuysuccess" script="boughtCargo" match="^You pay (?P<credits>.*) credits to have (?P<quantity>.*) units of smuggled (?P<resource>.*) loaded on to your ship\.$" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
   <trigger name="contrasellfail" script="contraSellFailed" match="^You fail\.\nYou lose your cargo\!\Z" lines_to_match="2" multi_line="y" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
   <trigger name="contrabuyfail" script="contraBuyFailed" match="^You fail\.\nYou lose your credits\!\Z" lines_to_match="2" multi_line="y" group="AutoCargo" enabled="n" regexp="y" sequence="100" />
 
-  
-	<!-- Ship manifest triggers -->
+  	<!-- Ship manifest triggers -->
   <trigger name="beginShipManifest" script="enableShipManifest" match="^Cargo Readout for (.*)\:$" group="ManifestStart" enabled="n" regexp="y" sequence="100" />
   <trigger name="errorwithmanifest" script="errorShipManifest" match="^Only the owner\/pilot\/copilot may view the cargo for that ship\!$" group="ManifestStart" enabled="n" regexp="y" sequence="100" />
   <trigger name="shipnotfound" script="errorShipManifest" match="^You can\'t find that ship here\!$" group="ManifestStart" enabled="n" regexp="y" sequence="100" />
@@ -1131,6 +1131,9 @@ function gainMoney(name, list, args)
 	amountEarned = amountEarned + earned
 end
 function loseMoney(name, list, args)
+	amountEarned = amountEarned - tonumber(args[2])
+end
+function payFuel(name, list, args)
 	amountEarned = amountEarned - tonumber(args[1])
 end
 function displayEfficiency()
