@@ -3,7 +3,7 @@
 <!--  Saved on Thursday, July 05, 2012, 1:04 AM   --> 
 <!-- MuClient version 4.73 --> 
 <muclient>
-<plugin name="LotJStarMap" author="@Johnson+@Domovoi" id="dd5080a41939faabc233da8f" language="Lua" purpose="Dynamically display a system map with player location overlay" save_state="y" requires="4.73" version="2.3">
+<plugin name="LotJStarMap" author="@Johnson+@Domovoi" id="dd5080a41939faabc233da8f" language="Lua" purpose="Dynamically display a system map with player location overlay" save_state="y" requires="4.73" version="2.31">
 <description trim="y">
 <![CDATA[
 This plugin will gather information about the current galaxy's star systems 
@@ -42,8 +42,9 @@ Distance calculation corrected by @Domovoi
     <trigger name="clanCapture" script="storeClan" match="^(.*[a-zA-Z])(\s+((\d(.*)\+)|\d+\s+\(None\))(.*))$" group="ClanCap" enabled="n" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
     <trigger name="clanCapDone" script="findPlanets" match="^Use SHOWCLAN for more information\.$" regexp="y" enabled="n" group="ClanCap" omit_from_log="y" omit_from_output="y" sequence="100" />
     <trigger name="planetCapTitle" match="Planet*Starsystem*Governed By*Opinion*Military" group="PlanetCap" enabled="n" omit_from_log="y" omit_from_output="y" sequence="100" />
+    <trigger name="planetCapTail" match="Use PLANETS AI or PLANETS INCOME for other views of planet information." group="PlanetCap" enabled="n" omit_from_log="y" omit_from_output="y" sequence="100" />
 	<trigger name="planetCapture" script="storePlanet" match="^((\S(\s)?)+)\s+((\S(\s)?)+)\s+((\S(\s)?)+)(.*[^\.])$" regexp="y" enabled="n" group="PlanetCap" omit_from_log="y" omit_from_output="y" sequence="100" />
-	<trigger name="planetCapDone" script="setupWindow" match="^Use SHOWPLANET for more information\.$" regexp="y" enabled="n" group="PlanetCap" omit_from_log="y" omit_from_output="y" sequence="100" />
+	<trigger name="planetCapDone" script="setupWindow" match="^Use SHOWPLANET \<planet\> for more information\.$" regexp="y" enabled="n" group="PlanetCap" omit_from_log="y" omit_from_output="y" sequence="100" />
 	<!-- Lightspeed triggers -->
 	<trigger name="partialJump" match="^Remaining jump distance\: (.*)$" script="storePartialJump" group="LotJStarMap" enabled="y" regexp="y" sequence="100" />
 	<trigger name="completedjump" match="^Hyperjump complete\.$" script="clearJump" group="LotJStarMap" enabled="y" regexp="y" sequence="100" />
