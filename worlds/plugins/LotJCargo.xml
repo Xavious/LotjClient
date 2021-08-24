@@ -160,7 +160,12 @@ That's it! If everything was set up correctly the plugin should fly between worl
 You can pause the script at any time by entering 'cargoauto'. You can clear the script and restart by
 entering 'cargoclear'. Note: to clear your saved cargo ship list, enter 'cargoshipclear'.
 More info on all plugin commands can be found using 'cargohelp'.
-Initial contraband features added by @Domovoi.
+
+Stuff by @Domovoi:
+Initial contraband features added.
+Updated for showplanet changes.
+Removed 'cargobest' since we have 3 planet routes and cargobest only handles 2.
+
   ]]> 
   </description>
   </plugin>
@@ -174,7 +179,12 @@ Initial contraband features added by @Domovoi.
 	<trigger name="cargoSystemCapDone" script="scanNext" match="^Show what to whom\?$" regexp="y" enabled="n" group="SystemCap" omit_from_log="y" omit_from_output="y" sequence="100" />
 	<trigger name="cargoBodyCapTitle" script="cleanUp" match="*Starsystem*Governed By*Popular Support" enabled="n" group="BodyCap" omit_from_log="y" omit_from_output="y" sequence="100" />
 	<trigger name="cargoBodyCapture" script="storeBody" match="^(.*)\.\d$" regexp="y" enabled="n" group="BodyCap" omit_from_log="y" omit_from_output="y" sequence="100" />
-	<trigger name="cargoBodyCapDone" script="scanNext" match="^Use SHOWPLANET for more information\.$" regexp="y" enabled="n" group="BodyCap" omit_from_log="y" omit_from_output="y" sequence="100" />
+	<trigger name="cargoBodyCapDone" script="scanNext" match="^Use SHOWPLANET \<planet\> for more information\.$" regexp="y" enabled="n" group="BodyCap" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger name="cargoBodyCapDone2" script="scanNext" match="^Use SHOWPLANET for more information\.$" regexp="y" enabled="n" group="BodyCap" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger name="cleanup1" script="cleanUp" match="Use PLANETS AI or PLANETS INCOME for other views of planet information." enabled="n" group="BodyCap" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger name="cleanup2" script="cleanUp" match="Use PLANETS AI or PLANETS INCOME for other views of planet information." enabled="n" group="BodyCap" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger name="cleanup2" script="cleanUp" match="Listing publicly known starsystems:" enabled="n" group="BodyCap" omit_from_log="y" omit_from_output="y" sequence="100" />
+  <trigger name="cleanup2" script="cleanUp" match="There are no moons currently formed." enabled="n" group="BodyCap" omit_from_log="y" omit_from_output="y" sequence="100" />
 
 	<!-- Resource Capture Triggers -->
 	<trigger enabled="n" group="ResourceStart" match="^You use the datapad to lookup the information\.$" name="ShowplanetSuccess" script="showplanetSuccess" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
@@ -222,7 +232,7 @@ Initial contraband features added by @Domovoi.
 	<!-- Capture Aliases -->
 	<alias name="populateTable" script="scanNext" match="^cargoscan$" enabled="y" regexp="y" ignore_case="y" group="LotJCargo" sequence="100" />
 	<alias name="listsystems" script="listSystems" match="listsystems" enabled="y" ignore_case="y" group="LotJCargo" sequence="100" />
-	<alias name="cargoBestRoute" script="cargoBestRoute" match="^cargobest( +(.*))?$" enabled="y" ignore_case="y" regexp="y" group="LotJCargo" sequence="100" />
+	<!--<alias name="cargoBestRoute" script="cargoBestRoute" match="^cargobest( +(.*))?$" enabled="y" ignore_case="y" regexp="y" group="LotJCargo" sequence="100" />-->
 	<alias name="Cargosetup" script="cargoSetup" match="^cargosetup$" enabled="y" ignore_case="y" regexp="y" group="LotJCargo" sequence="100" />
 	<alias name="cargoHelp" script="cargoHelp" match="^cargohelp(\s*(.*))?$" enabled="y" regexp="y" ignore_case="y" group="LotJCargo" sequence="100" />
 	<alias name="cargoStart" script="retrievePlanet" match="^cargostart(\s*(.*))?" enabled="y" regexp="y" ignore_case="y" group="LotJCargo" sequence="100" />
@@ -1512,7 +1522,7 @@ function cargoAuto(name, list, args)
       end
    end
 end
-function cargoBestRoute(name, list, args)					-- find the most profitable route in the entire galaxy
+--[[function cargoBestRoute(name, list, args)					-- find the most profitable route in the entire galaxy
 	foundPlanet = false
 	--bestRouteValue = 0
 	--bestPlanet1 = {}
@@ -1589,7 +1599,8 @@ function cargoBestRoute(name, list, args)					-- find the most profitable route 
 	ColourNote("silver","","Start: ","red","",best.planet1.name,"silver",""," (","red","",best.resource1.name,"silver","",") End: ","red","",best.planet2.name,"silver",""," (","red","",best.resource2.name,"silver","",") Value: ","red","",string.format("%.0f",best.value*1000))
 	end
 	
-end
+end]]--
+
 function calculateRouteValue(sys1, sys2, resourcecost1, resourcecost2, tax1, tax2)
 	local distance = distance(sys1, sys2)
 	local time = (((((distance * 10) / 95) * 1000) / 50) * 2)
@@ -1766,10 +1777,6 @@ end
 local commands = { { name = "cargoScan", desc = "Scans every system in the galaxy into the cargo database.",
                          args = {  }
                           },
-               { name = "cargoBest", desc = "Searches through the cargo database to find the most profitable route.",
-                        args = { { name = "<none>", desc = "Searches through cargo database to find the most profitable route in the entire galaxy."}, 
-                                 { name = "<planet>", desc = "Searches through cargo database to find the most profitable route from the given planet."}, }
-                          },
                { name = "listSystems", desc = "Displays every system currently saved in the cargo database for debug purposes.",
                         args = { }
                           },
@@ -1869,6 +1876,12 @@ local commands = { { name = "cargoScan", desc = "Scans every system in the galax
                         }
                         
   --[[ 
+
+               { name = "cargoBest", desc = "Searches through the cargo database to find the most profitable route.",
+                        args = { { name = "<none>", desc = "Searches through cargo database to find the most profitable route in the entire galaxy."}, 
+                                 { name = "<planet>", desc = "Searches through cargo database to find the most profitable route from the given planet."}, }
+                          },
+
     <alias script="flyNext" match="cargonext" enabled="y" group="LotJCargo" ignore_case="y" sequence="100" />
   <alias match="^cargoShipProfileList(.*?)?$" script="shipProfileList" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
   <alias match="^cargoShipProfileName(.*?)?$" script="shipProfileName" enabled="y" group="LotJCargo" ignore_case="y" regexp="y" sequence="100" />
