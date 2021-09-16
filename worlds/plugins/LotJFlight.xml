@@ -251,7 +251,7 @@ coords = {-50000, 0, 50000}
 function waitHyper()
   --if not hyperCompleted then
     hypertries = hypertries + 1
-    if hypertries >= 10 then
+    if hypertries >= 16 then
       hypertries = 0
       Send("course "..coords[math.random(3)].." "..coords[math.random(3)].." "..coords[math.random(3)])
     end
