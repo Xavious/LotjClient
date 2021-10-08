@@ -767,7 +767,7 @@ function ReturnFromAFK(name, line, wildcards)
 end -- function
 
 function getParts(name, line, wildcards)
-	Send("get 100 " .. partNames[currentPart])
+	Send("get 25 " .. partNames[currentPart])
 	buildShip()
 end -- function
 
