@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="iso-8859-1" ?> 
+<!DOCTYPE muclient>  
+<muclient>
+<plugin name="LotJ_Auto_Limber_Endurance" author="@Daljo" id="f5afa559035d0716c7b22e8a" language="Lua" purpose="Re-up BH Skills" requires="4.73" version="0.1">
+<description trim="y">
+<![CDATA[
+--LotJ BH Skills Auto Re-Upper--
+
+Auto re-up endurance and limber when they run low.
+]]>
+</description>
+
+</plugin>
+
+<triggers></triggers>
+<aliases></aliases>
+<timers></timers>
+
+<script>
+<![CDATA[ 
+
+AUTHOR = GetPluginInfo(GetPluginID(), 2) -- author info
+VERSION = string.format("%1.2f", GetPluginInfo(GetPluginID(), 19)) -- version info
+
+function OnPluginBroadcast( msg, id, name, text )
+  if ( 91 == msg ) then
+    if ( 'AFFECTS' == text ) then
+      f, err = loadfile((GetPluginInfo("b3aae34498d5bf19b5b2e2af",20)).."LotJMSDPHelper.lua");
+
+      if ( f == nil ) then 
+        Note("Failed to load MSDP Helper!");
+      else
+        f();
+        local aff = getmsdp( "AFFECTS" );
+
+        local limber = string.match( aff, 'limber,(%d+)' );
+        if ( limber == nil ) then
+          -- No limber affect. Bail.
+        elseif ( tonumber( limber ) < 2 ) then
+          Execute( 'limber' );
+        end
+
+        local endurance = string.match( aff, 'endurance,(%d+)');
+        if ( endurance == nil ) then
+          -- No endurance affect. Bail.
+        elseif ( tonumber( endurance ) < 2 ) then
+          Execute( 'endurance' );
+        end
+      end
+    end
+  end
+end
+
+]]>
+</script>
+
+</muclient>
