@@ -53,7 +53,6 @@
   <variable name="immchat_echo">1</variable>
   <variable name="immnet_echo">1</variable>
   <variable name="log_colour_codes">1</variable>
-  <variable name="log_filename">C:\Users\Brandon\Documents\GitHub\LotjClient\logs\Legends of the JediChatLog.txt</variable>
   <variable name="log_timestamps">1</variable>
   <variable name="log_to_file">0</variable>
   <variable name="mindtalk_echo">0</variable>
