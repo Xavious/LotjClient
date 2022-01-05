@@ -42,12 +42,21 @@ USAGE:
   <trigger enabled="n" name="ask2" match="'*'*ask*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="exclaim1" match="*exclaim*'*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="exclaim2" match="'*'*exclaim*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="whisper1" match="You *whisper to * '*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="whisper2" match="* whispers to you '*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="whisperlink" match="* whispers *into a comlink." regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="mindtalk" match="*speak* your mind '*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="farspeak" match="A voice inside your mind says '*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="clan" match="*{*}<*>[*]*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="clan2" match="\[(Outgoing|Incoming) Transmission (to|from) (.*)\](.*)" regexp="y" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="comms" match="CommNet*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
   <trigger enabled="n" name="broadcast" match="Broadcasting Network*:*" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="radio" match="* radios, '*'" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="hail1" match="[Hail from *" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="hail2" match="[Broadcasting Hail to *" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+  <trigger enabled="n" name="intercom" match="[INTERCOM: *" regexp="n" omit_from_output="n" script="untagged_info" sequence="100" />
+
+
   
   --- begin OOC chat grabs
   
