@@ -1,58 +1,58 @@
-<?xml version="1.0" encoding="iso-8859-1" ?> 
-<!DOCTYPE muclient> 
-<!--  Saved on Wednesday, July 25, 2012, 7:14 PM   -->  
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE muclient>
+<!--  Saved on Wednesday, July 25, 2012, 7:14 PM   -->
 <muclient>
 <plugin name="LotJFlight" author="@Johnson" id="680bf1a4e5e600854747c379" language="Lua" purpose="Flight Made Easy" save_state="y" requires="4.40" version="1.49">
-<description trim="y">
-<![CDATA[ 
+  <description trim="y">
+<![CDATA[
 'FlyHelp'      - To see the list of commands associated with this plugin.
-ChangeLog - 
+
+ChangeLog -
 v1.45 -
-	Added flyclear alias to reset all variables before a new flight.
+  Added flyclear alias to reset all variables before a new flight.
 v1.44 -
-	Correctly prompts for exit directions and landing preference when using flyfinish.
-	Added flystatus alias to display current flight information.
+  Correctly prompts for exit directions and landing preference when using flyfinish.
+  Added flystatus alias to display current flight information.
 v1.42 -
-	Fixed auto landing mechanism.
-  ]]> 
+  Fixed auto landing mechanism.
+]]>
   </description>
-  </plugin>
-<!--   Get our standard constants   --> 
-	<include name="constants.lua" /> 
-<!--   Triggers    --> 
+</plugin>
+
+<include name="constants.lua" />
+
 <triggers>
-	<trigger name="LaunchComp" match="^Launch complete\.$" script="calcPlanet" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="CalcDone" match="^\[Status\]\: Hyperspace calculations have been completed\.$" script="calcDone" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="HyperComp" match="^Hyperjump complete\.$" script="coursePlanet" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="OrbitObtained" match="^You begin orbiting (.*)\.$" script="doLand" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="LandGrabStart" match="^Possible choices for (.*)\:$" script="startLandGrab" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="MatchLine" match="^(.*?) \((All|Max|Min)(.*?)\)$" script="landGrab" group="landGrab" enabled="n" regexp="y" keep_evaluating="y" omit_from_log="n" omit_from_output="n" sequence="100" />
-	<trigger name="LandGrabEnd" match="^$" script="endLandGrab" group="landGrab" enabled="n" regexp="y" sequence="100" />
-	<trigger name="LandStarted" match="^You begin to land on (.*)\.$" script="landing" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="LandComp" match="^Landing sequence complete\.$" script="endFlight" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="Proximity" match="^You are too close to (.*) to make the jump to lightspeed\!$" script="waitHyper" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="landsitelocked" match="^Restricted Landing pad\. Limited to clans members and ships only\.$" script="landNext" group="Flight" enabled="n" regexp="y" sequence="100" />
-	<trigger name="LeftShip" match="^You exit the ship\.$" script="reenterCheck" group="Flight" enabled="n" regexp="y" sequence="100" />
+  <trigger name="LaunchComp" match="^Launch complete\.$" script="calcPlanet" group="Flight" enabled="n" regexp="y" sequence="100" />
+  <trigger name="CalcDone" match="^\[Status\]\: Hyperspace calculations have been completed\.$" script="calcDone" group="Flight" enabled="n" regexp="y" sequence="100" />
+  <trigger name="HyperComp" match="^Hyperjump complete\.$" script="coursePlanet" group="Flight" enabled="n" regexp="y" sequence="100" />
+  <trigger name="OrbitObtained" match="^You begin orbiting (.*)\.$" script="doLand" group="Flight" enabled="n" regexp="y" sequence="100" />
+  <trigger name="LandGrabStart" match="^Possible choices for (.*)\:$" script="startLandGrab" group="Flight" enabled="n" regexp="y" sequence="100" />
+  <trigger name="MatchLine" match="^(.*?) \((All|Max|Min)(.*?)\)$" script="landGrab" group="landGrab" enabled="n" regexp="y" keep_evaluating="y" omit_from_log="n" omit_from_output="n" sequence="100" />
+  <trigger name="LandGrabEnd" match="^$" script="endLandGrab" group="landGrab" enabled="n" regexp="y" sequence="100" />
+  <trigger name="LandStarted" match="^You begin to land on (.*)\.$" script="landing" group="Flight" enabled="n" regexp="y" sequence="100" />
+  <trigger name="LandComp" match="^Landing sequence complete\.$" script="endFlight" group="Flight" enabled="n" regexp="y" sequence="100" />
+  <trigger name="Proximity" match="^You are too close to (.*) to make the jump to lightspeed\!$" script="waitHyper" group="Flight" enabled="n" regexp="y" sequence="100" />
+  <trigger name="landsitelocked" match="^Restricted Landing pad\. Limited to clans members and ships only\.$" script="landNext" group="Flight" enabled="n" regexp="y" sequence="100" />
+  <trigger name="LeftShip" match="^You exit the ship\.$" script="reenterCheck" group="Flight" enabled="n" regexp="y" sequence="100" />
   <trigger name="squadronlaunched" match="^(?P<fightertype>.+?) '(?P<fightername>.+?)' launches from a hangar on (?P<hangartype>.+?) '(?P<hangarname>.+?)'\,(.*)$" script="fighterGrab" group="Squadron" enabled="y" regexp="y" sequence="100" />
   <trigger name="squadronview" match="^(L\[(.*)\]\:P\[(.*)\] )?(?P<fightertype>.+?) '(?P<fightername>.+?)'((\s+[\d-]+\s[\d-]+\s[\d-]+|\s+Prox\: \d+))?$" script="fighterShow" group="Squadron" enabled="y" regexp="y" sequence="100" />
   <trigger match="^Checking hyperspace course integrity\. Please wait\.$" script="calcEntered" group="Flight" regexp="y" sequence="100" />
   <trigger match="^Please wait until the ship has finished its current maneuver\.$" script="waitHyper" group="Flight" regexp="y" sequence="100" />
-
 </triggers>
 
 <aliases>
-	<alias name="Flytoarg" match="flyto *" script="beginFlight" enabled="y" group="FlightCmd" ignore_case="y" sequence="100" />
-	<alias name="Flyfinish" match="^flyfinish (.*)$" script="finishFlight" regexp="y" enabled="y" group="FlightCmd" ignore_case="y" sequence="100" />
-	<alias name="Flystatus" match="flystatus" script="flightStatus" enabled="y" group="FlightCmd" ignore_case="y" sequence="100" />
-	<alias name="Flyauto" match="^flyauto( +(.*))?$" script="flyAuto" enabled="y" regexp="y" group="FlightCmd" ignore_case="y" sequence="100" />
-	<alias name="Flyclear" match="flyclear" script="flyClear" enabled="y" regexp="n" group="FlightCmd" ignore_case="y" sequence="100" />
-	<alias name="FlyHelp" match="^flyhelp$" script="flightHelp" enabled="y" regexp="y" group="FlightCmd" ignore_case="y" sequence="100" />
+  <alias name="Flytoarg" match="flyto *" script="beginFlight" enabled="y" group="FlightCmd" ignore_case="y" sequence="100" />
+  <alias name="Flyfinish" match="^flyfinish (.*)$" script="finishFlight" regexp="y" enabled="y" group="FlightCmd" ignore_case="y" sequence="100" />
+  <alias name="Flystatus" match="flystatus" script="flightStatus" enabled="y" group="FlightCmd" ignore_case="y" sequence="100" />
+  <alias name="Flyauto" match="^flyauto( +(.*))?$" script="flyAuto" enabled="y" regexp="y" group="FlightCmd" ignore_case="y" sequence="100" />
+  <alias name="Flyclear" match="flyclear" script="flyClear" enabled="y" regexp="n" group="FlightCmd" ignore_case="y" sequence="100" />
+  <alias name="FlyHelp" match="^flyhelp$" script="flightHelp" enabled="y" regexp="y" group="FlightCmd" ignore_case="y" sequence="100" />
   <alias match="^flychecksale$" script="toggleCheckSale" enabled="y" regexp="y" group="FlightCmd" ignore_case="y" sequence="100" />
-	<alias name="FlyReenterToggle" match="^flyreenter(\s*(.*))?$" script="toggleReenter" enabled="y" regexp="y" group="FlightCmd" ignore_case="y" sequence="100" />
-	<alias name="fighterclear" match="fighterclear" script="fighterClear" enabled="y" regexp="n" group="FlightCmd" ignore_case="y" sequence="100" />
+  <alias name="FlyReenterToggle" match="^flyreenter(\s*(.*))?$" script="toggleReenter" enabled="y" regexp="y" group="FlightCmd" ignore_case="y" sequence="100" />
+  <alias name="fighterclear" match="fighterclear" script="fighterClear" enabled="y" regexp="n" group="FlightCmd" ignore_case="y" sequence="100" />
   <alias match="^flyland(\s*(.*))?$" script="flyLand" enabled="y" regexp="y" group="FlightCmd" ignore_case="y" sequence="100" />
 </aliases>
-<!--   Script    --> 
+
 <script>
 <![CDATA[
 local shipName = ""
@@ -126,7 +126,6 @@ function flyLand(name, line, args)
     landPref[args[1]] = args[2]
     ColourNote("yellow","","LotJFlight: Landing preference '"..args[2].."' designated for planet '"..args[1].."'.")
   end
-
 end
 
 function runDirs(dirs)
@@ -177,8 +176,8 @@ function fighterShow(name, line, args, styles)
       if args.fightertype.." '"..args.fightername.."'" == j then
         DeleteLines(1)
         for a, b in pairs(styles) do
-          ColourTell (RGBColourToName(b.textcolour), RGBColourToName(b.backcolour), b.text) 
-        end 
+          ColourTell (RGBColourToName(b.textcolour), RGBColourToName(b.backcolour), b.text)
+        end
         ColourNote("yellow","","->","gray","","[","red","",k,"gray","","]")
       end
     end
@@ -189,7 +188,7 @@ function fighterClear()
   hangars = {}
   Note("Squadron information cleared.")
 end
-  
+
 function reenterCheck()
   if reentership then
     enterShip()
@@ -208,26 +207,26 @@ function toggleReenter(name, line, args)
 end
 
 function flyClear()
-	shipName = ""
-	hatchCode = -1
-	shipEnterDirs = ""
-	shipLeaveDirs = ""
+  shipName = ""
+  hatchCode = -1
+  shipEnterDirs = ""
+  shipLeaveDirs = ""
   pilotToNav = ""
   navToPilot = ""
-	planetName = ""
-	lastPlanet = ""
-	autoFly = false
-	landingSites = {}
-	landingSiteNum = 0
-	landgrabbing = false
-	reentership = false
+  planetName = ""
+  lastPlanet = ""
+  autoFly = false
+  landingSites = {}
+  landingSiteNum = 0
+  landgrabbing = false
+  reentership = false
   checkSale = false
   dirsEntered = false
   navEntered = false
   hyperCompleted = false
-	hypertries = 0
-	Note("Fly variables cleared.")
-	toggleFlyOff()
+  hypertries = 0
+  Note("Fly variables cleared.")
+  toggleFlyOff()
 end
 
 function endFlight()
@@ -260,18 +259,18 @@ function waitHyper()
 end
 
 function landing()
-	Send("shields on")
-	Send("autopilot on")
-end	
+  Send("shields on")
+  Send("autopilot on")
+end
 
 function endLandGrab()
   landingSiteNum = 0
-	if (landgrabbing == false) then
-		landgrabbing = true
-		Note("Grabbing landing sites...")
-	else
-		landgrabbing = false
-		EnableTriggerGroup("landGrab", false)
+  if (landgrabbing == false) then
+    landgrabbing = true
+    Note("Grabbing landing sites...")
+  else
+    landgrabbing = false
+    EnableTriggerGroup("landGrab", false)
     local landing = landPref[planetName:lower()]
     if landing and tonumber(landing) then -- pref is a number
       if tonumber(landing) > 0 then -- landing number given
@@ -298,40 +297,40 @@ function endLandGrab()
     else -- no landing pref, use automatic
       landNext()
     end
-	end
+  end
 end
 
 function landNext()
-	landingSiteNum = landingSiteNum + 1
-	landArg(landingSiteNum)
+  landingSiteNum = landingSiteNum + 1
+  landArg(landingSiteNum)
 end
 
 function landArg(siteNum)
-	if (siteNum > #landingSites) then
-		Note("Error in auto landing sequence, aborting...")
-		toggleFlyOff()
-		return
-	end
-	Send("land '" .. planetName .. "' " .. landingSites[siteNum])
+  if (siteNum > #landingSites) then
+    Note("Error in auto landing sequence, aborting...")
+    toggleFlyOff()
+    return
+  end
+  Send("land '" .. planetName .. "' " .. landingSites[siteNum])
 end
 
 function landGrab(name, list, args)
-	landingSites[#landingSites + 1] = Trim(args[1])
+  landingSites[#landingSites + 1] = Trim(args[1])
 end
 
 function startLandGrab(name, list, args)
-	EnableTriggerGroup("landGrab", true)
+  EnableTriggerGroup("landGrab", true)
 end
 
 function doLand()
   hyperCompleted = true
-	Send("land '" .. planetName .. "'")
+  Send("land '" .. planetName .. "'")
 end
 
 
 function coursePlanet()
   hyperCompleted = true
-	Send("course '" .. planetName .. "'")
+  Send("course '" .. planetName .. "'")
 end
 
 function calcEntered()
@@ -343,13 +342,13 @@ end
 
 function calcDone()
   hypertries = 1
-	Send("hyper")
+  Send("hyper")
 end
 
 function calcPlanet(name, list, args)
-	if (planetName == "") then
-		planetName = utils.inputbox("Planet to fly to?", "Planet", "planet", "Courier", 9)
-	end
+  if (planetName == "") then
+    planetName = utils.inputbox("Planet to fly to?", "Planet", "planet", "Courier", 9)
+  end
   if not planetName then
     ColourNote("red","","Cancel detected, aborting.")
     return
@@ -357,8 +356,8 @@ function calcPlanet(name, list, args)
   if pilotToNav and pilotToNav ~= "" then
     runDirs(pilotToNav)
   end
-	Execute("calc " .. planetName)
-end		
+  Execute("calc " .. planetName)
+end
 
 function flightStatus(name, list, args)
   ColourNote(gray,"","LotJFlight status: ",cyan,"",((autoFly and "Enabled") or "Disabled"))
@@ -372,18 +371,18 @@ function flightStatus(name, list, args)
 end
 
 function finishFlight(name, list, args)
-	if (args[1] ~= "") then
-		planetName = Trim(args[1])
-		Note("Planet name: '" .. planetName .. "'")
-	end
-	toggleFlyOn()
-	if (shipName == "" or not shipName) then
-		shipName = utils.inputbox("What ship are you in?", "Ship name", "", "Courier", 9)
+  if (args[1] ~= "") then
+    planetName = Trim(args[1])
+    Note("Planet name: '" .. planetName .. "'")
+  end
+  toggleFlyOn()
+  if (shipName == "" or not shipName) then
+    shipName = utils.inputbox("What ship are you in?", "Ship name", "", "Courier", 9)
     if not shipName then
       ColourNote("red","","Cancel detected, aborting.")
       return
     end
-	end
+  end
   if not navEntered and (pilotToNav and pilotToNav == "") then
     pilotToNav = utils.inputbox("Dirs from pilot to nav station?", "Pilot To Nav", "", "Courier", 9)
   end
@@ -391,79 +390,79 @@ function finishFlight(name, list, args)
     navToPilot = utils.inputbox("Dirs from nav to pilot station?", "Nav To Pilot", "", "Courier", 9)
     navEntered = true
   end
-	if not dirsEntered and (shipEnterDirs and shipEnterDirs == "") then
-		shipEnterDirs = utils.inputbox("Dirs to cockpit?\nFormat options:\nSpaces: E U N\nCommas: E,U,N\nSemi-colons: E;U;N\n1-Room Ship: none", "Cockpit", "", "Courier", 9)
-	end
-	if not dirsEntered and (shipLeaveDirs and shipLeaveDirs == "") then
-		shipLeaveDirs = utils.inputbox("Dirs to leave ship?\nFormat options:\nSpaces: S D W\nCommas: S,D,W\nSemi-colons: S;D;W\n1-Room Ship: none", "Exit", "", "Courier", 9)
+  if not dirsEntered and (shipEnterDirs and shipEnterDirs == "") then
+    shipEnterDirs = utils.inputbox("Dirs to cockpit?\nFormat options:\nSpaces: E U N\nCommas: E,U,N\nSemi-colons: E;U;N\n1-Room Ship: none", "Cockpit", "", "Courier", 9)
+  end
+  if not dirsEntered and (shipLeaveDirs and shipLeaveDirs == "") then
+    shipLeaveDirs = utils.inputbox("Dirs to leave ship?\nFormat options:\nSpaces: S D W\nCommas: S,D,W\nSemi-colons: S;D;W\n1-Room Ship: none", "Exit", "", "Courier", 9)
     dirsEntered = true
-	end
-	if landPref[planetName:lower()] then
+  end
+  if landPref[planetName:lower()] then
     ColourNote("yellow","","Using saved landing preference '"..landPref[planetName:lower()].."'.")
   else
     ColourNote("red","","No landing preference saved, using automatic landing.")
-	end
+  end
 end
 
 function beginFlight(name, list, args)
-	if (args[1] ~= "") then
-		planetName = Trim(args[1])
-	else
-		planetName = utils.inputbox("Enter planet name to fly to:", "Destination", "Planet", "Courier", 9)
+  if (args[1] ~= "") then
+    planetName = Trim(args[1])
+  else
+    planetName = utils.inputbox("Enter planet name to fly to:", "Destination", "Planet", "Courier", 9)
     if not planetName then
       ColourNote("red","","Cancel detected, aborting.")
       return
     end
-	end
-	enterShip()
-	toCockpit()
+  end
+  enterShip()
+  toCockpit()
   hyperCompleted = false
-	Send("pilot")
-	Send("autopilot off")
-	Send("launch confirm")
-	Send("shields on")
-	Note("Flying to: '" .. planetName .. "'")
-	toggleFlyOn()
-	if landPref[planetName:lower()] then
+  Send("pilot")
+  Send("autopilot off")
+  Send("launch confirm")
+  Send("shields on")
+  Note("Flying to: '" .. planetName .. "'")
+  toggleFlyOn()
+  if landPref[planetName:lower()] then
     ColourNote("yellow","","Using saved landing preference '"..landPref[planetName:lower()].."'.")
   else
     ColourNote("red","","No landing preference saved, using automatic landing.")
-	end
+  end
 end
 
 function enterShip(name, list, args)
-	if (shipName == "" or not shipName) then
-		shipName = utils.inputbox("Ship to be flown?", "Shipname", "shipname", "Courier", 9)
+  if (shipName == "" or not shipName) then
+    shipName = utils.inputbox("Ship to be flown?", "Shipname", "shipname", "Courier", 9)
     if not shipName then
       ColourNote("red","","Cancel detected, aborting.")
       return
     end
-	end
-	if (hatchCode == -1) then
+  end
+  if (hatchCode == -1) then
     local num = utils.inputbox("Hatch code? (0 for none)", "Hatchcode", "0", "Courier", 9)
     if not num then
       ColourNote("red","","Cancel detected, aborting.")
       return
     end
-		hatchCode = tonumber(num)
-	end
-	if (hatchCode < 1) then
-		Send("openhatch " .. shipName)
-	else
-		Send("openhatch " .. shipName .. " " .. hatchCode)
-	end
-	Send("enter " .. shipName)
-	Send("closehatch")
+    hatchCode = tonumber(num)
+  end
+  if (hatchCode < 1) then
+    Send("openhatch " .. shipName)
+  else
+    Send("openhatch " .. shipName .. " " .. hatchCode)
+  end
+  Send("enter " .. shipName)
+  Send("closehatch")
 end
 
 function toCockpit(name, list, args)
-	if not dirsEntered and (shipEnterDirs and shipEnterDirs == "") then
-		shipEnterDirs = utils.inputbox("Dirs to cockpit?\nFormat options:\nSpaces: E U N\nCommas: E,U,N\nSemi-colons: E;U;N\n1-Room Ship: none", "Cockpit", "", "Courier", 9)
-	end
-	if not dirsEntered and (shipLeaveDirs and shipLeaveDirs == "") then
-		shipLeaveDirs = utils.inputbox("Dirs to leave ship?\nFormat options:\nSpaces: S D W\nCommas: S,D,W\nSemi-colons: S;D;W\n1-Room Ship: none", "Exit", "", "Courier", 9)
+  if not dirsEntered and (shipEnterDirs and shipEnterDirs == "") then
+    shipEnterDirs = utils.inputbox("Dirs to cockpit?\nFormat options:\nSpaces: E U N\nCommas: E,U,N\nSemi-colons: E;U;N\n1-Room Ship: none", "Cockpit", "", "Courier", 9)
+  end
+  if not dirsEntered and (shipLeaveDirs and shipLeaveDirs == "") then
+    shipLeaveDirs = utils.inputbox("Dirs to leave ship?\nFormat options:\nSpaces: S D W\nCommas: S,D,W\nSemi-colons: S;D;W\n1-Room Ship: none", "Exit", "", "Courier", 9)
     dirsEntered = true
-	end
+  end
   if not navEntered and (pilotToNav and pilotToNav == "") then
     pilotToNav = utils.inputbox("Dirs from pilot to nav station?", "Pilot To Nav", "", "Courier", 9)
   end
@@ -477,15 +476,15 @@ function toCockpit(name, list, args)
 end
 
 function toggleFlyOn()
-	autoFly = true
-	EnableTriggerGroup("Flight", true)
-	Note("Auto Flight activated.")
+  autoFly = true
+  EnableTriggerGroup("Flight", true)
+  Note("Auto Flight activated.")
 end
 
 function toggleFlyOff()
-	autoFly = false
-	EnableTriggerGroup("Flight", false)
-	Note("Auto Flight deactivated.")
+  autoFly = false
+  EnableTriggerGroup("Flight", false)
+  Note("Auto Flight deactivated.")
 end
 
 function flyAuto(name, line, args)
@@ -505,22 +504,22 @@ function flyAuto(name, line, args)
 end
 
 function flightHelp()
-	Note("Automatic flight commands:")
-	Note("------------------------------")
-	Note("Flyto <planet>      - Begin a flight to given planet, while standing in front of ship")
-	--Note("Flyto prompt        - Begin a new flight, prompting for parameters")
-	Note("Flyfinish <planet>  - Finish a flight already in progress to given planet")
-	Note("Flystatus           - Display current status of flight")
-	Note("Flyauto on/off      - Enable or disable automatic flight")
-	Note("Flyclear            - Clears all current fly variables")
-	Note("Flyreenter          - Re-enter your ship at the end of a flight")
+  Note("Automatic flight commands:")
+  Note("------------------------------")
+  Note("Flyto <planet>      - Begin a flight to given planet, while standing in front of ship")
+  --Note("Flyto prompt        - Begin a new flight, prompting for parameters")
+  Note("Flyfinish <planet>  - Finish a flight already in progress to given planet")
+  Note("Flystatus           - Display current status of flight")
+  Note("Flyauto on/off      - Enable or disable automatic flight")
+  Note("Flyclear            - Clears all current fly variables")
+  Note("Flyreenter          - Re-enter your ship at the end of a flight")
   Note("FlyCheckSale        - Check for sale spacecraft at the end of a flight")
-	Note("FlyHelp             - Display this help menu")
+  Note("FlyHelp             - Display this help menu")
   Note("FlyLand list        - Display saved landing preferences")
   Note("FlyLand clear       - Clear saved landing preferences")
   Note("FlyLand <planet>    - Delete saved landing preference")
   Note("FlyLand <planet>,<landing> - Store landing preference for given planet")
-	Note("\n")
+  Note("\n")
 end
 
 function OnPluginSaveState()
@@ -529,23 +528,23 @@ end
 
 require "checkplugin"
 function OnPluginListChanged()
-	do_plugin_check_now ("b2c06b3dcc775c0ede861316", "LotJCalc") -- check we have LotJCalc Plugin
+  do_plugin_check_now ("b2c06b3dcc775c0ede861316", "LotJCalc") -- check we have LotJCalc Plugin
 end
 
 
-  ]]> 
-  </script>
- <!--   Plugin help    -->
-  <aliases>
-  <alias script="OnHelp" match="LotJFlight:help" enabled="y" /> 
-  </aliases>
- <script>
- <![CDATA[ function OnHelp ()
+]]>
+</script>
+
+<aliases>
+  <alias script="OnHelp" match="LotJFlight:help" enabled="y" />
+</aliases>
+
+<script>
+<![CDATA[
+function OnHelp ()
   world.Note (world.GetPluginInfo (world.GetPluginID (), 3))
 end
+]]>
+</script>
 
-  ]]> 
-  </script>
-  </muclient>
-  
-  
+</muclient>
