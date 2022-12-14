@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="iso-8859-1" ?> 
+<!DOCTYPE muclient>
+<muclient>
+
+<plugin name="LotJ_Prompt_Token" author="@Daljo" id="0d88a1c4bd7ae7183d1a7d7b" language="Lua" purpose="Inject dynamic vars into your prompt" requires="4.73" version="0.1">
+<description trim="y">
+<![CDATA[
+
+To swap your prompts to the format parsed by this, use the following alias:
+
+```
+prompt token
+```
+
+In a future version I will update it to let you specify a foreground and background color.
+
+]]>
+</description>
+</plugin>
+
+<triggers>
+	<trigger name="fullswap" match="^(f|p)romptData = \{" regexp="y" script="fullprompt" enabled="y" keep_evaluating="y" omit_from_output="y" />
+	<trigger name="afkprompt" match="-[AFK MODE]--Type-AFK-to-return!--[AFK MODE]-" script="afkprompt" enabled="y" keep_evaluating="y" />
+
+	<!-- Some triggers to disable the prompt rewriting when we are changing stuff -->
+	<trigger match="^Your current f?prompt string:$" regexp="y" script="disableswaps" enabled="y" />
+	<trigger match="^Replacing old f?prompt of:$" regexp="y" script="disableswaps" enabled="y" />
+	<trigger match="^Set f?prompt to what\? \(try help prompt\)$" regexp="y" script="enableswaps" name="enableswaps1" enabled="n" />
+	<trigger match="^Ok.$" regexp="y" script="enableswaps" name="enableswaps2" enabled="n" />
+</triggers>
+
+<aliases>
+    <alias enabled="y" script="setprompts" match="prompt token" sequence="10" ignore_case="y" />
+</aliases>
+<script>
+<![CDATA[
+
+require "serialize"
+json = dofile( GetPluginInfo( GetPluginID(), 20 ) .. "json.lua" )
+f = loadfile( GetPluginInfo( GetPluginID(), 20 ) .. "lotj_colors.lua" )
+if ( f ~= nil ) then
+	f()
+end
+
+local promptVars = nil;
+
+function setprompts()
+	Send( 'prompt &xpromptData = { "PeopleNear": "%A", "TimeOfDay": "%W", "Ambience": "%J", "Tone": "%D", "Language": "%w", "Action": "%g", "Droid": "%d", "DroidHP": "%s", "MentalState": "%G", "CurrUsers": "%u" }}%_' )
+	Send( 'fprompt &xfromptData = { "PeopleNear": "%A", "TimeOfDay": "%W", "Ambience": "%J", "Tone": "%D", "Language": "%w", "Action": "%g", "Droid": "%d", "DroidHP": "%s", "MentalState": "%G", "CurrUsers": "%u", "EnemyHP": "%E" }}%_' )
+end
+
+function disableswaps()
+	EnableTrigger( 'fullswap', false )
+	EnableTrigger( 'enableswaps1', true )
+	EnableTrigger( 'enableswaps2', true )
+end
+
+function enableswaps()
+	EnableTrigger( 'fullswap', true )
+	EnableTrigger( 'enableswaps1', false )
+	EnableTrigger( 'enableswaps2', false )
+end
+
+function colorFromPercent( percent )
+	local percent = tonumber( percent )
+	local retColor = '#00ff00'
+
+	if ( percent <= 35 ) then
+		retColor = '#ff0000'
+	elseif ( percent <= 65 ) then
+		retColor = '#ffff00'
+	end
+
+	return retColor
+end
+
+function afkprompt()
+	if ( promptVars ~= nil ) then
+		show()
+	end
+end
+
+-- prompt promptData = { "PeopleNear": "%A", "TimeOfDay": "%W", "Ambience": "%J", "Tone": "%D", "Language": "%w", "Action": "%g", "Droid": "%d", "DroidHP": "%s", "MentalState": "%g", "CurrUsers": "%u" }}%_
+-- 
+function fullprompt( name, line, args )
+	-- Load the prompt variables in ...
+	-- Gotta extract out PeopleNear manually, as it could include doublequotes for some mob names.
+	local _, _, PeopleNear = line:find( [===["PeopleNear": "(.*)", "TimeOfDay"]===] )
+	line = line:gsub( [===["PeopleNear": "(.*)", "TimeOfDay"]===], [==["TimeOfDay"]==], 1 )
+	promptVars = json.decode( string.sub( line, 14 ) )
+	promptVars.PeopleNear = PeopleNear
+	promptVars.fprompt = ( 'f' == line:sub( 1, 1 ) )
+	if ( nil ~= promptVars.EnemyHP ) then
+		promptVars.EnemyHP = promptVars.EnemyHP:gsub( "Enemy: %[ (%d+)%% %]", "%1", 1 )
+	end
+
+	show()
+end
+
+function show()
+	if ( not IsPluginInstalled( '371e010fa206b5a1b0a7965d' ) ) then
+		Note( 'Error! You must install the LotJ_GMCP plugin for this to work!' )
+		return
+	end
+
+	if ( not GetPluginInfo( '371e010fa206b5a1b0a7965d', 17 ) ) then
+		Note( 'GMCP Plugin not enabled -- enabling!' )
+		EnablePlugin( '371e010fa206b5a1b0a7965d', true )
+	end
+
+	-- Grab the GMCP blob ...
+	local ret, datastring = CallPlugin( "371e010fa206b5a1b0a7965d", "gmcpdata_as_string", "" )
+	pcall( loadstring( "gmcp = " .. datastring ) )
+
+	--[[ Possible alternate method:
+		local f = loadfile( ( GetPluginInfo( "371e010fa206b5a1b0a7965d", 20 ) ) .. "gmcphelper.lua" )
+		f()
+		local gmcp = gmcp()
+	--]]
+
+	-- Set the colors we want to use for output ...
+	local blue  = '#0000ff';
+	local gray  = '#c0c0c0'
+	local cyan  = '#00ffff'
+	local white = '#ffffff'
+
+	local fg    = '#afaf00'
+	local bg    = '#8787ff'
+
+	-- Change the fg and bg color values here if you'd like:
+	fg = fg
+	bg = bg
+
+	-- Determine whether we'd like to add enemy data and adjust prompt based on there being an enemy, or the fprompt being loaded.
+	-- local inCombat = ( nil ~= gmcp.Char.Enemy.name )
+	local inCombat = ( nil ~= promptVars.EnemyHP )
+
+	ColourTell(
+		gray, '', '[',
+		cyan, '', gmcp.Char.Info.name,
+		gray, '', '] '
+	)
+
+	if ( inCombat ) then
+		local hpPercent = math.floor( 100 * tonumber( gmcp.Char.Vitals.hp ) / tonumber( gmcp.Char.Vitals.maxHp ) );
+		ColourTell(
+			gray, '', '[ ',
+			colorFromPercent( hpPercent ), '', hpPercent .. '%',
+			gray, '', ' ] '
+		)
+	end
+
+	-- hp
+	ColourTell(
+		bg, '', 'HP: ',
+		fg, '', gmcp.Char.Vitals.hp,
+		bg, '', '/' .. gmcp.Char.Vitals.maxHp .. ' '
+	)
+
+	-- action timer
+	ColourTell(
+		gray, '', '[',
+		white, '', promptVars.Action,
+		gray, '', '] '
+	)
+
+	-- comlink
+	if ( nil ~= gmcp.Char.Chat ) then
+		ColourTell(
+			gray, '', '(',
+			white, '', gmcp.Char.Chat.commChannel and gmcp.Char.Chat.commChannel or '-',
+			gray, '', ':',
+			white, '', gmcp.Char.Chat.commEncrypt and gmcp.Char.Chat.commEncrypt or '-',
+			gray, '', '/',
+			white, '', promptVars.Tone,
+			gray, '', ') '
+		)
+	end
+
+	-- mv
+	ColourTell(
+		bg, '', 'MV: ',
+		fg, '', gmcp.Char.Vitals.move,
+		bg, '', '/' .. gmcp.Char.Vitals.maxMove .. ' '
+	)
+
+	if ( inCombat ) then
+		local mvPercent = math.floor( 100 * tonumber( gmcp.Char.Vitals.move ) / tonumber( gmcp.Char.Vitals.maxMove ) );
+		ColourTell(
+			gray, '', '[ ',
+			colorFromPercent( mvPercent ), '', mvPercent .. '%',
+			gray, '', ' ] '
+		)
+	end
+
+	-- mana
+	if ( tonumber( gmcp.Char.Vitals.maxMana ) > 0 ) then
+		ColourTell(
+			bg, '', 'FP: ',
+			fg, '', gmcp.Char.Vitals.mana,
+			bg, '', '/' .. gmcp.Char.Vitals.maxMana .. ' '
+		)
+
+		if ( gmcp.Char.Vitals.mana ~= gmcp.Char.Vitals.maxMana ) then
+            Hyperlink(
+                'meditate',
+                'med',
+                'Click to meditate your mana back up.',
+                fg,
+                '',
+                false
+            )
+			ColourTell(
+				bg, '', ' '
+			)
+		end
+	end
+
+	if ( promptVars.MentalState ~= "0" ) then
+		ColourTell(
+			bg, '', 'Mental State: ',
+			fg, '', promptVars.MentalState
+		)
+	end
+
+	-- End Line 1
+	ColourNote(
+		bg, '', '>'
+	)
+
+	if ( promptVars.Droid ~= '-' ) then
+		local droidHp, droidHpMax = promptVars.DroidHP:match( '(%d+)/(%d+)')
+		ColourTell(
+			bg, '', 'Droid:',
+			cyan, '', promptVars.Droid .. ' ',
+			fg, '', droidHp,
+			bg, '', '/' .. droidHpMax
+		)
+
+		if ( droidHp ~= droidHpMax ) then
+			ColourTell(
+				gray, '', ' [',
+				cyan, '', math.floor( 100 * tonumber( droidHp ) / tonumber( droidHpMax ) ) .. '%',
+				gray, '', ']'
+			)
+		end
+
+		ColourNote(
+			bg, '', ' >'
+		)
+	end
+
+	if ( nil ~= promptVars.EnemyHP ) then
+		ColourTell(
+			'#ff0000', '', 'Enemy',
+			gray, '', ': '
+		)
+
+		-- gmcp lags slightly, so use prompt instead of gmcp.Char.Enemy.percent
+		if ( nil ~= promptVars.EnemyHP ) then
+			local oppHpPercent = tonumber( promptVars.EnemyHP )
+			ColourTell(
+				gray, '', '[ ',
+				colorFromPercent( oppHpPercent ), '', oppHpPercent .. '%',
+				gray, '', ' ] '
+			)
+		end
+
+		if ( nil ~= gmcp.Char.Enemy.name ) then
+			ColourTell(
+				'#ff0000', '', strip_colours( gmcp.Char.Enemy.name ),
+				gray, '', ' '
+			)
+		end
+
+		ColourNote(
+			'#880000', '', '>'
+		)
+	end
+
+
+	if ( gmcp.Ship.Info.maxHull ) then
+		-- Zoom zoom?
+		if ( nil ~= gmcp.Ship.Info.speed ) then
+			ColourTell(
+				bg, '', 'Speed: ',
+				fg, '', gmcp.Ship.Info.speed,
+				bg, '', '/' .. gmcp.Ship.Info.maxSpeed .. ' '
+			)
+		end
+
+		-- Ship Status
+		ColourTell(
+			bg, '', 'Fuel: ',
+			fg, '', gmcp.Ship.Info.energy,
+			bg, '', '/' .. gmcp.Ship.Info.maxEnergy .. ' '
+		)
+
+		if ( gmcp.Ship.Info.energy ~= gmcp.Ship.Info.maxEnergy ) then
+			local fuelPercent = math.floor( 100 * tonumber( gmcp.Ship.Info.energy ) / tonumber( gmcp.Ship.Info.maxEnergy ) )
+			ColourTell(
+				gray, '', '[',
+				colorFromPercent( fuelPercent ), '', fuelPercent .. '%',
+				gray, '', '] '
+			)
+		end
+
+		local shieldsPercent = math.floor( 100 * tonumber( gmcp.Ship.Info.shield ) / tonumber( gmcp.Ship.Info.maxShield ) )
+		ColourTell(
+			bg, '', 'Shields: ',
+			colorFromPercent( shieldsPercent ), '', shieldsPercent .. '% '
+		)
+
+		if ( gmcp.Ship.Info.hull ~= gmcp.Ship.Info.maxHull ) then
+			local hullPercent = math.floor( 100 * tonumber( gmcp.Ship.Info.hull ) / tonumber( gmcp.Ship.Info.maxHull ) )
+			ColourTell(
+				bg, '', 'Hull: ',
+				colorFromPercent( hullPercent ), '', hullPercent .. '%',
+				bg, '', ' ' .. gmcp.Ship.Info.hull .. '/' .. gmcp.Ship.Info.maxHull .. ' '
+			)
+		end
+
+		-- Piloting?
+		if ( "true" == gmcp.Ship.Info.piloting ) then
+			ColourTell(
+				fg, '', 'Piloting '
+			)
+		elseif ( "false" == gmcp.Ship.Info.piloting ) then
+			ColourTell(
+				bg, '', 'Not Piloting '
+			)
+		end
+
+		Note( '' )
+
+		if ( gmcp.Ship.System.x ) then
+			ColourTell(
+				bg, '', 'Coords: ',
+				fg, '', gmcp.Ship.Info.posX .. ' ' .. gmcp.Ship.Info.posY .. ' ' .. gmcp.Ship.Info.posZ .. ' ',
+				bg, '', ': ' .. gmcp.Ship.System.name .. ' ',
+				gray, '', '(',
+				bg, '', gmcp.Ship.System.x,
+				gray, '', ', ',
+				bg, '', gmcp.Ship.System.y,
+				gray, '', ')'
+			)
+
+			if ( gmcp.Ship.Info.headX ) then
+				local dist = math.sqrt(
+					( tonumber( gmcp.Ship.Info.posX ) - tonumber( gmcp.Ship.Info.headX ) )^2 +
+					( tonumber( gmcp.Ship.Info.posY ) - tonumber( gmcp.Ship.Info.headY ) )^2 +
+					( tonumber( gmcp.Ship.Info.posZ ) - tonumber( gmcp.Ship.Info.headZ ) )^2
+				)
+
+				ColourTell(
+					bg, '', ' Dist: ',
+					fg, '', math.floor( dist )
+				)
+			end
+
+			Note( '' )
+		end
+
+	end
+
+
+	-- Approached
+	ColourTell(
+		gray, '', '[',
+		white, '', promptVars.PeopleNear,
+		gray, '', '] '
+	)
+
+	-- Time
+	ColourTell(
+		bg, '', 'Time: ',
+		fg, '', promptVars.TimeOfDay,
+		bg, '', ' '
+	)
+
+	-- Noise
+	ColourTell(
+		bg, '', 'Noise: ',
+		fg, '', promptVars.Ambience,
+		bg, '', ' '
+	)
+
+	-- Botting
+	-- May want to change to gmcp, as gmcp has a `Char.Info.botting` flag that tells you botting or not.
+	local bottingtime = tonumber( gmcp.Char.Info.bottingTime )
+	if ( 'true' == gmcp.Char.Info.botting ) then
+		ColourTell(
+			bg, '', 'Botting For: ',
+			fg, '', string.format( "%d:%02d", math.floor( bottingtime / 60 ), ( bottingtime % 60 ) ),
+			bg, '', ' '
+		)
+	end
+
+	local bottingcooldown = tonumber( gmcp.Char.Info.bottingCooldown )
+	if ( bottingcooldown > 0 ) then
+		ColourTell(
+			bg, '', 'Cooldown For: ',
+			fg, '', string.format( "%d:%02d", math.floor( bottingcooldown / 60 ), ( bottingcooldown % 60 ) ),
+			bg, '', ' '
+		)
+	end
+
+	-- Planet?
+	ColourTell(
+		bg, '', '@'
+	)
+	if ( gmcp.Room.Info.planet ) then
+		ColourTell(
+			fg, '', gmcp.Room.Info.planet,
+			bg, '', ':'
+		)
+	end
+	ColourTell(
+		fg, '', gmcp.Room.Info.vnum
+	)
+
+	Note( '' )
+
+end -- fullprompt
+
+]]>
+</script>
+
+</muclient>
