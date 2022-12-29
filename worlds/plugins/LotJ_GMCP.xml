@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="iso-8859-1" ?> 
+<!DOCTYPE muclient>  
+<muclient>
+
+<plugin name="LotJ_GMCP" author="@Daljo" id="371e010fa206b5a1b0a7965d" language="Lua" purpose="Plugin to interact with GMCP data" requires="4.73" version="0.1" save_state="y">
+<description trim="y">
+<![CDATA[
+
+== Legends of the Jedi GMCP Handler ==
+
+This is very loosely based on Aardwolf's GMCP handler --
+
+https://github.com/fiendish/aardwolfclientpackage/blob/MUSHclient/MUSHclient/worlds/plugins/aard_GMCP_handler.xml
+
+]]>
+</description>
+</plugin>
+
+<triggers>
+<!--
+  <trigger enabled="y" script="onOutputLine" match="You matched a line that includes *" />
+-->
+</triggers>
+
+<aliases>
+	 <alias enabled="y" script="gmcpdebug" match="^gmcpdebug (.*)?$" regexp="y" ignore_case="y" />
+	 <alias enabled="y" script="GMCP_Alias" match="sendgmcp *" send_to="12" />
+	 <alias enabled="y" script="gmcpShowAll" match="gmcp" ignore_case="y" />
+</aliases>
+
+<script>
+<![CDATA[
+
+require "serialize"
+json = dofile(GetPluginInfo(GetPluginID(), 20) .. "json.lua")
+
+-- Seems deprecated and mostly calls back to this?  Also taken from aard
+dofile(GetPluginInfo(GetPluginID(), 20) .. "gmcphelper.lua")
+
+-- Getting a unique client id and stashing it in the registry?
+-- Copied from aard's implementation.
+luacom = require "luacom"
+if luacom then
+	 Note( 'got luacom' )
+	wshell = luacom.CreateObject("WScript.Shell")
+end
+if wshell then
+	rr = wshell.RegRead
+	rw = wshell.RegWrite
+end
+if rr and rw then
+	ident_ok, ident = pcall(rr, wshell, "HKCU\\Software\\LotJMUSHclient\\Ident")
+	if not ident_ok then
+		pcall(rw, wshell, "HKCU\\Software\\LotJMUSHclient\\Ident", CreateGUID(), "REG_SZ")
+		ident_ok, ident = pcall(rr, wshell, "HKCU\\Software\\LotJMUSHclient\\Ident")
+	end
+end
+ident = ident_ok and ident or "{ident failed}"
+
+
+-- Settings we're populating from the saved data so we don't lose track of then.
+settings = {}
+loadstring( GetVariable('settings') or '' ) ()
+
+local GMCP      = 201
+
+----------------------------------------------------------
+-- The stuff that accomplishes the point of the plugin. --
+----------------------------------------------------------
+
+
+-- You can use CallPlugin to access any gmcp data via this function.
+-- example:
+--   local ret, datastring = CallPlugin( "371e010fa206b5a1b0a7965d", "gmcpdata_as_string", "char.status" )
+--   pcall( loadstring( "status_table = " .. datastring ) )
+--   for k, v in pairs( status_table ) do
+--      print( k, ":", v )
+--   end
+function gmcpdata_as_string( what )
+	return serialize.save_simple( gmcpdata_at_level( what ) or "" )
+end
+
+function gmcpShowAll()
+	print( gmcpdata_as_string('') )
+end
+
+
+-- toggle debug output
+function gmcpdebug( name, line, wildcards )
+	local newval = tonumber( wildcards[1] )
+	if ( not newval or newval > 2 or newval < 0 ) then
+		ColourNote("#FFAF00", "", "GMCPDebug valid values are: 0 - off, 1 - simple, 2 - verbose")
+		return
+	end
+	settings.debug = newval
+
+	local msg = "off"
+	if ( settings.debug == 1 ) then
+		msg = "simple"
+	elseif ( settings.debug == 2 ) then
+		msg = "verbose"
+	end
+
+	ColourNote( "#FFAF00", "", "settings.debug: " .. msg )
+end
+
+-- Handy Alias!
+function GMCP_Alias( name, line, wildcards )
+	Send_GMCP_Packet( wildcards[1] )
+end
+
+function deepCopy( orig )
+    local orig_type = type( orig )
+    local copy
+    if ( orig_type == 'table' ) then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[ deepCopy( orig_key ) ] = deepCopy(orig_value)
+        end
+        setmetatable( copy, deepCopy( getmetatable( orig ) ) )
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
+function deepCompare( first, second )
+	-- Compare all keys in the old and new node to see what changed.
+	local onlyInFirst  = {}
+	local onlyInSecond = {}
+	local changed      = {}
+	local same         = {}
+
+	for key,value in pairs( first ) do
+		if ( nil == second[ key ] ) then
+			onlyInFirst[ key ] = value
+		else
+			-- both first and second contain it, check if they're the same.
+			if ( 'table' == type( value ) and 'table' == type( second[ key ] ) ) then
+				local of, os, c, s = deepCompare( value, second[ key ] )
+				if ( nil ~= next( of ) ) then
+					onlyInFirst[ key ] = of
+				end
+				if ( nil ~= next( os ) ) then
+					onlyInSecond[ key ] = os
+				end
+				if ( nil ~= next( c ) ) then
+					changed[ key ] = c
+				end
+				if ( nil ~= next( s ) ) then
+					same[ key ] = s
+				end
+			elseif ( value == second[ key ] ) then
+				same[ key ] = value
+			else
+				changed[ key ] = { value, second[ key ] }
+			end
+		end
+	end
+
+	for key,value in pairs( second ) do
+		-- We've already handled all cases but onlyInSecond.
+		if ( nil == first[ key ] ) then
+			onlyInSecond[ key ] = value
+		end
+	end
+
+	return onlyInFirst, onlyInSecond, changed, same
+end
+
+function stringify( things )
+	for k, v in pairs( things ) do
+		if ( type( v ) == "table" ) then
+			stringify( v )
+		else
+			things[ k ] = tostring( v )
+		end
+	end
+end
+
+function OnPluginTelnetSubnegotiation (msg_type, data)
+	if ( msg_type ~= GMCP ) then
+		return
+	end
+
+	if ( settings.debug > 0 ) then
+		ColourNote( "#FFAF00", "", utils.utf8convert( data ) )
+	end
+
+	local message, params = string.match( data, "([%a.]+)%s+(.*)" )
+	if ( not message ) then
+		return
+	end
+
+	if ( not string.match( params, "^[%[{]" ) ) then
+		params =  "[" .. params .. "]"  -- JSON hack, make msg first element of an array. (I don't think this is needed - fiendish)
+	end
+
+	-- Received invalid GMCP message: Char.Money { "total": , "carried": 131961, "bank":  }
+	if ( 'Char.Money' == message ) then
+		if ( params:find( '"total": , ' ) ) then
+			params = params:gsub( '"total": , ', '"total": "", ' )
+		end
+		if ( params:find( '"carried": , ' ) ) then
+			params = params:gsub( '"carried": , ', '"carried": "", ' )
+		end
+		if ( params:find( '"bank":  }$' ) ) then
+			params = params:gsub( '"bank":  }$', '"bank": "" }' )
+		end
+	end
+
+	local succ, t = pcall( json.decode, params )
+	if ( succ and type( t ) == "table" ) then
+		gmcpdata = gmcpdata or {}
+		local gmcp_clone = deepCopy( gmcpdata )
+
+		-- find where to insert the new data
+		local node = gmcpdata
+		local prev_node = nil
+		local prev_item = ""
+
+		for next_item in string.gmatch(message,"%a+") do
+			node[next_item] = node[next_item] or {}
+			prev_node = node
+			prev_item = next_item
+			node = node[next_item]
+		end
+
+		-- For some reason we've historically treated numbers as strings.
+		-- It's bad form, but we should preserve that behavior.
+		stringify( t )
+
+		if ( prev_item == "config" ) then
+			for k, v in pairs(t) do
+				prev_node[ prev_item ][ k ] = v
+			end
+		else
+			prev_node[ prev_item ] = t
+		end
+
+		if ( settings.debug > 1 ) then
+			print( "gmcpdata serialized: " .. gmcpdata_as_string("") )
+		end
+
+		--[[	Identify what changed via this GMCP data, and fire off broadcasts with the changes.
+
+				The changes will be fired as a 502 for dropped, a 503 for new data, and a 504 for changed data.
+
+				In the case of a 504, the keys containing scalar values that have changed will be
+				returned as tables, containing the old and new values respectively.
+		--]]
+
+		local unsetData, newData, changedData = deepCompare( gmcp_clone, gmcpdata )
+		if ( nil ~= next( unsetData ) ) then
+			BroadcastPlugin( 502, serialize.save_simple( unsetData ) )
+		end
+		if ( nil ~= next( newData ) ) then
+			BroadcastPlugin( 503, serialize.save_simple( newData ) )
+		end
+		if ( nil ~= next( changedData ) ) then
+			BroadcastPlugin( 504, serialize.save_simple( changedData ) )
+		end
+	else
+		ColourNote( "white", "red", "GMCP DECODE ERROR: " .. t )
+		ColourNote( "white", "red", "Received invalid GMCP message: " .. utils.utf8convert( data ) )
+		ColourNote( "white", "red", "Basically, the GMCP message from the mud was not validly formatted. Maybe this is known, maybe a bug. Report it if you like." )
+	end
+end
+-- function OnPluginTelnetSubnegotiation
+
+
+function gmcpdata_at_level( what )
+	local node = gmcpdata
+
+	for level in string.gmatch( what, "%a+" ) do
+		if ( type( node ) ~= "table" or node[ level ] == nil ) then return end
+		node = node[level]
+	end
+
+	return node
+end
+
+
+function OnPluginInstall()
+	BroadcastPlugin( 501, "reload" ) -- reload basically tells other plugins "clear all your gmcp data"
+	if ( IsConnected() ) then
+		-- pretend like we just logged in
+		OnPluginConnect()
+	end
+end
+
+function OnPluginConnect()
+	Send_GMCP_Packet("config compact")
+	Send_GMCP_Packet("config prompt")
+	Send_GMCP_Packet("config xterm yes")
+	Send_GMCP_Packet("rawcolor on")
+	Send_GMCP_Packet("request char")
+	Send_GMCP_Packet("request room")
+	Send_GMCP_Packet("request ship")
+	-- Send_GMCP_Packet("request area")
+	-- Send_GMCP_Packet("request quest")
+	-- Send_GMCP_Packet("request group")
+end
+
+function OnPluginTelnetRequest( msg_type, data )
+	if ( msg_type == GMCP and data == "WILL" ) then
+		return true
+	end
+
+	if ( msg_type == GMCP and data == "SENT_DO" ) then
+		-- This hard-coded block may need to be made into a config table as we add more message types.
+		Send_GMCP_Packet(
+			string.format(
+				'Core.Hello{ "client": "MUSHclient", "version": "%s", "ident": "%s" }',
+				Version(), -- .. " r" .. aard_extras.PackageVersionFull(),
+				ident
+			)
+		)
+		Send_GMCP_Packet( 'Core.Supports.Set [ "Char 1", "Comm 1", "Room 1", "Ship 1" ]' )
+		return true
+	end
+
+	return false
+end
+
+function OnPluginDisable()
+	EnablePlugin( GetPluginID(), true )
+	ColourNote( "white", "blue", "You are not allowed to disable the ".. GetPluginInfo( GetPluginID(), 1 ) .. " plugin. It is necessary for other plugins." )
+end
+
+--[[
+function getmemoryusage()
+	collectgarbage('collect')
+	return collectgarbage('count')
+end
+--]]
+
+-- Serialize and save what we care about!
+function OnPluginSaveState()
+	SetVariable( 'settings', serialize.save( 'settings' ) )
+end -- OnPluginSaveState
+
+]]>
+</script>
+
+</muclient>
