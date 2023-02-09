@@ -42,6 +42,7 @@ Distance calculation corrected by @Domovoi
     <trigger name="clanCapture" script="storeClan" match="^(.*[a-zA-Z])(\s+((\d(.*)\+)|\d+\s+\(None\))(.*))$" group="ClanCap" enabled="n" regexp="y" omit_from_log="y" omit_from_output="y" sequence="100" />
     <trigger name="clanCapDone" script="findPlanets" match="^Use SHOWCLAN for more information\.$" regexp="y" enabled="n" group="ClanCap" omit_from_log="y" omit_from_output="y" sequence="100" />
     <trigger name="planetCapTitle" match="Planet*Starsystem*Governed By*Opinion*Military" group="PlanetCap" enabled="n" omit_from_log="y" omit_from_output="y" sequence="100" />
+    <trigger name="planetCapTail" match="Use PLANETS AI or PLANETS INCOME for other views of planet information." group="PlanetCap" enabled="n" omit_from_log="y" omit_from_output="y" sequence="100" />
 	<trigger name="planetCapture" script="storePlanet" match="^((\S(\s)?)+)\s+((\S(\s)?)+)\s+((\S(\s)?)+)(.*[^\.])$" regexp="y" enabled="n" group="PlanetCap" omit_from_log="y" omit_from_output="y" sequence="100" />
 	<trigger name="planetCapDone" script="setupWindow" match="^Use SHOWPLANET \<planet\> for more information\.$" regexp="y" enabled="n" group="PlanetCap" omit_from_log="y" omit_from_output="y" sequence="100" />
 	<!-- Lightspeed triggers -->
