@@ -3,7 +3,7 @@
 <!--  Saved on Thursday, July 05, 2012, 1:04 AM   --> 
 <!-- MuClient version 4.73 --> 
 <muclient>
-<plugin name="LotJStarMap" author="@Johnson+@Domovoi" id="dd5080a41939faabc233da8f" language="Lua" purpose="Dynamically display a system map with player location overlay" save_state="y" requires="4.73" version="2.31">
+<plugin name="LotJStarMap" author="@Johnson+@Domovoi" id="dd5080a41939faabc233da8f" language="Lua" purpose="Dynamically display a system map with player location overlay" save_state="y" requires="4.73" version="2.32">
 <description trim="y">
 <![CDATA[
 This plugin will gather information about the current galaxy's star systems 
@@ -201,11 +201,14 @@ function resetBounds()
 	setupWindow()
 end
 
-function setClanColors()
-    for i in ipairs(clans) do
-        clans[i].color = ColourNameToRGB(clancolors[i])
-    end
-end
+
+ function setClanColors()
+     for i in ipairs(clans) do
+      if ( nil ~= clancolors[i] ) then
+         clans[i].color = ColourNameToRGB(clancolors[i])
+      end
+     end
+ end
 
 function setupWindow(name, line, args)
     --Note("Debug: Reached setupWindow")
