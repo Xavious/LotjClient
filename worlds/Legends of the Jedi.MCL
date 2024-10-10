@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Tuesday, June 08, 2021, 9:33 PM -->
+<!-- Saved on Wednesday, October 09, 2024, 8:31 PM -->
 <!-- MuClient version 5.06 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -8,7 +8,7 @@
 <world
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-06-08 21:33:23"
+   date_saved="2024-10-09 20:31:43"
 
    auto_say_override_prefix="-"
    auto_say_string="say "
@@ -111,7 +111,7 @@
 <triggers
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-06-08 21:33:23"
+   date_saved="2024-10-09 20:31:43"
   >
 </triggers>
 
@@ -120,7 +120,7 @@
 <aliases
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-06-08 21:33:23"
+   date_saved="2024-10-09 20:31:43"
   >
 </aliases>
 
@@ -129,7 +129,7 @@
 <timers
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-06-08 21:33:23"
+   date_saved="2024-10-09 20:31:43"
   >
 </timers>
 
@@ -138,7 +138,7 @@
 <macros
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-06-08 21:33:23"
+   date_saved="2024-10-09 20:31:43"
   >
 
   <macro name="up" type="send_now" >
@@ -232,7 +232,7 @@
 <variables
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-06-08 21:33:23"
+   date_saved="2024-10-09 20:31:43"
   >
 </variables>
 
@@ -241,7 +241,7 @@
 <colours
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-06-08 21:33:23"
+   date_saved="2024-10-09 20:31:43"
   >
 
 <ansi>
@@ -298,7 +298,7 @@
 <keypad
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-06-08 21:33:23"
+   date_saved="2024-10-09 20:31:43"
   >
 
   <key name="0" >
@@ -412,7 +412,7 @@
 <printing
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-06-08 21:33:23"
+   date_saved="2024-10-09 20:31:43"
   >
 
 <ansi>
@@ -438,19 +438,19 @@
 
 <!-- plugins -->
 <include name="lotj_repaint_buffer.xml" plugin="y" />
-<include name="LotJStarMap.xml" plugin="y" />
 <include name="LotJCalc.xml" plugin="y" />
 <include name="lotj_channels_ooc.xml" plugin="y" />
-<include name="LotJFlight.xml" plugin="y" />
 <include name="LotJResearch.xml" plugin="y" />
 <include name="LotJMSDPHandler.xml" plugin="y" />
 <include name="Lotj_Mapper.xml" plugin="y" />
 <include name="LotJ_Copy_colour_codes.xml" plugin="y" />
 <include name="LotJArmor.xml" plugin="y" />
-<include name="LotJBuildship.xml" plugin="y" />
 <include name="LotJStudy.xml" plugin="y" />
-<include name="LotJCargo.xml" plugin="y" />
 <include name="lotj_channels_ic.xml" plugin="y" />
 <include name="LotJDatanet.xml" plugin="y" />
 <include name="Lotj_Client.xml" plugin="y" />
+<include name="LotJCargo.xml" plugin="y" />
+<include name="LotJFlight.xml" plugin="y" />
+<include name="LotJBuildship.xml" plugin="y" />
+<include name="LotJStarMap.xml" plugin="y" />
 </muclient>

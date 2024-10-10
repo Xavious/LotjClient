@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Tuesday, June 08, 2021, 9:33 PM -->
+<!-- Saved on Wednesday, October 09, 2024, 8:31 PM -->
 <!-- MuClient version 5.06 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-06-08 21:33:23"
+   date_saved="2024-10-09 20:31:43"
   >
   <variable name="WINDOW_HEIGHT">131</variable>
   <variable name="WINDOW_NAME">Communication Log</variable>
@@ -36,12 +36,12 @@
     channels_table.ImmNet.capture = true
   channels_table.Clan = {}
     channels_table.Clan.capture = true
-  channels_table.Say = {}
-    channels_table.Say.capture = true
+  channels_table.Farspeak = {}
+    channels_table.Farspeak.capture = true
   channels_table.CouncilNet = {}
     channels_table.CouncilNet.capture = true
-  channels_table.Farspeak = {}
-    channels_table.Farspeak.capture = true</variable>
+  channels_table.Say = {}
+    channels_table.Say.capture = true</variable>
   <variable name="clan_echo">0</variable>
   <variable name="comms_echo">0</variable>
   <variable name="councilnet_echo">1</variable>
@@ -53,6 +53,7 @@
   <variable name="immchat_echo">1</variable>
   <variable name="immnet_echo">1</variable>
   <variable name="log_colour_codes">1</variable>
+  <variable name="log_filename">C:\Users\Brandon\Documents\GitHub\LotjClient\logs\Legends of the JediChatLog.txt</variable>
   <variable name="log_timestamps">1</variable>
   <variable name="log_to_file">0</variable>
   <variable name="mindtalk_echo">0</variable>

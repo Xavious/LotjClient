@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Tuesday, January 19, 2021, 2:08 PM -->
+<!-- Saved on Wednesday, October 09, 2024, 8:31 PM -->
 <!-- MuClient version 5.06 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,7 +14,7 @@
 <variables
    muclient_version="5.06"
    world_file_version="15"
-   date_saved="2021-01-19 14:08:48"
+   date_saved="2024-10-09 20:31:43"
   >
   <variable name="automap">true</variable>
   <variable name="config">config = {}
@@ -24,12 +24,12 @@
   config.EXIT_COLOUR = {}
     config.EXIT_COLOUR.name = "Exit"
     config.EXIT_COLOUR.colour = 10526303
-  config.HOTEL_FILL_COLOUR = {}
-    config.HOTEL_FILL_COLOUR.name = "Hotel"
-    config.HOTEL_FILL_COLOUR.colour = 255
-  config.UNKNOWN_ROOM_COLOUR = {}
-    config.UNKNOWN_ROOM_COLOUR.name = "Unknown room"
-    config.UNKNOWN_ROOM_COLOUR.colour = 13289984
+  config.ROOM_NAME_TEXT = {}
+    config.ROOM_NAME_TEXT.name = "Room name text"
+    config.ROOM_NAME_TEXT.colour = 15856574
+  config.OUR_ROOM_COLOUR = {}
+    config.OUR_ROOM_COLOUR.name = "Our room"
+    config.OUR_ROOM_COLOUR.colour = 0
   config.DELAY = {}
     config.DELAY.time = 0
   config.SCAN = {}
@@ -46,44 +46,44 @@
   config.WINDOW = {}
     config.WINDOW.height = 400
     config.WINDOW.width = 400
-  config.AREA_NAME_FILL = {}
-    config.AREA_NAME_FILL.name = "Area name fill"
-    config.AREA_NAME_FILL.colour = 5461520
-  config.OUR_ROOM_COLOUR = {}
-    config.OUR_ROOM_COLOUR.name = "Our room"
-    config.OUR_ROOM_COLOUR.colour = 0
-  config.ROOM_NAME_TEXT = {}
-    config.ROOM_NAME_TEXT.name = "Room name text"
-    config.ROOM_NAME_TEXT.colour = 15856574
-  config.BACKGROUND_COLOUR = {}
-    config.BACKGROUND_COLOUR.name = "Background"
-    config.BACKGROUND_COLOUR.colour = 6908265
-  config.LAST_VISIT_TIME = {}
-    config.LAST_VISIT_TIME.time = 180
   config.AREA_NAME_BORDER = {}
     config.AREA_NAME_BORDER.name = "Area name box"
     config.AREA_NAME_BORDER.colour = 0
+  config.UNKNOWN_ROOM_COLOUR = {}
+    config.UNKNOWN_ROOM_COLOUR.name = "Unknown room"
+    config.UNKNOWN_ROOM_COLOUR.colour = 13289984
+  config.HOTEL_FILL_COLOUR = {}
+    config.HOTEL_FILL_COLOUR.name = "Hotel"
+    config.HOTEL_FILL_COLOUR.colour = 255
   config.ROOM_NAME_BORDER = {}
     config.ROOM_NAME_BORDER.name = "Room name box"
     config.ROOM_NAME_BORDER.colour = 0
+  config.LAST_VISIT_TIME = {}
+    config.LAST_VISIT_TIME.time = 180
+  config.AREA_NAME_FILL = {}
+    config.AREA_NAME_FILL.name = "Area name fill"
+    config.AREA_NAME_FILL.colour = 5461520
+  config.BACKGROUND_COLOUR = {}
+    config.BACKGROUND_COLOUR.name = "Background"
+    config.BACKGROUND_COLOUR.colour = 6908265
   config.COMMAND_FILL_COLOUR = {}
     config.COMMAND_FILL_COLOUR.name = "Command"
     config.COMMAND_FILL_COLOUR.colour = 11829830
-  config.BANK_FILL_COLOUR = {}
-    config.BANK_FILL_COLOUR.name = "Bank"
-    config.BANK_FILL_COLOUR.colour = 65535
-  config.AREA_NAME_TEXT = {}
-    config.AREA_NAME_TEXT.name = "Area name text"
-    config.AREA_NAME_TEXT.colour = 15856574
-  config.CHARLIE_FILL_COLOUR = {}
-    config.CHARLIE_FILL_COLOUR.name = "Charlie"
-    config.CHARLIE_FILL_COLOUR.colour = 0
-  config.SHOP_FILL_COLOUR = {}
-    config.SHOP_FILL_COLOUR.name = "Shop"
-    config.SHOP_FILL_COLOUR.colour = 3107669
   config.FONT = {}
     config.FONT.name = "Dina"
     config.FONT.size = 8
+  config.CHARLIE_FILL_COLOUR = {}
+    config.CHARLIE_FILL_COLOUR.name = "Charlie"
+    config.CHARLIE_FILL_COLOUR.colour = 0
+  config.AREA_NAME_TEXT = {}
+    config.AREA_NAME_TEXT.name = "Area name text"
+    config.AREA_NAME_TEXT.colour = 15856574
+  config.SHOP_FILL_COLOUR = {}
+    config.SHOP_FILL_COLOUR.name = "Shop"
+    config.SHOP_FILL_COLOUR.colour = 3107669
+  config.BANK_FILL_COLOUR = {}
+    config.BANK_FILL_COLOUR.name = "Bank"
+    config.BANK_FILL_COLOUR.colour = 65535
   config.MAPPER_NOTE_COLOUR = {}
     config.MAPPER_NOTE_COLOUR.name = "Messages"
     config.MAPPER_NOTE_COLOUR.colour = 9498256

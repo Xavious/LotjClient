@@ -194,32 +194,32 @@ profiles = {}
 loadstring(GetVariable("profiles") or "") ()
 
 local componentTable = { ["hull"] = { size = .02, cost = 4 },
-                         ["shields"] = { size = .03, cost = 20 },
-                         ["comm"] = { size = .5, cost = 100 },
-                         ["sensor"] = { size = .5, cost = 100 },
-                         ["astroarray"] = { size = .5, cost = 150 },
-                         ["tractorbeam"] = { size = 25, cost = 75000 },
-                         ["autoblaster"] = { size = 2, cost = 2500 },
-                         ["lasers"] = { size = 5, cost = 8000 },
-                         ["turbolasers"] = { size = 25, cost = 40000 },
-                         ["ion"] = { size = 6, cost = 7500 },
-                         ["docking"] = { size = 10, cost = 15000 },
-                         ["cloaking"] = { size = 75, cost = 750000 },
-                         ["missile"] = { size = 5, cost = 2000 },
-                         ["missiles"] = { size = 1, cost = 2000 },
-                         ["torpedoes"] = { size = 1, cost = 2500 },
-                         ["rockets"] = { size = 1, cost = 3000 },
-                         ["pulse"] = { size = 1, cost = 5000 },
-                         ["chaff"] = { size = .2, cost = 100 },
-                         ["speed"] = { size = .1, cost = 100 },
-                         ["maneuver"] = { size = .2, cost = 1000 },
-                         ["energy"] = { size = .02, cost = 10 },
-                         ["gravity"] = { size = 100, cost = 1000000 },
-                         ["hyperspeed"] = { size = .5, cost = 200 },
-                         ["smallcargo"] = { size = 5, cost = 4000 },
-                         ["mediumcargo"] = { size = 10, cost = 12000 },
-                         ["largecargo"] = { size = 15, cost = 20000 },
-                         ["tune"] = { size = 0, cost = 0 },
+                        ["shields"] = { size = .03, cost = 20 },
+                        ["energy"] = { size = .02, cost = 10 },
+                        ["speed"] = { size = .5, cost = 400 },
+                        ["hyperspeed"] = { size = .5, cost = 400 },
+                        ["maneuver"] = { size = .5, cost = 400 },
+                        ["sensor"] = { size = .5, cost = 2500 },
+                        ["comm"] = { size = .5, cost = 2500 },
+                        ["shield booster"] = { size = 4, cost = 6000 },
+                        ["autoblaster"] = { size = 10, cost = 20000 },
+                        ["lasers"] = { size = 10, cost = 12000 },
+                        ["turbolasers"] = { size = 25, cost = 60000 },
+                        ["ion"] = { size = 12, cost = 18000 },
+                        ["missile tube"] = { size = 15, cost = 10000 },
+                        ["missiles"] = { size = .5, cost = 500 },
+                        ["torpedoes"] = { size = 1, cost = 1000 },
+                        ["rockets"] = { size = 2, cost = 3000 },
+                        ["pulse"] = { size = 2, cost = 12000 },
+                        ["chaff"] = { size = .2, cost = 100 },
+                        ["small cargo"] = { size = 5, cost = 4000 },
+                        ["medium cargo"] = { size = 10, cost = 12000 },
+                        ["large cargo"] = { size = 15, cost = 20000 },
+                        ["tractorbeam"] = { size = 25, cost = 75000 },
+                        ["docking"] = { size = 10, cost = 15000 },
+                        ["cloaking"] = { size = 75, cost = 750000 },
+                        ["gravity"] = { size = 100, cost = 1000000 },
+                        ["tune"] = { size = 0, cost = 0 },
                         }
 
 function enableEndLine()
@@ -457,8 +457,8 @@ function upgradeAdd(name, line, args)
   local addItems = {}
   if string.find(args[2], ",", 0, true) then
     addItems = utils.split(args[2], ",")
-  elseif string.find(args[2], " ", 0, true) then
-    addItems = utils.split(args[2], " ")
+  --elseif string.find(args[2], " ", 0, true) then -- spaces in part names removes the viability of splitting using spaces
+  --  addItems = utils.split(args[2], " ")
   else
   	ColourNote("red","","Usage: upgradeAdd <ship> <parameters>")
 	  return
@@ -534,9 +534,9 @@ function upgrade(name, line, args)
   if not args or args[1] == "" then -- entered nothing
     if (upgradespos > 0) and (upgradeppos > 0) then -- we're using a list
       if (getUpgradePartAmount() > 0) then -- part amount is over 0
-        Send("upgradeship "..getUpgradeShipName().." "..getUpgradePartName().." "..getUpgradePartAmount())
+        Send("upgradeship "..getUpgradeShipName().." \""..getUpgradePartName().."\" "..getUpgradePartAmount())
       elseif (getUpgradePartAmount() < 0) then -- part amount is under 0
-        Send("dismantle "..getUpgradeShipName().." "..getUpgradePartName().." "..math.abs(getUpgradePartAmount()))
+        Send("dismantle "..getUpgradeShipName().." \""..getUpgradePartName().."\" "..math.abs(getUpgradePartAmount()))
       elseif string.lower(getUpgradePartName()) == "tune" or string.lower(getUpgradePartName()) == "tuneship" then -- tune the ship
         Send("tuneship "..getUpgradeShipName())
       else -- should never get here, but just in case someone entered 0 as an amount, skip to the next part
@@ -767,7 +767,7 @@ function ReturnFromAFK(name, line, wildcards)
 end -- function
 
 function getParts(name, line, wildcards)
-	Send("get 25 " .. partNames[currentPart])
+	Send("get 10 " .. partNames[currentPart])
 	buildShip()
 end -- function
 
