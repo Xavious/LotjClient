@@ -15,7 +15,7 @@
    save_state="y"
    date_written="2021-08-02 14:20:21"
    requires="5.06"
-   version="1.0"
+   version="1.0.1"
    >
 <description trim="y">
 <![CDATA[
@@ -48,9 +48,7 @@ EnableTrigger( 'BankListScrapeEndRebalance', false )
 
 f, err = loadfile((GetPluginInfo("b3aae34498d5bf19b5b2e2af",20)).."LotJMSDPHelper.lua")
 
-if (f == nil) then 
-  Note("Failed to load MSDP Helper!")
-else
+if (f ~= nil) then 
   f()
 
   -- Do some stuff with it!
@@ -143,7 +141,7 @@ end
   </trigger>
   <trigger
    group="bank"
-   match="Account                   Amount    "
+   match="Account                    Amount   "
    name="BankListScrapeStart"
    send_to="12"
    sequence="100"
@@ -161,13 +159,16 @@ EnableTrigger( 'BankListScrapeEndRebalance', true )
   </trigger>
   <trigger
    group="bank"
-   match="^(\d{5}) +(\d+) +$"
+   match="^(\d{5}) +([\d\,]+) +$"
    name="BankListScrapeAccts"
    regexp="y"
    send_to="12"
    sequence="100"
   >
-  <send>ArraySet( 'BankAccounts', %1, %2 )</send>
+  <send>
+  local amount = ( [==[%2]==] ):gsub( '%D', '' )
+  ArraySet( 'BankAccounts', %1, tonumber( amount ) )
+  </send>
   </trigger>
 </triggers>
 
