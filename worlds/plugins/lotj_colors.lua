@@ -54,14 +54,14 @@ function init_ansi()
 
    -- Set up xterm color conversions using the extended_colours global array
    for i = 1,8 do
-      colour_conversion[string.format("%03d",i-1)] = GetNormalColour(i)
-      colour_conversion[string.format("%02d",i-1)] = GetNormalColour(i)
-      colour_conversion[string.format("%d",i-1)] = GetNormalColour(i)
+      colour_conversion[string.format("x%03d",i-1)] = GetNormalColour(i)
+      colour_conversion[string.format("x%02d",i-1)] = GetNormalColour(i)
+      colour_conversion[string.format("x%d",i-1)] = GetNormalColour(i)
    end
    for i = 8,15 do
-      colour_conversion[string.format("%03d",i)] = GetBoldColour(i-7)
-      colour_conversion[string.format("%02d",i)] = GetBoldColour(i-7)
-      colour_conversion[string.format("%d",i)] = GetBoldColour(i-7)
+      colour_conversion[string.format("x%03d",i)] = GetBoldColour(i-7)
+      colour_conversion[string.format("x%02d",i)] = GetBoldColour(i-7)
+      colour_conversion[string.format("x%d",i)] = GetBoldColour(i-7)
    end
 
    ANSI_colours = {
@@ -165,6 +165,17 @@ function StylesToColoursOneLine (styles, startcol, endcol)
       local code = conversion_colours[v.textcolour]
       if code then
          copystring = copystring..code..text
+		 
+	  elseif (v.textcolour ~= nil) then
+		  -- did you know mushclient internally stores colors as windows COLORREF format
+		  -- and that uses opposite byte order from html hex representation?
+		  -- neither did I!
+        -- anyway 24 bit color copy should work now - @Fishy
+		  local wrongend = string.format("%06x",v.textcolour)
+		  local hexcode = "&#"..string.sub(wrongend,5,6)..string.sub(wrongend,3,4)..string.sub(wrongend,1,2)
+		  
+		  copystring = copystring..hexcode..text
+		  
       else
          copystring = copystring..text
       end
@@ -188,43 +199,33 @@ function ColoursToStyles (Text)
 
       Text = Text:gsub ("&%-", "~") -- fix tildes
       Text = Text:gsub ("&&", "\0") -- change && to 0x00
+      Text = Text:gsub ("&([^%d])","%1") -- strip invalid xterm codes (non-number)
       Text = Text:gsub ("&[3-9]%d%d","") -- strip invalid xterm codes (300+)
       Text = Text:gsub ("&2[6-9]%d","") -- strip invalid xterm codes (260+)
       Text = Text:gsub ("&25[6-9]","") -- strip invalid xterm codes (256+)
-      Text = Text:gsub ("&[^xrgObpcwzRGYBPCWD0-9]", "")  -- rip out hidden garbage
+      Text = Text:gsub ("&[^xrgObpcwzRGYBPCW]", "")  -- rip out hidden garbage
       
       -- make sure we start with & or gsub doesn't work properly
       if Text:sub (1, 1) ~= "&" then
          Text = DEFAULT_COLOUR .. Text
       end -- if
 
-      local text = {}
-      local code = ""
-      local i = 1
-      while i <= #Text do -- iterate over the whole input string
-        if Text:sub(i, i):match("&") then -- found a color tag 
-          if Text:sub(i+1, i+1):match("(%a)") then -- found a regular color code
-            code = Text:sub(i+1, i+1) -- assign the regular code
-            local textStart = i+2 -- beginning of text
-            while i < #Text and not Text:sub(i+1, i+1):match("&") do i = i + 1 end -- scroll forward to find the next &
-            local textEnd = i -- end of text
-            text = Text:sub(textStart, textEnd)
-          elseif string.match(Text:sub(i+1, i+3), "(%d%d%d)") then -- found an xterm code
-            code = Text:sub(i+1, i+3) -- assign the xterm code
-            local textStart = i+4 -- beginning of text
-            while i < #Text and not Text:sub(i+1, i+1):match("&") do i = i + 1 end -- scroll forward to the next &
-            local textEnd = i -- end of text
-            text = Text:sub(textStart, textEnd)
-          end
-          if code and text then
-            table.insert(astyles, { text = text,
-            length = #text,
-            textcolour = colour_conversion [code] or GetNormalColour(WHITE),
-            backcolour = GetNormalColour(BLACK) })
-          end
-        end
-        i = i + 1
-      end
+      for colour, text in Text:gmatch ("&(%a)([^&]+)") do
+         text = text:gsub ("%z", "&") -- put any & characters back
+
+         if colour == "x" then -- xterm 256 colors
+            code,text = text:match("(%d%d?%d?)(.*)")
+            colour = colour..code
+         end
+           
+         if #text > 0 then
+            table.insert (astyles, { text = text, 
+               length = #text, 
+               textcolour = colour_conversion [colour] or GetNormalColour (WHITE),
+               backcolour = GetNormalColour (BLACK) })
+         end -- if some text
+      end -- for each colour run.
+
       return astyles
    end -- if any colour codes at all
 
@@ -239,9 +240,9 @@ end  -- function ColoursToStyles
 function strip_colours (s)
    s = s:gsub ("&%-", "~")    -- fix tildes
    s = s:gsub ("&&", "\0")  -- change && to 0x00
-   s = s:gsub ("&%d%d%d", "") -- strip xterm color codes
+   s = s:gsub ("&[^xcmyrgbwCMYRGBWD]", "")  -- rip out hidden garbage
+   s = s:gsub ("&%d{3}", "") -- strip xterm color codes
    s = s:gsub ("&%a([^&]*)", "%1") -- strip normal color codes
-   s = s:gsub ("&[^xrgObpcwzRGYBPCWD]", "")  -- rip out hidden garbage
    return (s:gsub ("%z", "&")) -- put & back
 end -- strip_colours
 
