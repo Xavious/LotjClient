@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Wednesday, October 09, 2024, 8:31 PM -->
-<!-- MuClient version 5.06 -->
+<!-- Saved on Saturday, March 07, 2026, 10:12 PM -->
+<!-- MuClient version 5.07 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
 <muclient>
 <world
-   muclient_version="5.06"
+   muclient_version="5.07"
    world_file_version="15"
-   date_saved="2024-10-09 20:31:43"
+   date_saved="2026-03-07 22:12:52"
 
    auto_say_override_prefix="-"
    auto_say_string="say "
@@ -72,7 +72,7 @@
    output_font_weight="400"
    paste_delay_per_lines="1"
    pixel_offset="1"
-   port="5656"
+   port="5676"
    proxy_port="1080"
    script_errors_to_output_window="y"
    send_file_delay_per_lines="1"
@@ -98,6 +98,7 @@
    use_custom_link_colour="y"
    use_default_input_font="y"
    use_default_output_font="y"
+   use_ssl="y"
    warn_if_scripting_inactive="y"
    wrap="y"
    wrap_column="88"
@@ -109,36 +110,36 @@
 <!-- triggers -->
 
 <triggers
-   muclient_version="5.06"
+   muclient_version="5.07"
    world_file_version="15"
-   date_saved="2024-10-09 20:31:43"
+   date_saved="2026-03-07 22:12:52"
   >
 </triggers>
 
 <!-- aliases -->
 
 <aliases
-   muclient_version="5.06"
+   muclient_version="5.07"
    world_file_version="15"
-   date_saved="2024-10-09 20:31:43"
+   date_saved="2026-03-07 22:12:52"
   >
 </aliases>
 
 <!-- timers -->
 
 <timers
-   muclient_version="5.06"
+   muclient_version="5.07"
    world_file_version="15"
-   date_saved="2024-10-09 20:31:43"
+   date_saved="2026-03-07 22:12:52"
   >
 </timers>
 
 <!-- macros -->
 
 <macros
-   muclient_version="5.06"
+   muclient_version="5.07"
    world_file_version="15"
-   date_saved="2024-10-09 20:31:43"
+   date_saved="2026-03-07 22:12:52"
   >
 
   <macro name="up" type="send_now" >
@@ -230,18 +231,18 @@
 <!-- variables -->
 
 <variables
-   muclient_version="5.06"
+   muclient_version="5.07"
    world_file_version="15"
-   date_saved="2024-10-09 20:31:43"
+   date_saved="2026-03-07 22:12:52"
   >
 </variables>
 
 <!-- colours -->
 
 <colours
-   muclient_version="5.06"
+   muclient_version="5.07"
    world_file_version="15"
-   date_saved="2024-10-09 20:31:43"
+   date_saved="2026-03-07 22:12:52"
   >
 
 <ansi>
@@ -264,8 +265,8 @@
    <colour seq="3" rgb="lime" />
    <colour seq="4" rgb="yellow" />
    <colour seq="5" rgb="blue" />
-   <colour seq="6" rgb="magenta" />
-   <colour seq="7" rgb="cyan" />
+   <colour seq="6" rgb="fuchsia" />
+   <colour seq="7" rgb="aqua" />
    <colour seq="8" rgb="white" />
 
  </bold>
@@ -281,7 +282,7 @@
   <colour seq="6" name="Custom6" text="#FF80C0" back="black" />
   <colour seq="7" name="Custom7" text="red" back="black" />
   <colour seq="8" name="Custom8" text="#0080C0" back="black" />
-  <colour seq="9" name="Custom9" text="magenta" back="black" />
+  <colour seq="9" name="Custom9" text="fuchsia" back="black" />
   <colour seq="10" name="Custom10" text="#804040" back="black" />
   <colour seq="11" name="Custom11" text="#FF8040" back="black" />
   <colour seq="12" name="Custom12" text="teal" back="black" />
@@ -296,9 +297,9 @@
 <!-- keypad -->
 
 <keypad
-   muclient_version="5.06"
+   muclient_version="5.07"
    world_file_version="15"
-   date_saved="2024-10-09 20:31:43"
+   date_saved="2026-03-07 22:12:52"
   >
 
   <key name="0" >
@@ -410,9 +411,9 @@
 <!-- printing -->
 
 <printing
-   muclient_version="5.06"
+   muclient_version="5.07"
    world_file_version="15"
-   date_saved="2024-10-09 20:31:43"
+   date_saved="2026-03-07 22:12:52"
   >
 
 <ansi>
