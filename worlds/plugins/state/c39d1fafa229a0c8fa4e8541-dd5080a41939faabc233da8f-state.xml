@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Friday, July 03, 2026, 12:45 PM -->
+<!-- Saved on Friday, July 03, 2026, 12:58 PM -->
 <!-- MuClient version 5.07 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
@@ -14,17 +14,17 @@
 <variables
    muclient_version="5.07"
    world_file_version="15"
-   date_saved="2026-07-03 12:45:00"
+   date_saved="2026-07-03 12:58:18"
   >
   <variable name="WINDOW_NAME">Galaxy Map</variable>
-  <variable name="enable_background_image">false</variable>
+  <variable name="enable_background_image">true</variable>
   <variable name="font_name">Courier New</variable>
   <variable name="font_size">10</variable>
   <variable name="height">611</variable>
   <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowflags">2</variable>
   <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowmode">0</variable>
-  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowx">708</variable>
-  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowy">80</variable>
+  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowx">545</variable>
+  <variable name="mw_galaxy_map_dd5080a41939faabc233da8f_windowy">136</variable>
   <variable name="starmap_background">.\worlds\plugins\stars_800_600.png</variable>
   <variable name="systems">systems = {}
   systems[1] = {}
