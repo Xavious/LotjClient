@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE muclient>
-<!-- Saved on Wednesday, October 09, 2024, 8:31 PM -->
-<!-- MuClient version 5.06 -->
+<!-- Saved on Friday, July 03, 2026, 12:45 PM -->
+<!-- MuClient version 5.07 -->
 <!-- Written by Nick Gammon -->
 <!-- Home Page: http://www.mushclient.com/ -->
 
@@ -12,9 +12,9 @@
 <!-- variables -->
 
 <variables
-   muclient_version="5.06"
+   muclient_version="5.07"
    world_file_version="15"
-   date_saved="2024-10-09 20:31:43"
+   date_saved="2026-07-03 12:45:00"
   >
   <variable name="circuitspart">circuits</variable>
   <variable name="enginespart">engine</variable>
